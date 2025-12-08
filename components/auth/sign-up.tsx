@@ -2,8 +2,9 @@
 
 import { AuthFlow } from "./auth-flow";
 import SignInForm from "./form/sign-in-form";
+import SignUpForm from "./form/sign-up-form";
 
-function SignIn({
+function SignUp({
   setAuthFlowState,
 }: {
   setAuthFlowState: (value: AuthFlow) => void;
@@ -11,23 +12,24 @@ function SignIn({
   return (
     <main className="signin min-h-screen flex justify-center items-center">
       <section className="container mx-auto w-[400px] space-y-8">
-        <h1 className="text-center">LOGO</h1>
         <div className="space-y-2">
-          <h1 className="text-center leading-none">Welcome Back!</h1>
+          <h2 className="text-center leading-none text-nowrap">
+            Become a SINV Member
+          </h2>
           <div className="flex items-center gap-1 w-full justify-center">
-            <p>Don&apos;t have an account yet?</p>
+            <p>Already have an account?</p>
             <button
-              onClick={() => setAuthFlowState("signUp")}
+              onClick={() => setAuthFlowState("signIn")}
               className="text-blue-500"
             >
-              Sign up now
+              Sign In
             </button>
           </div>
         </div>
-        <SignInForm />
+        <SignUpForm />
       </section>
     </main>
   );
 }
 
-export default SignIn;
+export default SignUp;
