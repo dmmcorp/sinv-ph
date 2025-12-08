@@ -1,10 +1,9 @@
-import SignIn from "@/components/auth/sign-in";
-import React from "react";
+import AuthFlow from "@/components/auth/auth-flow";
 
 function Page() {
   return (
     <div>
-      <SignIn />
+      <AuthFlow />
     </div>
   );
 }

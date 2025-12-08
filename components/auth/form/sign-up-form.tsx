@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -17,29 +16,27 @@ import { Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
 
 const signInFormSchema = z.object({
-  email: z
-    .email({
-      error: "Please enter a valid email.",
-    })
-    .min(1, {
-      message: "Please enter a valid email.",
-    }),
+  email: z.email().min(1, {
+    message: "Please enter a valid email.",
+  }),
   password: z.string().min(1, {
     message: "Password is required.",
   }),
+  confirmPassword: z.string().min(1, {
+    message: "confirmPassword is required.",
+  }),
 });
 
-function SignInForm() {
-  const [rememberMe, setRememberMe] = useState<boolean>(false);
+function SignUpForm() {
   const [hidden, setIsHidden] = useState<boolean>(true);
   const form = useForm<z.infer<typeof signInFormSchema>>({
     resolver: zodResolver(signInFormSchema),
     defaultValues: {
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
   function onSubmit(values: z.infer<typeof signInFormSchema>) {
@@ -96,23 +93,48 @@ function SignInForm() {
             </FormItem>
           )}
         />
-        <div className=" flex items-center justify-between">
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm Password</FormLabel>
+              <FormControl className="relative">
+                <div className="relative">
+                  <Input
+                    className="px-5 py-5 pr-10"
+                    type={hidden ? "password" : "text"}
+                    placeholder="Confirm Password"
+                    {...field}
+                  />
+                  <button
+                    onClick={() => setIsHidden(!hidden)}
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                  >
+                    {hidden ? <Eye size={20} /> : <EyeClosed />}
+                  </button>
+                </div>
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className=" flex items-center justify-start">
           <div className="flex items-center gap-2">
-            <Checkbox id="rememberMe" />
-            <Label htmlFor="rememberMe" className="font-normal">
-              Remember me
-            </Label>
+            <p className="text-sm text-gray-400">
+              By signing up, you confirm to have read and agree to our{" "}
+              <span>Terms of Use</span> and <span>Privacy Policy</span>
+            </p>
           </div>
-          <Link href={"/auth/forgot-password"} className="">
-            <h5 className="text-blue-500">Forgot Password?</h5>
-          </Link>
         </div>
         <div className="w-full flex items-center justify-center">
           <Button
             type="submit"
             className="mx-auto rounded-full px-10 py-3 font-normal"
           >
-            Sign In
+            Sign Up
           </Button>
         </div>
       </form>
@@ -120,4 +142,4 @@ function SignInForm() {
   );
 }
 
-export default SignInForm;
+export default SignUpForm;
