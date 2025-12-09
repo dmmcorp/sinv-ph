@@ -60,7 +60,7 @@ function SignUpForm() {
       email: values.email,
       password: values.password,
       onboarding: false,
-      updatedAt: Math.floor(Date.now() / 1000), // unix timestamp
+      updatedAt: Math.floor(Date.now() / 1000), // unix timestamp today
     });
   }
   return (

@@ -17,6 +17,8 @@ export default defineSchema({
     }).index("by_email", ["email"]),
     // bussiness profile
     business_profile: defineTable({
+
+        //onboarding todo flow: add a selection for type of business / individual.
         userId: v.id("users"), // business or subscriber ID
 
         // business infos
@@ -35,6 +37,7 @@ export default defineSchema({
         name: v.string(),
         email: v.optional(v.string()),
         address: v.optional(v.string()),
+        // add contact
     }).index("by_user", ["userId"]),
     // invoices
     invoices: defineTable({
@@ -59,8 +62,8 @@ export default defineSchema({
 
         // tax infos
         taxType: v.union(
-            v.literal("NON_VAT"),
-            v.literal("VAT"),
+            v.literal("NON_VAT"), //
+            v.literal("VAT"), // 
             v.literal("VAT_EXEMPT"),
             v.literal("ZERO_RATED"),
             v.literal("MIXED"),
@@ -111,9 +114,9 @@ export default defineSchema({
 
         vatType: v.union(
             v.literal("VATABLE"),
+            v.literal("NON_VAT"),
             v.literal("VAT_EXEMPT"),
             v.literal("ZERO_RATED"),
-            v.literal("NON_VAT"),
         ),
 
         isSpecialDiscountEligible: v.boolean(),
@@ -127,5 +130,5 @@ export default defineSchema({
         headerLayout: v.string(),
         logoUrl: v.optional(v.string()),
         digitalSignatureUrl: v.optional(v.string()),
-    })
+    }),
 });

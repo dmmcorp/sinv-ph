@@ -1,11 +1,18 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { useAuthActions } from "@convex-dev/auth/react";
+
+import { OnboardingCard } from "./_components/onboarding-card";
+import { OnboardingForm } from "./_components/onboarding-form";
 
 const OnboardingPage = () => {
-  const { signOut } = useAuthActions();
+  return (
+    <div className="flex flex-row w-full p-6 space-x-32">
+      {/* Onboarding Info, why they need to do this and things they should know before they start */}
+      <OnboardingCard />
 
-  return <Button onClick={async () => await signOut()}>Sign Out</Button>;
+      {/* Onboarding Form, business profile */}
+      <OnboardingForm />
+    </div>
+  );
 };
 
 export default OnboardingPage;
