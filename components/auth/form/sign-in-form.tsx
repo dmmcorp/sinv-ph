@@ -18,6 +18,7 @@ import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { useAuthActions } from "@convex-dev/auth/react";
 
 const signInFormSchema = z.object({
   email: z
@@ -42,11 +43,14 @@ function SignInForm() {
       password: "",
     },
   });
+
+  const { signIn } = useAuthActions();
+
   function onSubmit(values: z.infer<typeof signInFormSchema>) {
-    // Do something with the form values.
-    // convex sign in process here.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+    signIn("password", {
+      flow: "signIn",
+      ...values,
+    });
   }
   return (
     <Form {...form}>

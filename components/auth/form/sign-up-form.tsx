@@ -16,18 +16,30 @@ import { Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { useAuthActions } from "@convex-dev/auth/react";
 
-const signInFormSchema = z.object({
-  email: z.email().min(1, {
-    message: "Please enter a valid email.",
-  }),
-  password: z.string().min(1, {
-    message: "Password is required.",
-  }),
-  confirmPassword: z.string().min(1, {
-    message: "confirmPassword is required.",
-  }),
-});
+const signInFormSchema = z
+  .object({
+    email: z.string().email({
+      message: "Please enter a valid email.",
+    }),
+    password: z
+      .string()
+      .min(8, {
+        message: "Password must be at least 8 characters.",
+      })
+      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
+        message:
+          "Password must contain at least one uppercase letter, one lowercase letter, and one number.",
+      }),
+    confirmPassword: z.string().min(1, {
+      message: "Please confirm your password.",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
 
 function SignUpForm() {
   const [hidden, setIsHidden] = useState<boolean>(true);
@@ -39,11 +51,17 @@ function SignUpForm() {
       confirmPassword: "",
     },
   });
+  const { signIn } = useAuthActions();
+
   function onSubmit(values: z.infer<typeof signInFormSchema>) {
-    // Do something with the form values.
-    // convex sign in process here.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+    signIn("password", {
+      flow: "signUp",
+      role: "subscriber",
+      email: values.email,
+      password: values.password,
+      onboarding: false,
+      updatedAt: Math.floor(Date.now() / 1000), // unix timestamp today
+    });
   }
   return (
     <Form {...form}>
