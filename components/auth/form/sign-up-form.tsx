@@ -59,6 +59,7 @@ function SignUpForm() {
       role: "subscriber",
       email: values.email,
       password: values.password,
+      onboarding: false,
       updatedAt: Math.floor(Date.now() / 1000), // unix timestamp
     });
   }

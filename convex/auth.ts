@@ -7,6 +7,7 @@ const CustomPassword = Password({
       email: params.email as string,
       role: params.role as "admin" | "subscriber",
       updatedAt: params.updatedAt as number,
+      onboarding: params.onboarding as boolean,
     }
   }
 })

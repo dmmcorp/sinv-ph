@@ -12,6 +12,7 @@ export default defineSchema({
             v.literal("subscriber"),
         ),
 
+        onboarding: v.boolean(),
         updatedAt: v.number(),
     }).index("by_email", ["email"]),
     // bussiness profile
