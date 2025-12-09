@@ -1,34 +1,30 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import z from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "convex/react";
+import { UploadIcon, XIcon } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import z from "zod";
 
 const onboardingFormSchema = z.object({
   businessName: z.string().min(2, {
     message: "Business name must be at least 2 characters.",
   }),
-  logoUrl: z.union([
-    z.literal(""),
-    z.string().url({
-      message: "Please enter a valid URL.",
-    }),
-  ]),
+  logoFile: z.instanceof(File).optional(),
   address: z.union([
     z.literal(""),
     z.string().min(5, {
@@ -47,14 +43,18 @@ const onboardingFormSchema = z.object({
 
 export const OnboardingForm = () => {
   const [step, setStep] = useState(1); // 1 and 2 step
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
   const board = useMutation(api.onboarding.board);
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
 
   const form = useForm<z.infer<typeof onboardingFormSchema>>({
     resolver: zodResolver(onboardingFormSchema),
     defaultValues: {
       address: "",
       businessName: "",
-      logoUrl: "",
+      logoFile: undefined,
       tin: "",
     },
     mode: "onChange",
@@ -62,37 +62,99 @@ export const OnboardingForm = () => {
 
   console.log(form.watch());
 
+  const handleFileChange = (file: File | null) => {
+    if (!file) {
+      form.setValue("logoFile", undefined);
+      setLogoPreview(null);
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    // Max file size
+    if (file.size > 4 * 1024 * 1024) {
+      toast.error("Image size must be less than 4MB");
+      return;
+    }
+
+    form.setValue("logoFile", file);
+
+    const previewUrl = URL.createObjectURL(file);
+    setLogoPreview(previewUrl);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleFileChange(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const removeLogo = () => {
+    if (logoPreview) {
+      URL.revokeObjectURL(logoPreview);
+    }
+    setLogoPreview(null);
+    form.setValue("logoFile", undefined);
+  };
+
   async function onSubmit(values: z.infer<typeof onboardingFormSchema>) {
     if (step === 1) {
       const isValid = await form.trigger(["businessName", "tin"]);
-
-      console.log("isValid:", isValid);
-      console.log("Form errors:", form.formState.errors);
-      console.log("Business Name:", form.getValues("businessName"));
-      console.log("TIN:", form.getValues("tin"));
-
       if (isValid) {
         setStep(2);
       }
       return;
     }
 
-    toast("Business Profile has been created", {
-      description: new Date().toLocaleString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      // action: {
-      //   label: "Undo",
-      //   onClick: () => console.log("Undo"),
-      // },
-    });
+    try {
+      let logoUrl = "";
 
-    await board(values);
+      if (values.logoFile) {
+        const uploadUrl = await generateUploadUrl();
+
+        const result = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": values.logoFile.type },
+          body: values.logoFile,
+        });
+
+        const { storageId } = await result.json();
+        logoUrl = storageId;
+      }
+
+      await board({
+        businessName: values.businessName,
+        tin: values.tin,
+        address: values.address,
+        logoUrl,
+      });
+
+      // clean up preview url blob
+      if (logoPreview) {
+        URL.revokeObjectURL(logoPreview);
+      }
+
+      toast.success("Business Profile has been created");
+    } catch (error) {
+      toast.error("Failed to create business profile");
+      console.error(error);
+    }
   }
 
   return (
@@ -187,22 +249,71 @@ export const OnboardingForm = () => {
 
             <FormField
               control={form.control}
-              name="logoUrl"
-              render={({ field }) => (
+              name="logoFile"
+              render={({ field: { value, onChange, ...field } }) => (
                 <FormItem>
                   <FormLabel className="font-semibold text-lg">
-                    Logo URL
+                    Business Logo
                   </FormLabel>
                   <p className="text-gray-600 text-sm max-w-md">
-                    Provide a URL to your business logo. This will be displayed
-                    on your invoices.
+                    Upload your business logo. This will be displayed on your
+                    invoices.
                   </p>
                   <FormControl>
-                    <Input
-                      placeholder="e.g. https://example.com/logo.png"
-                      {...field}
-                      className="bg-white h-11"
-                    />
+                    <div className="space-y-4">
+                      {!logoPreview ? (
+                        <div
+                          onDrop={handleDrop}
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          className={`
+                            border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
+                            transition-colors
+                            ${isDragging ? "border-sky-500 bg-sky-50" : "border-gray-300 hover:border-gray-400"}
+                          `}
+                          onClick={() =>
+                            document.getElementById("logo-upload")?.click()
+                          }
+                        >
+                          <UploadIcon className="mx-auto h-12 w-12 text-gray-400" />
+                          <p className="mt-2 text-sm text-gray-600">
+                            Drag and drop your logo here, or click to browse
+                          </p>
+                          <p className="mt-1 text-xs text-gray-500">
+                            PNG, JPG, GIF up to 4MB
+                          </p>
+                          <Input
+                            id="logo-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleFileChange(file);
+                            }}
+                            {...field}
+                          />
+                        </div>
+                      ) : (
+                        <div className="relative inline-block">
+                          <div className="relative w-48 h-48 border-2 border-gray-200 rounded-lg overflow-hidden">
+                            <Image
+                              src={logoPreview}
+                              alt="Logo preview"
+                              fill
+                              className="object-contain p-2"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={removeLogo}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                          >
+                            <XIcon className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
