@@ -135,4 +135,8 @@
   button:hover {
     cursor: pointer;
   }
+
+  li {
+    @apply hover:cursor-pointer hover:bg-accent/70 hover:rounded-full px-5;
+  }
 }

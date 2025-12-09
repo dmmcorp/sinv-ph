@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${poppinsFont} antialiased`}>
-        {children}
+        <main className="container mx-auto min-h-screen">{children}</main>
       </body>
     </html>
   );
