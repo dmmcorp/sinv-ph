@@ -1,89 +1,45 @@
 "use client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
 import {
-  Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus } from "lucide-react";
-import { AddItemsDialog, Item } from "./add-items-dialog";
-import { useState } from "react";
+import { SelectedItemType } from "@/app/subscriber/invoices/new/_components/new-invoice";
+import { formatCurrency } from "@/lib/utils";
+import { useBusinessProfileSync } from "@/hooks/use-business-profile";
+import { UseFormReturn } from "react-hook-form";
+import { InvoiceFormValues } from "@/lib/types";
 
-const nvoiceFormSchema = z.object({
-  clientName: z.string().min(2).max(50),
-  clientAddress: z.string().min(2).max(50),
-  clientTIN: z.string().optional(),
-  date: z.string(),
-  invoiceNo: z.string().min(1),
-  items: z.array(
-    z.object({
-      description: z.string().min(1),
-      quantity: z.number().min(1),
-      price: z.number().min(0),
-      total: z.number().min(0),
-    })
-  ),
-  subTotal: z.number().min(0),
-  discount: z.number().min(0),
-  total: z.number().min(0),
-});
-
-export interface SelectedItemType {
-  id: number;
-  description: string;
-  price: number;
-  quantity: number;
+interface NewInvoiceFormProps {
+  form: UseFormReturn<InvoiceFormValues>;
+  currentItems: SelectedItemType[] | [];
+  selectedCurrency: string;
+  setSelectedItems: React.Dispatch<React.SetStateAction<SelectedItemType[]>>;
+  setSelectedCurrency: React.Dispatch<React.SetStateAction<string>>;
+  includeTax: boolean;
+  includeDiscount: boolean;
+  discountValue: string;
+  isPercentage: boolean;
 }
 
-function NewInvoiceForm() {
-  //client name(billed to)
-  //client address(billed to)
-  //tin(optional)
-  //Date of transaction
-  // invoice no
-  //items or services - it can be selected from the list of items or services
-  //quantity
-  //price
-  // total
-  const [selectedCurrency, setSelectedCurrency] = useState("php");
-  const [selectedItems, setSelectedItems] = useState<SelectedItemType[] | []>(
-    []
-  );
-  const form = useForm<z.infer<typeof nvoiceFormSchema>>({
-    resolver: zodResolver(nvoiceFormSchema),
-    defaultValues: {
-      clientName: "",
-      clientAddress: "",
-      clientTIN: "",
-      date: new Date().toISOString().split("T")[0],
-      invoiceNo: "",
-      items: selectedItems,
-      subTotal: 0,
-      discount: 0,
-      total: 0,
-    },
-  });
+function NewInvoiceForm({
+  form,
+  currentItems,
+  selectedCurrency,
+  setSelectedItems,
+  setSelectedCurrency,
+  includeTax,
+  includeDiscount,
+  discountValue,
+  isPercentage,
+}: NewInvoiceFormProps) {
+  const { businessProfile } = useBusinessProfileSync();
 
   const onSetQuantity = (process: "add" | "sub", itemId: number) => {
-    const itemToModify = selectedItems.find((i) => i.id === itemId);
+    const itemToModify = currentItems.find((i) => i.id === itemId);
 
     if (process === "add" && itemToModify) {
       setSelectedItems((prev) =>
@@ -105,126 +61,162 @@ function NewInvoiceForm() {
     }
   };
 
+  const calculateSubTotal = () => {
+    return currentItems.reduce((total, item) => {
+      const lineTotal = (item.quantity || 0) * (item.price || 0);
+      return total + lineTotal;
+    }, 0);
+  };
+
+  const subtotal = calculateSubTotal();
+
+  const calculateTaxAmount = () => {
+    return 0.12 * subtotal;
+  };
+  const calculateDiscountAmount = () => {
+    const disc = isPercentage
+      ? Number(discountValue) * subtotal
+      : Number(discountValue);
+    return disc;
+  };
+  const discountAmount = calculateDiscountAmount();
+  const taxAmount = calculateTaxAmount();
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof nvoiceFormSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
-  }
 
   return (
-    <div>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <FormField
-            control={form.control}
-            name="invoiceNo"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Invoice Number</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter invoice number" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="clientName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Client Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter client name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="clientAddress"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Client Address</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter client address" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="clientTIN"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>TIN (Optional)</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter TIN" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Date</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Card>
-            <CardHeader className="">
-              <div className="flex items-center justify-between w-full">
-                <CardTitle>List of items/Services</CardTitle>
-                <div className="flex items-center">
-                  <Select onValueChange={(value) => setSelectedCurrency(value)}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue
-                        defaultValue={selectedCurrency}
-                        placeholder="Select a currency"
+    <div className=" border-2 border-black/60 p-5 rounded-2xl">
+      <div className="flex justify-between">
+        <div className="">
+          <h3 className="text-lg font-bold">{businessProfile?.businessName}</h3>
+          <p>{businessProfile?.businessName}</p>
+          <h5>email@email.com</h5>
+          <h5>+63 921 2135 124</h5>
+        </div>
+        <h1>INVOICE</h1>
+      </div>
+      <div className="space-y-8">
+        <div className="flex justify-between">
+          <div className="">
+            <h3 className="text-md font-bold">Bill To</h3>
+            <div className="">
+              <FormField
+                control={form.control}
+                name="clientName"
+                render={({ field }) => (
+                  <FormItem>
+                    {/* <FormLabel>Client Name</FormLabel> */}
+                    <FormControl>
+                      <Input
+                        className="border-none shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
+                        placeholder="Enter client name"
+                        {...field}
                       />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Currency</SelectLabel>
-                        <SelectItem value="php">₱PHP</SelectItem>
-                        <SelectItem value="usd">$USD</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  <AddItemsDialog
-                    currentItems={selectedItems}
-                    setSelectedItems={setSelectedItems}
-                  />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-12 gap-x-1 text-xs lg:text-lg font-semibold">
-                <div className="col-span-6">Description</div>
-                <div className="col-span-2">Price</div>
-                <div className="col-span-2">QTY</div>
-                <div className="col-span-2">Total</div>
-              </div>
-              {selectedItems.map((selectedItem) => (
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="">
+              <FormField
+                control={form.control}
+                name="clientAddress"
+                render={({ field }) => (
+                  <FormItem>
+                    {/* <FormLabel>Client Address</FormLabel> */}
+                    <FormControl>
+                      <Input
+                        className="border-none shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
+                        placeholder="Enter address"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+          <div className="">
+            <h3 className="text-md font-bold opacity-0">1</h3>
+            <div className="flex items-center">
+              Invoice No.
+              <FormField
+                control={form.control}
+                name="invoiceNo"
+                render={({ field }) => (
+                  <FormItem>
+                    {/* <FormLabel>Invoice Number</FormLabel> */}
+                    <FormControl>
+                      <Input
+                        className="border-none text-base shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
+                        placeholder="0001"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="flex items-center">
+              Date Issued:
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem>
+                    {/* <FormLabel>Date</FormLabel> */}
+                    <FormControl>
+                      <Input
+                        className="border-none shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* <FormField
+              control={form.control}
+              name="clientTIN"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>TIN (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter TIN" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            /> */}
+
+        <div className="">
+          <div className="grid grid-cols-12 gap-x-1  font-semibold border-y-2 border-black text-sm">
+            <div className="col-span-[0.5] text-center">#</div>
+            <div className="col-span-6 text-center">Description</div>
+            <div className="col-span-2 text-center">Unit Price</div>
+            <div className="col-span-[1.5] text-center">QTY</div>
+            <div className="col-span-2 text-center">Amount</div>
+          </div>
+
+          {currentItems.length > 0
+            ? currentItems.map((selectedItem, index) => (
                 <div
                   key={selectedItem.description}
-                  className="grid grid-cols-12  gap-x-1 text-xs items-center border-t border-t-black/70 py-2"
+                  className="grid grid-cols-12 text-center  gap-x-1 text-xs items-center border-t border-t-black/70 py-2 border-b border-b-black"
                 >
+                  <div className="col-span-[0.5]">{index + 1}</div>
                   <div className="col-span-6">{selectedItem.description}</div>
-                  <div className="col-span-2">{selectedItem.price}</div>
-                  <div className="col-span-2 flex items-center gap-2">
-                    <Button
+                  <div className="col-span-2">
+                    {formatCurrency(selectedItem.price, selectedCurrency)}
+                  </div>
+                  <div className="col-span-[1.5] flex items-center justify-center gap-2">
+                    {/* <Button
                       onClick={() => onSetQuantity("sub", selectedItem.id)}
                       disabled={selectedItem.quantity > 0 ? false : true}
                       type="button"
@@ -232,28 +224,124 @@ function NewInvoiceForm() {
                       variant={"outline"}
                     >
                       -
-                    </Button>
+                    </Button> */}
                     {selectedItem.quantity}
-
-                    <Button
+                    {/* <Button
                       onClick={() => onSetQuantity("add", selectedItem.id)}
                       type="button"
                       size={"icon-sm"}
                       variant={"outline"}
                     >
                       +
-                    </Button>
+                    </Button> */}
                   </div>
                   <div className="col-span-2">
-                    {selectedItem.quantity * selectedItem.price}
+                    {}
+                    {formatCurrency(
+                      selectedItem.quantity * selectedItem.price,
+                      selectedCurrency
+                    )}
+                  </div>
+                </div>
+              ))
+            : [1, 2, 3, 5].map((_, index) => (
+                <div
+                  key={index}
+                  className="grid grid-cols-12 text-center min-h-5  gap-x-1 text-xs items-center border-t border-t-black/70 py-2 border-b border-b-black"
+                >
+                  <div className="col-span-[0.5]">{}</div>
+                  <div className="col-span-6">{}</div>
+                  <div className="col-span-2">{}</div>
+                  <div className="col-span-[1.5] flex items-center justify-center gap-2">
+                    {/* <Button
+                      onClick={() => onSetQuantity("sub", selectedItem.id)}
+                      disabled={selectedItem.quantity > 0 ? false : true}
+                      type="button"
+                      size={"icon-sm"}
+                      variant={"outline"}
+                    >
+                      -
+                    </Button> */}
+                    {}
+                    {/* <Button
+                      onClick={() => onSetQuantity("add", selectedItem.id)}
+                      type="button"
+                      size={"icon-sm"}
+                      variant={"outline"}
+                    >
+                      +
+                    </Button> */}
+                  </div>
+                  <div className="col-span-2">
+                    {}
+                    {}
                   </div>
                 </div>
               ))}
-            </CardContent>
-          </Card>
-          <Button type="submit">Submit</Button>
-        </form>
-      </Form>
+          <div className="mt-4">
+            <div className="grid grid-cols-12 gap-x-1  font-semibold text-sm">
+              <div className="col-span-8 "></div>
+              <div className="col-span-2 text-right"> Subtotal:</div>
+              <div className="col-span-2 text-center ">
+                {formatCurrency(subtotal, selectedCurrency)}
+              </div>
+            </div>
+            {includeTax && (
+              <>
+                <div className="grid grid-cols-12 gap-x-1  font-semibold text-sm">
+                  <div className="col-span-8 "></div>
+                  <div className="col-span-2 text-right font-light"> Tax%:</div>
+                  <div className="col-span-2 text-center font-light">12%</div>
+                </div>
+                <div className="grid grid-cols-12 gap-x-1  font-semibold text-sm">
+                  <div className="col-span-8 "></div>
+                  <div className="col-span-2 text-right font-light">
+                    {" "}
+                    Tax Amount:
+                  </div>
+                  <div className="col-span-2 text-center font-light">
+                    {formatCurrency(taxAmount, selectedCurrency)}
+                  </div>
+                </div>
+              </>
+            )}
+            {includeDiscount && (
+              <>
+                {isPercentage && (
+                  <div className="grid grid-cols-12 gap-x-1  font-semibold text-sm">
+                    <div className="col-span-8 "></div>
+                    <div className="col-span-2 text-right font-light">
+                      {" "}
+                      Discount %:
+                    </div>
+                    <div className="col-span-2 text-center font-light">
+                      {discountValue}%
+                    </div>
+                  </div>
+                )}
+                <div className="grid grid-cols-12 gap-x-1  font-semibold text-sm">
+                  <div className="col-span-8 "></div>
+                  <div className="col-span-2 text-right font-light">
+                    {" "}
+                    Discount Amount:
+                  </div>
+                  <div className="col-span-2 text-center font-light">
+                    {formatCurrency(discountAmount, selectedCurrency)}
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className="grid grid-cols-12 gap-x-1  font-semibold text-sm">
+              <div className="col-span-8 "></div>
+              <div className="col-span-2 text-right"> Total Amount:</div>
+              <div className="col-span-2 text-center ">
+                {formatCurrency(taxAmount + subtotal, selectedCurrency)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

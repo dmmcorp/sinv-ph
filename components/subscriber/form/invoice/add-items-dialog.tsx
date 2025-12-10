@@ -28,7 +28,7 @@ import { CheckIcon, ChevronsUpDownIcon, Plus } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import { SelectedItemType } from "./new-invoice-form";
+import { SelectedItemType } from "@/app/subscriber/invoices/new/_components/new-invoice";
 
 export type Item = {
   id: number;
@@ -145,8 +145,8 @@ export function AddItemsDialog({
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          <Plus /> <span className="hidden lg:block">Add</span>
+        <Button variant="outline" className="w-full">
+          <span className="hidden lg:block ">Select items/services</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">

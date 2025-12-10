@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as business_profile from "../business_profile.js";
 import type * as http from "../http.js";
 import type * as onboarding from "../onboarding.js";
 import type * as users from "../users.js";
@@ -21,6 +22,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  business_profile: typeof business_profile;
   http: typeof http;
   onboarding: typeof onboarding;
   users: typeof users;

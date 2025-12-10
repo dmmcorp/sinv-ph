@@ -1,10 +1,10 @@
-import NewInvoiceForm from "@/components/subscriber/form/invoice/new-invoice-form";
 import React from "react";
+import NewInvoice from "./_components/new-invoice";
 
 function Page() {
   return (
-    <div>
-      <NewInvoiceForm />
+    <div className="">
+      <NewInvoice />
     </div>
   );
 }
