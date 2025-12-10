@@ -108,6 +108,7 @@ export default defineSchema({
     }).index("by_user", ["userId"]),
     // items
     items: defineTable({
+        userId: v.id("users"), // business/subscriber who owns this item
         invoiceId: v.id("invoices"),
 
         description: v.string(), // goods or nature of service
@@ -123,7 +124,9 @@ export default defineSchema({
         ),
 
         isSpecialDiscountEligible: v.boolean(),
-    }).index("by_invoice", ["invoiceId"]),
+    })
+        .index("by_invoice", ["invoiceId"])
+        .index("by_user", ["userId"]),
     // branding
     branding: defineTable({
         userId: v.id("users"), //subscriber
@@ -134,4 +137,9 @@ export default defineSchema({
         logoUrl: v.optional(v.string()),
         digitalSignatureUrl: v.optional(v.string()),
     }),
+    // invoice counter table for better scalability
+    invoiceCounters: defineTable({
+        name: v.string(),
+        value: v.number(),
+    }).index("by_name", ["name"]),
 });

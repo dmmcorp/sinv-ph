@@ -3,6 +3,13 @@ import { mutation } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
 import { VAT_RATE } from "@/../../lib/VAT_RATE"
 
+// COUNTER SYNTAX:
+// INVOCE - TYPE OF INVOICE - BUSINESS ID - YEAR
+const getCounterName = (userId: string, year: number, type: "SALES" | "SERVICE" | "COMMERCIAL") => {
+    return `invoice_${type}_${userId}_${year}`
+}
+
+
 export const createInvoice = mutation({
     args: {
         // client
@@ -111,25 +118,35 @@ export const createInvoice = mutation({
         const totalAmount = subTotal + taxAmount;
 
         // SERIAL/INVOICE NUMBER GENERATION:
-        let invoiceNumber: string = "";
+        const currentYear = new Date().getFullYear()
+        const counterName = getCounterName(user._id, currentYear, args.invoiceType)
 
-        if (args.invoiceType === "SALES") {
-            // SI-
-            invoiceNumber = "SI-"
+        // counter table
+        const existingCounter = await ctx.db
+            .query("invoiceCounters")
+            .withIndex("by_name", q => q.eq("name", counterName))
+            .first()
 
-            // XX-2025-
-            const currentYear = new Date().getFullYear().toString();
-            invoiceNumber += currentYear + "-";
+        let serialNumber: number;
 
-            const invoices = await ctx.db
-                .query("invoices")
-                .withIndex("by_user", q => q.eq("userId", user._id))
-                .collect()
+        if (existingCounter) {
+            serialNumber = existingCounter.value + 1;
+            await ctx.db.patch(existingCounter._id, {
+                value: serialNumber
+            })
+        } else {
+            serialNumber = 1; ``
+            await ctx.db.insert("invoiceCounters", {
+                name: counterName,
+                value: serialNumber, // this means first invoice
+            })
+        }
 
-            // XX-XXXX-00001
-            const invoiceSerialNumber = invoices.length + 1
-            invoiceNumber += invoiceSerialNumber.toString().padStart(5, '0')
-        } // TODO else SERVICE & COMMERCIAL
+        const prefix = args.invoiceType === "SALES" ? "SI"
+            : args.invoiceType === "SERVICE" ? "SV"
+                : "CM"
+
+        const invoiceNumber = `${prefix}-${currentYear}-${serialNumber.toString().padStart(5, "0")}`
 
         const invoiceId = await ctx.db
             .insert("invoices", {
@@ -155,16 +172,19 @@ export const createInvoice = mutation({
                 buyerTin: args.buyerTin,
                 buyerAddress: args.buyerAddress,
 
+                // totals
                 subTotal,
                 taxAmount,
                 totalAmount,
 
+                // miscs.
                 status: args.status ?? "DRAFT",
-                updatedAt: Math.floor(Date.now() / 1000), // unix timestamp
+                updatedAt: Math.floor(Date.now() / 1000),
             })
 
         for (const item of args.items) {
             await ctx.db.insert("items", {
+                userId,
                 invoiceId,
                 description: item.description,
                 quantity: item.quantity,
