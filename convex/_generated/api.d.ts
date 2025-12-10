@@ -10,7 +10,10 @@
 
 import type * as auth from "../auth.js";
 import type * as business_profile from "../business_profile.js";
+import type * as clients from "../clients.js";
+import type * as files from "../files.js";
 import type * as http from "../http.js";
+import type * as invoices from "../invoices.js";
 import type * as onboarding from "../onboarding.js";
 import type * as users from "../users.js";
 
@@ -23,7 +26,10 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   business_profile: typeof business_profile;
+  clients: typeof clients;
+  files: typeof files;
   http: typeof http;
+  invoices: typeof invoices;
   onboarding: typeof onboarding;
   users: typeof users;
 }>;

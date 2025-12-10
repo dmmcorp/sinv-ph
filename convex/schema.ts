@@ -37,9 +37,11 @@ export default defineSchema({
         name: v.string(),
         email: v.optional(v.string()),
         address: v.optional(v.string()),
-        // add contact
+        // TODO add contact 
     }).index("by_user", ["userId"]),
     // invoices
+
+    // if this business have already 3 si client1 3values .count() = 3 + 1 = sequential number 
     invoices: defineTable({
         userId: v.id("users"), // subscribers id
         clientId: v.id("clients"), // subscribers client id
@@ -54,7 +56,7 @@ export default defineSchema({
         ),
 
         invoiceType: v.union(
-            v.literal("SALES"),
+            v.literal("SALES"), // SI-00003 = sales i
             v.literal("SERVICE"),
             v.literal("COMMERCIAL"),
         ), // from bir sales invoice format
@@ -94,6 +96,7 @@ export default defineSchema({
         taxAmount: v.number(),
         totalAmount: v.number(),
 
+        // draft = wag ibilang
         status: v.union(
             v.literal("DRAFT"),
             v.literal("SENT"),
@@ -102,7 +105,7 @@ export default defineSchema({
         ),
         pdfUrl: v.optional(v.string()),
         updatedAt: v.number(),
-    }),
+    }).index("by_user", ["userId"]),
     // items
     items: defineTable({
         invoiceId: v.id("invoices"),
