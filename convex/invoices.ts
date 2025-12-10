@@ -1,6 +1,7 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { mutation } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
+import { VAT_RATE } from "@/../../lib/VAT_RATE"
 
 export const createInvoice = mutation({
     args: {
@@ -13,7 +14,7 @@ export const createInvoice = mutation({
             v.literal("SERVICE"),
             v.literal("COMMERCIAL"),
         ),
-        invoiceNumber: v.string(),
+        // invoiceNumber: v.string(), // This is auto generated and incremental (CHECK DOCS MHF for rules) 
 
         // seller infos (subscribers)
         sellerBusinessName: v.string(),
@@ -91,12 +92,89 @@ export const createInvoice = mutation({
             throw new Error("Client not found or unauthorized")
         }
 
-        // calculation
-
         let subTotal = 0;
-        let taxableAmount = 0;
-        let vatExemptAmount = 0;
-        let zeroRatedAmount = 0;
 
+        for (const item of args.items) {
+            const itemAmount = item.unitPrice * item.quantity
+            subTotal += itemAmount
+        }
+
+        let taxAmount = 0;
+
+        // for VAT
+        if (args.taxType === "VAT") {
+            taxAmount = subTotal * VAT_RATE;
+        }
+
+        // TODO OTHER TAXTYPE (IF IBA YUNG COMPUTATION)
+
+        const totalAmount = subTotal + taxAmount;
+
+        // SERIAL/INVOICE NUMBER GENERATION:
+        let invoiceNumber: string = "";
+
+        if (args.invoiceType === "SALES") {
+            // SI-
+            invoiceNumber = "SI-"
+
+            // XX-2025-
+            const currentYear = new Date().getFullYear().toString();
+            invoiceNumber += currentYear + "-";
+
+            const invoices = await ctx.db
+                .query("invoices")
+                .withIndex("by_user", q => q.eq("userId", user._id))
+                .collect()
+
+            // XX-XXXX-00001
+            const invoiceSerialNumber = invoices.length + 1
+            invoiceNumber += invoiceSerialNumber.toString().padStart(5, '0')
+        } // TODO else SERVICE & COMMERCIAL
+
+        const invoiceId = await ctx.db
+            .insert("invoices", {
+                // relationships
+                userId: user._id,
+                clientId: args.clientId,
+
+                // seller (subscriber infos)
+                sellerBusinessName: args.sellerBusinessName,
+                sellerTin: args.sellerTin,
+                sellerAddress: args.sellerAddress,
+                sellerVatStatus: args.sellerVatStatus,
+
+                // invoice infos
+                invoiceType: args.invoiceType,
+                invoiceNumber: invoiceNumber,
+
+                // if vat, nonvat, etc.
+                taxType: args.taxType,
+
+                // buyer infos
+                buyerName: args.buyerName,
+                buyerTin: args.buyerTin,
+                buyerAddress: args.buyerAddress,
+
+                subTotal,
+                taxAmount,
+                totalAmount,
+
+                status: args.status ?? "DRAFT",
+                updatedAt: Math.floor(Date.now() / 1000), // unix timestamp
+            })
+
+        for (const item of args.items) {
+            await ctx.db.insert("items", {
+                invoiceId,
+                description: item.description,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                amount: item.quantity * item.unitPrice,
+                vatType: args.taxType === "VAT" ? "VATABLE" : "NON_VAT",
+                isSpecialDiscountEligible: false, // TODO DISCOUNTS
+            })
+        }
+
+        return invoiceId;
     }
 })

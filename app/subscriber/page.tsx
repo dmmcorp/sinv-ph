@@ -2,7 +2,6 @@
 import Dashboard from "@/components/subscriber/pages/dashboard/dashboard";
 import { Button } from "@/components/ui/button";
 import { useAuthActions } from "@convex-dev/auth/react";
-import React from "react";
 
 function Page() {
   const { signOut } = useAuthActions();
