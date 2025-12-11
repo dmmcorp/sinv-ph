@@ -12,6 +12,7 @@ import { formatCurrency } from "@/lib/utils";
 import { useBusinessProfileSync } from "@/hooks/use-business-profile";
 import { UseFormReturn } from "react-hook-form";
 import { InvoiceFormValues } from "@/lib/types";
+import Image from "next/image";
 
 interface NewInvoiceFormProps {
   form: UseFormReturn<InvoiceFormValues>;
@@ -75,18 +76,41 @@ function NewInvoiceForm({
   };
   const calculateDiscountAmount = () => {
     const disc = isPercentage
-      ? Number(discountValue) * subtotal
+      ? subtotal * (Number(discountValue) / 100)
       : Number(discountValue);
+
     return disc;
+  };
+  const calculateTotalAmount = () => {
+    let total = subtotal;
+    if (includeTax) {
+      total += taxAmount;
+    }
+
+    if (includeDiscount) {
+      total -= discountAmount;
+    }
+
+    return total;
   };
   const discountAmount = calculateDiscountAmount();
   const taxAmount = calculateTaxAmount();
+  const totalAmount = calculateTotalAmount();
   // 2. Define a submit handler.
 
   return (
-    <div className=" border-2 border-black/60 p-5 rounded-2xl">
+    <div className=" border-2 border-black/60 p-5 rounded-2xl space-y-10 ">
       <div className="flex justify-between">
         <div className="">
+          {businessProfile && (
+            <Image
+              width={70}
+              height={70}
+              src={businessProfile?.logoUrl}
+              alt={businessProfile?.businessName ?? ""}
+              className="object-contain"
+            />
+          )}
           <h3 className="text-lg font-bold">{businessProfile?.businessName}</h3>
           <p>{businessProfile?.businessName}</p>
           <h5>email@email.com</h5>
@@ -107,8 +131,9 @@ function NewInvoiceForm({
                     {/* <FormLabel>Client Name</FormLabel> */}
                     <FormControl>
                       <Input
-                        className="border-none shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
+                        className="border-none font-semibold shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
                         placeholder="Enter client name"
+                        disabled
                         {...field}
                       />
                     </FormControl>
@@ -126,6 +151,7 @@ function NewInvoiceForm({
                     {/* <FormLabel>Client Address</FormLabel> */}
                     <FormControl>
                       <Input
+                        disabled
                         className="border-none shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
                         placeholder="Enter address"
                         {...field}
@@ -139,7 +165,7 @@ function NewInvoiceForm({
           </div>
           <div className="">
             <h3 className="text-md font-bold opacity-0">1</h3>
-            <div className="flex items-center">
+            <div className="flex items-center gap-x-2">
               Invoice No.
               <FormField
                 control={form.control}
@@ -151,6 +177,7 @@ function NewInvoiceForm({
                       <Input
                         className="border-none text-base shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
                         placeholder="0001"
+                        disabled
                         {...field}
                       />
                     </FormControl>
@@ -159,7 +186,7 @@ function NewInvoiceForm({
                 )}
               />
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-x-2">
               Date Issued:
               <FormField
                 control={form.control}
@@ -169,7 +196,7 @@ function NewInvoiceForm({
                     {/* <FormLabel>Date</FormLabel> */}
                     <FormControl>
                       <Input
-                        className="border-none shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
+                        className="border-none shadow-none  focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
                         {...field}
                       />
                     </FormControl>
@@ -195,8 +222,8 @@ function NewInvoiceForm({
               )}
             /> */}
 
-        <div className="">
-          <div className="grid grid-cols-12 gap-x-1  font-semibold border-y-2 border-black text-sm">
+        <div className="border-x border-y border-black rounded-lg pb-5">
+          <div className="grid grid-cols-12 gap-x-1 py-1  font-semibold border-b border-black text-sm">
             <div className="col-span-[0.5] text-center">#</div>
             <div className="col-span-6 text-center">Description</div>
             <div className="col-span-2 text-center">Unit Price</div>
@@ -247,30 +274,13 @@ function NewInvoiceForm({
             : [1, 2, 3, 5].map((_, index) => (
                 <div
                   key={index}
-                  className="grid grid-cols-12 text-center min-h-5  gap-x-1 text-xs items-center border-t border-t-black/70 py-2 border-b border-b-black"
+                  className="grid grid-cols-12 text-center min-h-5 py-3  gap-x-1 text-xs items-center border-t border-t-black/70  border-b border-b-black"
                 >
                   <div className="col-span-[0.5]">{}</div>
                   <div className="col-span-6">{}</div>
                   <div className="col-span-2">{}</div>
                   <div className="col-span-[1.5] flex items-center justify-center gap-2">
-                    {/* <Button
-                      onClick={() => onSetQuantity("sub", selectedItem.id)}
-                      disabled={selectedItem.quantity > 0 ? false : true}
-                      type="button"
-                      size={"icon-sm"}
-                      variant={"outline"}
-                    >
-                      -
-                    </Button> */}
                     {}
-                    {/* <Button
-                      onClick={() => onSetQuantity("add", selectedItem.id)}
-                      type="button"
-                      size={"icon-sm"}
-                      variant={"outline"}
-                    >
-                      +
-                    </Button> */}
                   </div>
                   <div className="col-span-2">
                     {}
@@ -288,12 +298,12 @@ function NewInvoiceForm({
             </div>
             {includeTax && (
               <>
-                <div className="grid grid-cols-12 gap-x-1  font-semibold text-sm">
+                <div className="grid grid-cols-12 gap-x-1  font-semibold text-xs">
                   <div className="col-span-8 "></div>
                   <div className="col-span-2 text-right font-light"> Tax%:</div>
                   <div className="col-span-2 text-center font-light">12%</div>
                 </div>
-                <div className="grid grid-cols-12 gap-x-1  font-semibold text-sm">
+                <div className="grid grid-cols-12 gap-x-1  font-semibold text-xs">
                   <div className="col-span-8 "></div>
                   <div className="col-span-2 text-right font-light">
                     {" "}
@@ -308,9 +318,9 @@ function NewInvoiceForm({
             {includeDiscount && (
               <>
                 {isPercentage && (
-                  <div className="grid grid-cols-12 gap-x-1  font-semibold text-sm">
-                    <div className="col-span-8 "></div>
-                    <div className="col-span-2 text-right font-light">
+                  <div className="grid grid-cols-12 gap-x-1  font-semibold text-xs">
+                    <div className="col-span-6 "></div>
+                    <div className="col-span-4 text-right font-light">
                       {" "}
                       Discount %:
                     </div>
@@ -319,9 +329,9 @@ function NewInvoiceForm({
                     </div>
                   </div>
                 )}
-                <div className="grid grid-cols-12 gap-x-1  font-semibold text-sm">
-                  <div className="col-span-8 "></div>
-                  <div className="col-span-2 text-right font-light">
+                <div className="grid grid-cols-12 gap-x-1  font-semibold text-xs">
+                  <div className="col-span-6 "></div>
+                  <div className="col-span-4 text-right font-light">
                     {" "}
                     Discount Amount:
                   </div>
@@ -332,15 +342,22 @@ function NewInvoiceForm({
               </>
             )}
 
-            <div className="grid grid-cols-12 gap-x-1  font-semibold text-sm">
+            <div className="grid grid-cols-12 gap-x-1  font-semibold text-sm mt-5">
               <div className="col-span-8 "></div>
               <div className="col-span-2 text-right"> Total Amount:</div>
               <div className="col-span-2 text-center ">
-                {formatCurrency(taxAmount + subtotal, selectedCurrency)}
+                {formatCurrency(totalAmount, selectedCurrency)}
               </div>
             </div>
           </div>
         </div>
+        {!includeTax && (
+          <div className="">
+            <h1 className="text-red-600 text-xl uppercase text-center">
+              &quot;This document is not valid for claim of input tax.&quot;
+            </h1>
+          </div>
+        )}
       </div>
     </div>
   );

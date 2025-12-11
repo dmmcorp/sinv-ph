@@ -20,6 +20,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import useClientSelection from "@/stores/client/useClientSelection";
 
 export interface SelectedItemType {
   id: number;
@@ -94,6 +95,7 @@ const invoiceFormSchema = z.object({
 });
 
 function NewInvoice() {
+  const { selectedClient } = useClientSelection();
   const [selectedCurrency, setSelectedCurrency] = useState("PHP");
   const [includeTax, setIncludeTax] = useState(false);
   const [includeDiscount, setIncludeDiscount] = useState(false);
@@ -106,8 +108,8 @@ function NewInvoice() {
   const form = useForm<z.infer<typeof invoiceFormSchema>>({
     resolver: zodResolver(invoiceFormSchema),
     defaultValues: {
-      clientName: "",
-      clientAddress: "",
+      clientName: selectedClient?.name ?? "",
+      clientAddress: selectedClient?.address ?? "",
       clientTIN: "",
       date: new Date().toISOString().split("T")[0],
       invoiceNo: "",
@@ -143,7 +145,7 @@ function NewInvoice() {
               isPercentage={isPercentage}
             />
           </div>
-          <Card className="col-span-1 lg:col-span-3  h-fit">
+          <Card className="col-span-1 lg:col-span-3   h-fit">
             <CardHeader>
               <CardTitle>Actions</CardTitle>
             </CardHeader>

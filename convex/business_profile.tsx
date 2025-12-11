@@ -1,5 +1,6 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { query } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 
 export const getBusinessProfile = query({
   handler: async (ctx) => {
@@ -9,6 +10,15 @@ export const getBusinessProfile = query({
       .query("business_profile")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .unique();
-    return businessProfile;
+    if (!businessProfile) {
+      return null;
+    }
+    const logoUrl = await ctx.storage.getUrl(
+      businessProfile.logoUrl as Id<"_storage">
+    );
+    return {
+      ...businessProfile,
+      logoUrl: logoUrl,
+    };
   },
 });

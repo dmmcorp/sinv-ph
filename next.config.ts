@@ -1,7 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "disciplined-bird-908.convex.cloud",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

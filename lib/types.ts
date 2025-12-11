@@ -1,3 +1,5 @@
+import { Doc } from "@/convex/_generated/dataModel";
+
 export type InvoiceFormValues = {
   clientName: string;
   clientAddress: string;
@@ -14,3 +16,5 @@ export type InvoiceFormValues = {
   total: number;
   clientTIN?: string;
 };
+
+export type ClientConvexType = Doc<"clients">;
