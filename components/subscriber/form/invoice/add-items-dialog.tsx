@@ -24,11 +24,11 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckIcon, ChevronsUpDownIcon, Plus } from "lucide-react";
+import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import { SelectedItemType } from "@/app/subscriber/invoices/new/_components/new-invoice";
+import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
 
 export type Item = {
   id: number;
@@ -43,21 +43,25 @@ const ItemsDummy: Item[] = [
   { id: 4, description: "Consulting", price: 2000 },
   { id: 5, description: "Maintenance & Support", price: 1500 },
 ];
-interface AddItemsDialogProps {
-  currentItems: SelectedItemType[];
-  setSelectedItems: (items: SelectedItemType[]) => void;
-}
+// interface AddItemsDialogProps {
+//   currentItems: SelectedItemType[];
+//   setSelectedItems: (items: SelectedItemType[]) => void;
+// }
 
-export function AddItemsDialog({
-  currentItems,
-  setSelectedItems,
-}: AddItemsDialogProps) {
+export function AddItemsDialog(
+  {
+    // currentItems,
+    // setSelectedItems,
+  }
+) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [item, setItem] = useState<Item | undefined>();
+
+  const { selectedItems, addItem, updateItemQuantity } = useInvoiceStore();
 
   const onAddNewItem = () => {
     // get the item
@@ -69,19 +73,18 @@ export function AddItemsDialog({
       };
 
       //check if the item is already been added
-      const existingItem = currentItems.find((item) => item.id === curItem.id);
+      const existingItem = selectedItems.find((item) => item.id === curItem.id);
       // just add quantity if yes
       if (existingItem) {
-        setSelectedItems(
-          currentItems.map((item) =>
-            item.id === curItem.id
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          )
-        );
+        // selectedItems.map((item) =>
+        //   item.id === curItem.id
+        //     ? { ...item, quantity: item.quantity + 1 }
+        //     : item
+        // )
+        updateItemQuantity(existingItem.id, 1);
       } else {
         //add the whole item to the array if no
-        setSelectedItems([...currentItems, curItem]);
+        addItem(curItem);
       }
     }
 
@@ -100,19 +103,21 @@ export function AddItemsDialog({
       };
 
       console.log(curItem);
-      const existingItem = currentItems.find((item) => item.id === curItem.id);
+      const existingItem = selectedItems.find((item) => item.id === curItem.id);
       // just add quantity if yes
       if (existingItem) {
-        setSelectedItems(
-          currentItems.map((item) =>
-            item.id === curItem.id
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          )
-        );
+        // setSelectedItems(
+        //   currentItems.map((item) =>
+        //     item.id === curItem.id
+        //       ? { ...item, quantity: item.quantity + 1 }
+        //       : item
+        //   )
+        // );
+        updateItemQuantity(existingItem.id, 1);
       } else {
         //add the whole item to the array if no
-        setSelectedItems([...currentItems, curItem]);
+        // setSelectedItems([...currentItems, curItem]);
+        addItem(curItem);
       }
 
       //simulation of step 1
