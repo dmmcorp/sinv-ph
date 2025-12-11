@@ -2,7 +2,6 @@
 import { AddItemsDialog } from "@/components/subscriber/form/invoice/add-items-dialog";
 import NewInvoiceForm from "@/components/subscriber/form/invoice/new-invoice-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -21,6 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import useClientSelection from "@/stores/client/useClientSelection";
+import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
 
 export interface SelectedItemType {
   id: number;
@@ -94,16 +94,21 @@ const invoiceFormSchema = z.object({
     .min(0, "Total cannot be negative"),
 });
 
-function NewInvoice() {
+function NewInvoice({ invoiceNo }: { invoiceNo: string }) {
   const { selectedClient } = useClientSelection();
-  const [selectedCurrency, setSelectedCurrency] = useState("PHP");
-  const [includeTax, setIncludeTax] = useState(false);
-  const [includeDiscount, setIncludeDiscount] = useState(false);
-  const [discountValue, setDiscountValue] = useState("");
-  const [isPercentage, setIsPercentage] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<SelectedItemType[] | []>(
-    []
-  );
+  const {
+    selectedCurrency,
+    includeTax,
+    includeDiscount,
+    discountValue,
+    isPercentage,
+    selectedItems,
+    setCurrency,
+    toggleTax,
+    toggleDiscount,
+    setDiscountValue,
+    setIsPercentage,
+  } = useInvoiceStore();
 
   const form = useForm<z.infer<typeof invoiceFormSchema>>({
     resolver: zodResolver(invoiceFormSchema),
@@ -112,13 +117,14 @@ function NewInvoice() {
       clientAddress: selectedClient?.address ?? "",
       clientTIN: "",
       date: new Date().toISOString().split("T")[0],
-      invoiceNo: "",
+      invoiceNo: invoiceNo,
       items: selectedItems,
       subTotal: 0,
       discount: 0,
       total: 0,
     },
   });
+  console.log(invoiceNo);
 
   const handleSaveInvoice = () => {};
   const handlePreviewPDF = () => {};
@@ -135,14 +141,14 @@ function NewInvoice() {
           <div className="col-span-1 lg:col-span-9">
             <NewInvoiceForm
               form={form}
-              selectedCurrency={selectedCurrency}
-              setSelectedCurrency={setSelectedCurrency}
-              currentItems={selectedItems}
-              setSelectedItems={setSelectedItems}
-              includeDiscount={includeDiscount}
-              includeTax={includeTax}
-              discountValue={discountValue}
-              isPercentage={isPercentage}
+              // selectedCurrency={selectedCurrency}
+              // setSelectedCurrency={setSelectedCurrency}
+              // currentItems={selectedItems}
+              // setSelectedItems={setSelectedItems}
+              // includeDiscount={includeDiscount}
+              // includeTax={includeTax}
+              // discountValue={discountValue}
+              // isPercentage={isPercentage}
             />
           </div>
           <Card className="col-span-1 lg:col-span-3   h-fit">
@@ -154,10 +160,7 @@ function NewInvoice() {
                 <Label className="text-sm text-muted-foreground">
                   Item/Service Selection
                 </Label>
-                <AddItemsDialog
-                  currentItems={selectedItems}
-                  setSelectedItems={setSelectedItems}
-                />
+                <AddItemsDialog />
               </div>
               <div className="space-y-2 mb-2">
                 <Label className="text-sm text-muted-foreground">
@@ -165,7 +168,7 @@ function NewInvoice() {
                 </Label>
                 <Select
                   defaultValue={selectedCurrency}
-                  onValueChange={(value) => setSelectedCurrency(value)}
+                  onValueChange={(value) => setCurrency(value)}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue>
@@ -206,7 +209,7 @@ function NewInvoice() {
                   <Switch
                     id="tax-switch"
                     checked={includeTax}
-                    onCheckedChange={setIncludeTax}
+                    onCheckedChange={toggleTax}
                   />
                 </div>
 
@@ -221,7 +224,7 @@ function NewInvoice() {
                   <Switch
                     id="discount-switch"
                     checked={includeDiscount}
-                    onCheckedChange={setIncludeDiscount}
+                    onCheckedChange={toggleDiscount}
                   />
                 </div>
                 {includeDiscount && (

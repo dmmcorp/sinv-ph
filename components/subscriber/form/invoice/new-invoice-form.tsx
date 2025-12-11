@@ -7,63 +7,71 @@ import {
 } from "@/components/ui/form";
 
 import { Input } from "@/components/ui/input";
-import { SelectedItemType } from "@/app/subscriber/invoices/new/_components/new-invoice";
 import { formatCurrency } from "@/lib/utils";
 import { useBusinessProfileSync } from "@/hooks/use-business-profile";
 import { UseFormReturn } from "react-hook-form";
 import { InvoiceFormValues } from "@/lib/types";
 import Image from "next/image";
+import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
 
 interface NewInvoiceFormProps {
   form: UseFormReturn<InvoiceFormValues>;
-  currentItems: SelectedItemType[] | [];
-  selectedCurrency: string;
-  setSelectedItems: React.Dispatch<React.SetStateAction<SelectedItemType[]>>;
-  setSelectedCurrency: React.Dispatch<React.SetStateAction<string>>;
-  includeTax: boolean;
-  includeDiscount: boolean;
-  discountValue: string;
-  isPercentage: boolean;
+  // currentItems: SelectedItemType[] | [];
+  // selectedCurrency: string;
+  // setSelectedItems: React.Dispatch<React.SetStateAction<SelectedItemType[]>>;
+  // setSelectedCurrency: React.Dispatch<React.SetStateAction<string>>;
+  // includeTax: boolean;
+  // includeDiscount: boolean;
+  // discountValue: string;
+  // isPercentage: boolean;
 }
 
 function NewInvoiceForm({
   form,
-  currentItems,
-  selectedCurrency,
-  setSelectedItems,
-  setSelectedCurrency,
-  includeTax,
-  includeDiscount,
-  discountValue,
-  isPercentage,
+  // currentItems,
+  // selectedCurrency,
+  // setSelectedItems,
+  // setSelectedCurrency,
+  // includeTax,
+  // includeDiscount,
+  // discountValue,
+  // isPercentage,
 }: NewInvoiceFormProps) {
   const { businessProfile } = useBusinessProfileSync();
+  const {
+    selectedCurrency,
+    includeTax,
+    includeDiscount,
+    discountValue,
+    isPercentage,
+    selectedItems,
+  } = useInvoiceStore();
 
-  const onSetQuantity = (process: "add" | "sub", itemId: number) => {
-    const itemToModify = currentItems.find((i) => i.id === itemId);
+  // const onSetQuantity = (process: "add" | "sub", itemId: number) => {
+  //   const itemToModify = currentItems.find((i) => i.id === itemId);
 
-    if (process === "add" && itemToModify) {
-      setSelectedItems((prev) =>
-        prev.map((item) =>
-          item.id === itemToModify.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      );
-    }
-    if (process === "sub" && itemToModify) {
-      setSelectedItems((prev) =>
-        prev.map((item) =>
-          item.id === itemToModify.id
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
-        )
-      );
-    }
-  };
+  //   if (process === "add" && itemToModify) {
+  //     setSelectedItems((prev) =>
+  //       prev.map((item) =>
+  //         item.id === itemToModify.id
+  //           ? { ...item, quantity: item.quantity + 1 }
+  //           : item
+  //       )
+  //     );
+  //   }
+  //   if (process === "sub" && itemToModify) {
+  //     setSelectedItems((prev) =>
+  //       prev.map((item) =>
+  //         item.id === itemToModify.id
+  //           ? { ...item, quantity: item.quantity - 1 }
+  //           : item
+  //       )
+  //     );
+  //   }
+  // };
 
   const calculateSubTotal = () => {
-    return currentItems.reduce((total, item) => {
+    return selectedItems.reduce((total, item) => {
       const lineTotal = (item.quantity || 0) * (item.price || 0);
       return total + lineTotal;
     }, 0);
@@ -231,8 +239,8 @@ function NewInvoiceForm({
             <div className="col-span-2 text-center">Amount</div>
           </div>
 
-          {currentItems.length > 0
-            ? currentItems.map((selectedItem, index) => (
+          {selectedItems.length > 0
+            ? selectedItems.map((selectedItem, index) => (
                 <div
                   key={selectedItem.description}
                   className="grid grid-cols-12 text-center  gap-x-1 text-xs items-center border-t border-t-black/70 py-2 border-b border-b-black"
