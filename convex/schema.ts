@@ -86,6 +86,16 @@ export default defineSchema({
         ),
         specialDiscountId: v.optional(v.string()),
 
+        // items
+        items: v.array(
+            v.object({
+                unitPrice: v.number(),
+                description: v.string(),
+                quantity: v.number(),
+                amount: v.number(),
+            })
+        ),
+
         // buyer info
         buyerName: v.string(),
         buyerTin: v.optional(v.string()), // if b2c usually no tin.
@@ -96,7 +106,7 @@ export default defineSchema({
         taxAmount: v.number(),
         totalAmount: v.number(),
 
-        // draft = wag ibilang
+        // draft = wag ibilang sa mga successful invoices
         status: v.union(
             v.literal("DRAFT"),
             v.literal("SENT"),
@@ -106,26 +116,28 @@ export default defineSchema({
         pdfUrl: v.optional(v.string()),
         updatedAt: v.number(),
     }).index("by_user", ["userId"]),
-    // items
-    items: defineTable({
+
+    // items catalog table
+    itemCatalog: defineTable({
         userId: v.id("users"), // business/subscriber who owns this item
-        invoiceId: v.id("invoices"),
+        // invoiceId: v.id("invoices"),
 
-        description: v.string(), // goods or nature of service
-        quantity: v.number(),
         unitPrice: v.number(),
-        amount: v.number(), // quantity * unitPrice = amount vlaue
+        description: v.string(), // goods or nature of service
+        isActive: v.boolean(), // soft delete
+        // quantity: v.number(),
+        // amount: v.number(), // quantity * unitPrice = amount vlaue
 
-        vatType: v.union(
-            v.literal("VATABLE"),
-            v.literal("NON_VAT"),
-            v.literal("VAT_EXEMPT"),
-            v.literal("ZERO_RATED"),
-        ),
+        // vatType: v.union(
+        //     v.literal("VATABLE"),
+        //     v.literal("NON_VAT"),
+        //     v.literal("VAT_EXEMPT"),
+        //     v.literal("ZERO_RATED"),
+        // ),
 
-        isSpecialDiscountEligible: v.boolean(),
+        // isSpecialDiscountEligible: v.boolean(),
     })
-        .index("by_invoice", ["invoiceId"])
+        // .index("by_invoice", ["invoiceId"])
         .index("by_user", ["userId"]),
     // branding
     branding: defineTable({

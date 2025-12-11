@@ -93,16 +93,10 @@ export const createInvoice = mutation({
 
         // items
         items: v.array(v.object({
-            description: v.string(),
-            quantity: v.number(),
-            unitPrice: v.number(),
-            vatType: v.union(
-                v.literal("VATABLE"),
-                v.literal("NON_VAT"),
-                v.literal("VAT_EXEMPT"),
-                v.literal("ZERO_RATED"),
-            ),
-            isSpecialDiscountEligible: v.boolean(),
+            description: v.string(), // from item catalog
+            quantity: v.number(), // from frontend
+            unitPrice: v.number(), // from item catalog
+            amount: v.number(), // from frontend
         })),
 
         // status
@@ -204,6 +198,9 @@ export const createInvoice = mutation({
                 buyerTin: args.buyerTin,
                 buyerAddress: args.buyerAddress,
 
+                // items
+                items: args.items,
+
                 // totals
                 subTotal,
                 taxAmount,
@@ -213,19 +210,6 @@ export const createInvoice = mutation({
                 status: args.status ?? "DRAFT",
                 updatedAt: Math.floor(Date.now() / 1000),
             })
-
-        for (const item of args.items) {
-            await ctx.db.insert("items", {
-                userId,
-                invoiceId,
-                description: item.description,
-                quantity: item.quantity,
-                unitPrice: item.unitPrice,
-                amount: item.quantity * item.unitPrice,
-                vatType: args.taxType === "VAT" ? "VATABLE" : "NON_VAT",
-                isSpecialDiscountEligible: false, // TODO DISCOUNTS
-            })
-        }
 
         return invoiceId;
     }
