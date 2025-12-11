@@ -68,13 +68,20 @@ export default defineSchema({
             v.literal("VAT"), // 
             v.literal("VAT_EXEMPT"),
             v.literal("ZERO_RATED"),
-            v.literal("MIXED"),
+            v.literal("MIXED"), // some items vat, some exempt
             v.literal("PAYMENT_RECEIPT")
         ),
+
+        // discounts
         discountType: v.optional(
-            v.union(v.literal("PERCENT"), v.literal("FIXED"))
+            v.union(
+                v.literal("PERCENT"),
+                v.literal("FIXED")
+            )
         ),
         discountValue: v.optional(v.number()),
+        discountAmount: v.optional(v.number()),
+
         specialDiscountType: v.optional(
             v.union(
                 v.literal("SC"),
@@ -85,6 +92,7 @@ export default defineSchema({
             )
         ),
         specialDiscountId: v.optional(v.string()),
+        specialDiscountAmount: v.optional(v.number()),
 
         // items
         items: v.array(
@@ -93,6 +101,12 @@ export default defineSchema({
                 description: v.string(),
                 quantity: v.number(),
                 amount: v.number(),
+                vatType: v.union(
+                    v.literal("VATABLE"),
+                    v.literal("VAT_EXEMPT"),
+                    v.literal("ZERO_RATED"),
+                    v.literal("NON_VAT"),
+                ),
             })
         ),
 
@@ -102,9 +116,16 @@ export default defineSchema({
         buyerAddress: v.optional(v.string()), // same case if b2c usually no tin.
 
         // totality
-        subTotal: v.number(),
-        taxAmount: v.number(),
-        totalAmount: v.number(),
+        vatableSales: v.number(), // products without tax
+        vatAmount: v.number(), // 12% of vatable sales (vatableSales * 0.12)
+        vatExemptSales: v.optional(v.number()), // Sales exempt from VAT
+        zeroRatedSales: v.optional(v.number()), // Sales with 0% VAT
+
+        grossTotal: v.number(), // before any discounts (vat inclusive price)
+        lessDiscount: v.optional(v.number()),    // Regular discount
+        lessSpecialDiscount: v.optional(v.number()), // SC/PWD discount
+        netAmount: v.number(),          // After discounts, before tax
+        totalAmount: v.number(),        // Final amount
 
         // draft = wag ibilang sa mga successful invoices
         status: v.union(
@@ -128,12 +149,12 @@ export default defineSchema({
         // quantity: v.number(),
         // amount: v.number(), // quantity * unitPrice = amount vlaue
 
-        // vatType: v.union(
-        //     v.literal("VATABLE"),
-        //     v.literal("NON_VAT"),
-        //     v.literal("VAT_EXEMPT"),
-        //     v.literal("ZERO_RATED"),
-        // ),
+        vatType: v.union(
+            v.literal("VATABLE"), // Subject to 12% VAT
+            v.literal("NON_VAT"), // Seller not VAT-registered (usually for small businesses < 3MPHP ANNUAL SALES)
+            v.literal("VAT_EXEMPT"), // No VAT (usually educational services, books, newspapers)
+            v.literal("ZERO_RATED"), // 0% VAT (for export / international transport) 
+        ),
 
         // isSpecialDiscountEligible: v.boolean(),
     })
