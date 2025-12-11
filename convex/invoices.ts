@@ -1,5 +1,5 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
 import { VAT_RATE } from "@/../../lib/VAT_RATE"
 
@@ -9,6 +9,38 @@ const getCounterName = (userId: string, year: number, type: "SALES" | "SERVICE" 
     return `invoice_${type}_${userId}_${year}`
 }
 
+export const getNextInvoiceNumber = query({
+    args: {
+        invoiceType: v.union(
+            v.literal("SALES"),
+            v.literal("SERVICE"),
+            v.literal("COMMERCIAL"),
+        ),
+    },
+    handler: async (ctx, { invoiceType }) => {
+        const userId = await getAuthUserId(ctx)
+        if (!userId) {
+            throw new ConvexError("Not authenticated!")
+        }
+
+        const currentYear = new Date().getFullYear()
+        const counterName = getCounterName(userId, currentYear, invoiceType)
+
+        const existingCounter = await ctx.db
+            .query("invoiceCounters")
+            .withIndex("by_name", q => q.eq("name", counterName))
+            .first()
+
+        // fetch next serial number if doesnt exist then 1st invoice
+        const nextSerialNumber = existingCounter ? existingCounter.value + 1 : 1
+
+        const prefix = invoiceType === "SALES" ? "SI"
+            : invoiceType === "SERVICE" ? "SV"
+                : "CM"
+
+        return `${prefix}-${currentYear}-${nextSerialNumber.toString().padStart(5, "0")}`
+    }
+})
 
 export const createInvoice = mutation({
     args: {
