@@ -14,6 +14,7 @@ import type * as clients from "../clients.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as invoices from "../invoices.js";
+import type * as item_catalog from "../item_catalog.js";
 import type * as onboarding from "../onboarding.js";
 import type * as users from "../users.js";
 
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   files: typeof files;
   http: typeof http;
   invoices: typeof invoices;
+  item_catalog: typeof item_catalog;
   onboarding: typeof onboarding;
   users: typeof users;
 }>;
@@ -60,4 +62,29 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  shardedCounter: {
+    public: {
+      add: FunctionReference<
+        "mutation",
+        "internal",
+        { count: number; name: string; shard?: number; shards?: number },
+        number
+      >;
+      count: FunctionReference<"query", "internal", { name: string }, number>;
+      estimateCount: FunctionReference<
+        "query",
+        "internal",
+        { name: string; readFromShards?: number; shards?: number },
+        any
+      >;
+      rebalance: FunctionReference<
+        "mutation",
+        "internal",
+        { name: string; shards?: number },
+        any
+      >;
+      reset: FunctionReference<"mutation", "internal", { name: string }, any>;
+    };
+  };
+};
