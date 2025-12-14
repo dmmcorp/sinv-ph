@@ -1,11 +1,17 @@
+import { Doc, Id } from "@/convex/_generated/dataModel";
 import { create } from "zustand";
 
-export interface SelectedItemType {
-  id: number;
+export type SelectedItemType = {
+  _id: Id<"itemCatalog">;
   description: string;
   quantity: number;
   price: number;
-}
+};
+
+//  id: number;
+//   description: string;
+//   quantity: number;
+//   price: number;
 
 interface InvoiceStoreType {
   selectedCurrency: string;
@@ -27,8 +33,8 @@ interface InvoiceStoreType {
   setIsPercentage: (value: boolean) => void;
 
   addItem: (item: SelectedItemType) => void;
-  updateItemQuantity: (id: number, quantity: number) => void;
-  removeItem: (id: number) => void;
+  updateItemQuantity: (id: Id<"itemCatalog">, quantity: number) => void;
+  removeItem: (id: Id<"itemCatalog">) => void;
 
   clearInvoice: () => void;
 }
@@ -61,13 +67,13 @@ export const useInvoiceStore = create<InvoiceStoreType>((set) => ({
   updateItemQuantity: (id, quantity) =>
     set((state) => ({
       selectedItems: state.selectedItems.map((item) =>
-        item.id === id ? { ...item, quantity } : item
+        item._id === id ? { ...item, quantity: item.quantity + quantity } : item
       ),
     })),
 
   removeItem: (id) =>
     set((state) => ({
-      selectedItems: state.selectedItems.filter((i) => i.id !== id),
+      selectedItems: state.selectedItems.filter((i) => i._id !== id),
     })),
 
   clearInvoice: () =>

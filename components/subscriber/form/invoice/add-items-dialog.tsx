@@ -29,20 +29,23 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
+import { useItemsCatalog } from "@/hooks/use-items-catalog";
+import { Doc, Id } from "@/convex/_generated/dataModel";
+import { toast } from "sonner";
 
 export type Item = {
-  id: number;
+  _id: Id<"itemCatalog">;
+  unitPrice: number;
   description: string;
-  price: number;
 };
 
-const ItemsDummy: Item[] = [
-  { id: 1, description: "Web Development Services", price: 5000 },
-  { id: 2, description: "UI/UX Design", price: 3000 },
-  { id: 3, description: "Mobile App Development", price: 8000 },
-  { id: 4, description: "Consulting", price: 2000 },
-  { id: 5, description: "Maintenance & Support", price: 1500 },
-];
+// const ItemsDummy: Item[] = [
+//   { id: 1, description: "Web Development Services", price: 5000 },
+//   { id: 2, description: "UI/UX Design", price: 3000 },
+//   { id: 3, description: "Mobile App Development", price: 8000 },
+//   { id: 4, description: "Consulting", price: 2000 },
+//   { id: 5, description: "Maintenance & Support", price: 1500 },
+// ];
 // interface AddItemsDialogProps {
 //   currentItems: SelectedItemType[];
 //   setSelectedItems: (items: SelectedItemType[]) => void;
@@ -60,78 +63,73 @@ export function AddItemsDialog(
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [item, setItem] = useState<Item | undefined>();
-
+  const { itemsCatalog, loading, addItemToDB } = useItemsCatalog();
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState(0);
   const { selectedItems, addItem, updateItemQuantity } = useInvoiceStore();
 
-  const onAddNewItem = () => {
+  const onAddNewItem = async () => {
     // get the item
-    // Loop through ItemsDummy and find value === ItemsDummy.description then put the value of that data to item
     if (step === 1 && item) {
+      console.log(item);
       const curItem = {
-        ...item,
+        _id: item._id,
+        description: item.description,
+        price: item.unitPrice,
         quantity: 1,
       };
+      console.log("Current Item:", curItem);
 
       //check if the item is already been added
-      const existingItem = selectedItems.find((item) => item.id === curItem.id);
+      const existingItem = selectedItems.find(
+        (item) => item._id === curItem._id
+      );
+
+      console.log("Existing Item:", existingItem);
       // just add quantity if yes
       if (existingItem) {
-        // selectedItems.map((item) =>
-        //   item.id === curItem.id
-        //     ? { ...item, quantity: item.quantity + 1 }
-        //     : item
-        // )
-        updateItemQuantity(existingItem.id, 1);
+        updateItemQuantity(existingItem._id, 1);
       } else {
         //add the whole item to the array if no
         addItem(curItem);
       }
     }
 
-    if (step === 2 && item) {
+    if (step === 2) {
       //step 1 - add the item to the items list db
       //step 2 -after the it adds to db and have an convex id
       //step 3 - display it to the list in the ui
 
-      //for now just create a dummy id
-      const nextId = ItemsDummy.sort((a, b) => b.id - a.id)[0]?.id + 1;
+      //add item to the db
+      const result = await addItemToDB(description, price);
 
+      if (!result) {
+        toast.error("Error: result not found");
+        return;
+      }
+      if (result && result.newItem === null) {
+        toast.error("Error: " + result.newItem);
+        return;
+      }
+      console.log("result:", result.newItem);
       const curItem = {
-        ...item,
-        id: nextId,
+        _id: result.newItem._id,
+        description: result.newItem.description,
+        price: result.newItem.unitPrice,
         quantity: 1,
       };
 
       console.log(curItem);
-      const existingItem = selectedItems.find((item) => item.id === curItem.id);
+      const existingItem = selectedItems.find(
+        (item) => item._id === curItem._id
+      );
       // just add quantity if yes
       if (existingItem) {
-        // setSelectedItems(
-        //   currentItems.map((item) =>
-        //     item.id === curItem.id
-        //       ? { ...item, quantity: item.quantity + 1 }
-        //       : item
-        //   )
-        // );
-        updateItemQuantity(existingItem.id, 1);
+        updateItemQuantity(existingItem._id, 1);
       } else {
-        //add the whole item to the array if no
-        // setSelectedItems([...currentItems, curItem]);
         addItem(curItem);
       }
-
-      //simulation of step 1
-      ItemsDummy.push({
-        ...item,
-        id: nextId,
-      });
     }
-
-    // if (!item) {
-    //   setError("*select an item first.");
-    //   return;
-    // }
-
     setError("");
     onStepChange(0);
     dialogClose();
@@ -146,6 +144,14 @@ export function AddItemsDialog(
 
   const dialogClose = () => {
     setDialogOpen(false);
+  };
+
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDescription(e.target.value);
+  };
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPrice(parseFloat(e.target.value || "0"));
   };
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -181,7 +187,7 @@ export function AddItemsDialog(
             </div>
           )}
 
-          {step === 1 && (
+          {step === 1 && itemsCatalog && !loading && (
             <div className="grid gap-2">
               <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
@@ -192,7 +198,7 @@ export function AddItemsDialog(
                     className="w-full justify-between"
                   >
                     {value
-                      ? ItemsDummy.find(
+                      ? itemsCatalog.find(
                           (framework) => framework.description === value
                         )?.description
                       : "Select Item/service..."}
@@ -201,31 +207,35 @@ export function AddItemsDialog(
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0">
                   <Command>
-                    <CommandInput placeholder="Search framework..." />
+                    <CommandInput placeholder="Search items..." />
                     <CommandList>
-                      <CommandEmpty>No framework found.</CommandEmpty>
+                      <CommandEmpty>No Items found.</CommandEmpty>
                       <CommandGroup>
-                        {ItemsDummy.map((framework) => (
+                        {itemsCatalog.map((item) => (
                           <CommandItem
-                            key={framework.id}
-                            value={framework.description}
+                            key={item._id}
+                            value={item.description}
                             onSelect={(currentValue) => {
                               setValue(
                                 currentValue === value ? "" : currentValue
                               );
-                              setItem(framework);
+                              setItem({
+                                _id: item._id,
+                                unitPrice: item.unitPrice,
+                                description: item.description,
+                              });
                               setOpen(false);
                             }}
                           >
                             <CheckIcon
                               className={cn(
                                 "mr-2 h-4 w-4",
-                                value === framework.description
+                                value === item.description
                                   ? "opacity-100"
                                   : "opacity-0"
                               )}
                             />
-                            {framework.description}
+                            {item.description}
                           </CommandItem>
                         ))}
                       </CommandGroup>
@@ -248,16 +258,7 @@ export function AddItemsDialog(
                 <Input
                   id="description"
                   placeholder="Enter custom description"
-                  onChange={(e) =>
-                    setItem({
-                      id: Date.now(),
-                      description: e.target.value,
-                      price: parseFloat(
-                        (document.getElementById("price") as HTMLInputElement)
-                          ?.value || "0"
-                      ),
-                    })
-                  }
+                  onChange={handleDescriptionChange}
                 />
               </div>
               <div className="grid gap-2">
@@ -265,18 +266,7 @@ export function AddItemsDialog(
                 <Input
                   id="price"
                   type="number"
-                  onChange={(e) =>
-                    setItem({
-                      id: Date.now(),
-                      description:
-                        (
-                          document.getElementById(
-                            "description"
-                          ) as HTMLInputElement
-                        )?.value || "",
-                      price: parseFloat(e.target.value) || 0,
-                    })
-                  }
+                  onChange={handlePriceChange}
                   placeholder="Enter custom price"
                 />
               </div>

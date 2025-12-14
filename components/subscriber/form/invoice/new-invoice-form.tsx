@@ -16,27 +16,9 @@ import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
 
 interface NewInvoiceFormProps {
   form: UseFormReturn<InvoiceFormValues>;
-  // currentItems: SelectedItemType[] | [];
-  // selectedCurrency: string;
-  // setSelectedItems: React.Dispatch<React.SetStateAction<SelectedItemType[]>>;
-  // setSelectedCurrency: React.Dispatch<React.SetStateAction<string>>;
-  // includeTax: boolean;
-  // includeDiscount: boolean;
-  // discountValue: string;
-  // isPercentage: boolean;
 }
 
-function NewInvoiceForm({
-  form,
-  // currentItems,
-  // selectedCurrency,
-  // setSelectedItems,
-  // setSelectedCurrency,
-  // includeTax,
-  // includeDiscount,
-  // discountValue,
-  // isPercentage,
-}: NewInvoiceFormProps) {
+function NewInvoiceForm({ form }: NewInvoiceFormProps) {
   const { businessProfile } = useBusinessProfileSync();
   const {
     selectedCurrency,

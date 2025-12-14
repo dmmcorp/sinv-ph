@@ -1,9 +1,11 @@
 import { Doc } from "@/convex/_generated/dataModel";
 import { create } from "zustand";
 
+type BusinessProfileConvexType = Doc<"business_profile">;
+
 interface BusinessProfileType {
-  businessProfile: Doc<"business_profile"> | null;
-  setBusinessProfile: (value: Doc<"business_profile"> | null) => void;
+  businessProfile: BusinessProfileConvexType | null;
+  setBusinessProfile: (value: BusinessProfileConvexType | null) => void;
 }
 
 const useBusinessProfileStore = create<BusinessProfileType>((set) => ({
