@@ -1,8 +1,7 @@
+import { calculateInvoiceAmounts } from "@/../../lib/utils";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { mutation, query } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
-import { VAT_RATE } from "@/../../lib/VAT_RATE"
-import { calculateInvoiceAmounts } from "@/../../lib/utils"
+import { mutation, query } from "./_generated/server";
 
 // COUNTER SYNTAX:
 // INVOCE - TYPE OF INVOICE - BUSINESS ID - YEAR
