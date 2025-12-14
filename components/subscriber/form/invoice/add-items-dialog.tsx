@@ -30,13 +30,23 @@ import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
 import { useItemsCatalog } from "@/hooks/use-items-catalog";
-import { Doc, Id } from "@/convex/_generated/dataModel";
+import { Id } from "@/convex/_generated/dataModel";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { VATTYPE } from "@/lib/types";
+import { TAX_TYPES } from "@/lib/constants/TAX_TYPES";
 
 export type Item = {
   _id: Id<"itemCatalog">;
   unitPrice: number;
   description: string;
+  vatType: "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED" | "ZERO_RATED" | "NON_VAT";
 };
 
 // const ItemsDummy: Item[] = [
@@ -65,6 +75,9 @@ export function AddItemsDialog(
   const [item, setItem] = useState<Item | undefined>();
   const { itemsCatalog, loading, addItemToDB } = useItemsCatalog();
   const [description, setDescription] = useState("");
+  const [vatType, setVatType] = useState<
+    "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED" | "ZERO_RATED" | "NON_VAT"
+  >("VATABLE");
   const [price, setPrice] = useState(0);
   const { selectedItems, addItem, updateItemQuantity } = useInvoiceStore();
 
@@ -101,7 +114,7 @@ export function AddItemsDialog(
       //step 3 - display it to the list in the ui
 
       //add item to the db
-      const result = await addItemToDB(description, price);
+      const result = await addItemToDB(description, price, vatType);
 
       if (!result) {
         toast.error("Error: result not found");
@@ -223,6 +236,7 @@ export function AddItemsDialog(
                                 _id: item._id,
                                 unitPrice: item.unitPrice,
                                 description: item.description,
+                                vatType: item.vatType,
                               });
                               setOpen(false);
                             }}
@@ -269,6 +283,32 @@ export function AddItemsDialog(
                   onChange={handlePriceChange}
                   placeholder="Enter custom price"
                 />
+              </div>
+              <div className="space-y-2 mb-2">
+                <Label className="text-sm text-muted-foreground">
+                  Currency
+                </Label>
+                <Select
+                  defaultValue={vatType}
+                  onValueChange={(value) => setVatType(value as VATTYPE)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue>
+                      <span className="flex items-center gap-2">
+                        <span>{vatType}</span>
+                      </span>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TAX_TYPES.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        <span className="flex items-center gap-2">
+                          <span>{type}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </>
           )}

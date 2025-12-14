@@ -25,7 +25,6 @@ export const createItem = mutation({
       ...args,
     });
 
-    console.log(id);
     if (id) {
       const newItem = await ctx.db.get(id);
       if (!newItem) {

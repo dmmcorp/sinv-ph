@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { api } from "@/convex/_generated/api";
+import { VATTYPE } from "@/lib/types";
 import useItemCatalogStore from "@/stores/items/useItemsCatalogStore";
 import { useMutation, useQuery } from "convex/react";
 import { useEffect } from "react";
@@ -16,11 +17,16 @@ export const useItemsCatalog = () => {
     if (items) setItemCatalog(items);
   }, [items, setItemCatalog]);
 
-  const addItemToDB = async (description: string, unitPrice: number) => {
+  const addItemToDB = async (
+    description: string,
+    unitPrice: number,
+    vatType: VATTYPE
+  ) => {
     try {
       const item = await createItem({
         unitPrice,
         description,
+        vatType,
       });
 
       toast.success("Successfully added new item/service");

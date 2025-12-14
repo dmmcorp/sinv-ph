@@ -1,4 +1,4 @@
-import { Doc, Id } from "@/convex/_generated/dataModel";
+import { Id } from "@/convex/_generated/dataModel";
 import { create } from "zustand";
 
 export type SelectedItemType = {

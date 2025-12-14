@@ -1,5 +1,12 @@
 import { Doc } from "@/convex/_generated/dataModel";
 
+export type VATTYPE =
+  | "VATABLE"
+  | "VAT_EXEMPT"
+  | "ZERO_RATED"
+  | "ZERO_RATED"
+  | "NON_VAT";
+
 export type InvoiceFormValues = {
   clientName: string;
   clientAddress: string;
