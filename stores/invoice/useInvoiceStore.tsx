@@ -1,4 +1,5 @@
 import { Id } from "@/convex/_generated/dataModel";
+import { VATTYPE } from "@/lib/types";
 import { create } from "zustand";
 
 export type SelectedItemType = {
@@ -6,6 +7,7 @@ export type SelectedItemType = {
   description: string;
   quantity: number;
   price: number;
+  vatType: VATTYPE;
 };
 
 //  id: number;
@@ -41,7 +43,7 @@ interface InvoiceStoreType {
 
 export const useInvoiceStore = create<InvoiceStoreType>((set) => ({
   selectedCurrency: "PHP",
-  includeTax: false,
+  includeTax: true,
   includeDiscount: false,
 
   discountValue: "",

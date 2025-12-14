@@ -90,6 +90,7 @@ export function AddItemsDialog(
         description: item.description,
         price: item.unitPrice,
         quantity: 1,
+        vatType: item.vatType,
       };
       console.log("Current Item:", curItem);
 
@@ -130,6 +131,7 @@ export function AddItemsDialog(
         description: result.newItem.description,
         price: result.newItem.unitPrice,
         quantity: 1,
+        vatType: result.newItem.vatType,
       };
 
       console.log(curItem);
