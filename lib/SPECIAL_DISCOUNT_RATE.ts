@@ -1,0 +1,1 @@
+export const SPECIAL_DISCOUNT_RATE = 0.20;

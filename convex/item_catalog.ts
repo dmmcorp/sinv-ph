@@ -6,6 +6,13 @@ export const createItem = mutation({
   args: {
     unitPrice: v.number(),
     description: v.string(), // goods or nature of service
+
+    vatType: v.union(
+      v.literal("VATABLE"), // Subject to 12% VAT
+      v.literal("VAT_EXEMPT"), // Legally exempt (fresh goods, books, etc.)
+      v.literal("ZERO_RATED"), // 0% VAT (exports)
+      v.literal("NON_VAT") // Not subject to VAT
+    ),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -45,6 +52,7 @@ export const getAllItem = query({
       .query("itemCatalog")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .filter((q) => q.eq(q.field("isActive"), true))
+      .order("desc")
       .collect();
   },
 });

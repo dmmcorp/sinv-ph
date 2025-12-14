@@ -1,5 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { SPECIAL_DISCOUNT_RATE } from "./SPECIAL_DISCOUNT_RATE"
+import { VAT_RATE } from "./VAT_RATE";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -12,3 +14,218 @@ export const formatCurrency = (value: number, currency: string): string => {
     minimumFractionDigits: 0, // remove decimals if whole number
   }).format(value);
 };
+
+export const calculateInvoiceAmounts = (args: {
+  items: { unitPrice: number; quantity: number; vatType: "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED" | "NON_VAT"; }[];
+  taxType: "VAT" | "NON_VAT" | "VAT_EXEMPT" | "ZERO_RATED" | "MIXED" | "PAYMENT_RECEIPT";
+  discountType?: "PERCENT" | "FIXED";
+  discountValue?: number;
+  specialDiscountType?: "SC" | "PWD" | "NAAC" | "MOV" | "SP";
+}) => {
+  let vatablesTotal = 0;
+  let vatExemptTotal = 0;
+  let zeroRatedTotal = 0;
+  let nonVatTotal = 0;
+
+  for (const item of args.items) {
+    const itemTotal = item.unitPrice * item.quantity
+
+    switch (item.vatType) {
+      case "VATABLE":
+        vatablesTotal += itemTotal;
+        break;
+      case "VAT_EXEMPT":
+        vatExemptTotal += itemTotal;
+        break;
+      case "ZERO_RATED":
+        zeroRatedTotal += itemTotal;
+        break;
+      case "NON_VAT":
+        nonVatTotal += itemTotal;;
+        break;
+    }
+  }
+
+  const grossTotal = vatablesTotal + vatExemptTotal + zeroRatedTotal + nonVatTotal;
+
+  const vatableExclusiveAmount = vatablesTotal > 0 ? vatablesTotal / 1.12 : 0;
+  const originalVatAmount = vatableExclusiveAmount * VAT_RATE;
+
+  let regularDiscountAmount = 0;
+  if (args.discountType && args.discountValue) {
+    if (args.discountType === "PERCENT") {
+      regularDiscountAmount = grossTotal * (args.discountValue / 100);
+    } else {
+      regularDiscountAmount = args.discountValue;
+    }
+  }
+
+  const discountRatio = regularDiscountAmount / grossTotal;
+
+  const vatableAfterRegularDisc = vatableExclusiveAmount * (1 - discountRatio);
+  const exemptAfterRegularDisc = vatExemptTotal * (1 - discountRatio);
+  const zeroRatedAfterRegularDisc = zeroRatedTotal * (1 - discountRatio);
+  const nonVatAfterRegularDisc = nonVatTotal * (1 - discountRatio);
+
+  // special discounts logic
+
+  let specialDiscountAmount = 0;
+  let vatableSales = 0;
+  let vatExemptSales = 0;
+  let zeroRatedSales = 0;
+  let vatAmount = 0;
+
+  if (args.specialDiscountType) {
+    // ang pag compute ng special discount ay depende sa item if inclusive or exclusive. Separate ang pag discount ng 20%
+    const scDiscountOnVatable = vatableAfterRegularDisc * SPECIAL_DISCOUNT_RATE;
+    const scDiscountOnExempt = exemptAfterRegularDisc * SPECIAL_DISCOUNT_RATE;
+    const scDiscountOnZeroRated = zeroRatedAfterRegularDisc * SPECIAL_DISCOUNT_RATE;
+
+    specialDiscountAmount = scDiscountOnVatable + scDiscountOnExempt + scDiscountOnZeroRated;
+
+    // BIR Rule: ALL sales become VAT-EXEMPT for SC/PWD
+    vatableSales = 0;
+    vatAmount = 0;
+
+    // vat exempt na mapuounta after special discount 
+    vatExemptSales = (vatableAfterRegularDisc - scDiscountOnVatable) +
+      (exemptAfterRegularDisc - scDiscountOnExempt);
+    zeroRatedSales = zeroRatedAfterRegularDisc - scDiscountOnZeroRated;
+  } else {
+    // Regular transaction (no SC/PWD)
+    vatableSales = vatableAfterRegularDisc;
+    vatAmount = vatableSales * VAT_RATE;
+    vatExemptSales = exemptAfterRegularDisc;
+    zeroRatedSales = zeroRatedAfterRegularDisc;
+  }
+
+  const netAmount = vatExemptSales + vatableSales + zeroRatedSales + nonVatAfterRegularDisc;
+  const totalAmount = netAmount + vatAmount;
+
+  return {
+    // Gross amounts
+    grossTotal,                           // Total before any discounts
+
+    // Discounts
+    regularDiscountAmount,                // Regular discount (percent/fixed)
+    specialDiscountAmount,                // SC/PWD discount (20%)
+
+    // BIR-required sales breakdown
+    vatableSales,                         // Sales subject to VAT (0 if SC/PWD)
+    vatAmount,                            // VAT amount (0 if SC/PWD)
+    vatExemptSales,                       // VAT-exempt sales
+    zeroRatedSales,                       // Zero-rated sales
+
+    // Totals
+    netAmount,                            // After discounts, before VAT
+    totalAmount,                          // Final amount to pay
+  };
+
+  // // gross after deductions
+  // let grossTotal = 0
+  // for (const item of args.items) {
+  //   grossTotal += item.unitPrice * item.quantity
+  // }
+
+  // // normal discount
+  // let discountAmount = 0;
+  // if (args.discountType && args.discountValue) {
+  //   if (args.discountType === "PERCENT") {
+  //     discountAmount = grossTotal * (args.discountValue / 100);
+  //   } else if (args.discountType === "FIXED") {
+  //     discountAmount = args.discountValue
+  //   }
+  // }
+
+  // const afterRegularDiscount = grossTotal - discountAmount;
+
+  // // special discounts ( sc / sp / pwd / naac / mov)
+  // let specialDiscountAmount = 0;
+  // let taxAmount = 0; // VAT
+  // let vatableSales = 0;
+  // let vatExemptSales = 0;
+  // let netAmount = 0;
+
+  // if (args.taxType === 'VAT') {
+  //   vatableSales = afterRegularDiscount / 1.12
+
+  //   if (args.specialDiscountType) {
+  //     // sc / pwd: 20% discount on vatable sales
+  //     specialDiscountAmount = vatableSales * SPECIAL_DISCOUNT_RATE
+  //     vatExemptSales = specialDiscountAmount
+  //     vatableSales = vatableSales - specialDiscountAmount
+
+  //     // VAT only on remaining vatable sales 12% of vatable sales
+  //     taxAmount = vatableSales * VAT_RATE; // -- is this part really needed?
+
+  //     netAmount = vatableSales + taxAmount + vatExemptSales
+  //   } else {
+  //     taxAmount = vatableSales * VAT_RATE
+  //     netAmount = afterRegularDiscount
+  //   }
+  // } else if (args.taxType === "NON_VAT") {
+  //   if (args.specialDiscountType) {
+  //     specialDiscountAmount = afterRegularDiscount * SPECIAL_DISCOUNT_RATE;
+  //   }
+
+  //   netAmount = afterRegularDiscount - specialDiscountAmount;
+  //   taxAmount = 0;
+  // } else {
+  //   // TODO other tax types
+  // }
+
+  // const totalAmount = netAmount;
+
+  // return {
+  //   grossTotal,                  // Original total (VAT-inclusive if VAT)
+  //   discountAmount,              // Regular discount
+  //   specialDiscountAmount,       // SC/PWD discount (on vatable sales)
+  //   vatableSales,               // Sales subject to VAT (after SC discount)
+  //   vatExemptSales,             // VAT-exempt sales (SC discounted portion)
+  //   taxAmount,                  // VAT amount (12% on vatable sales)
+  //   netAmount,                  // After all discounts
+  //   totalAmount,                // Final amount
+  // };
+
+
+  // if (args.specialDiscountType) {
+  //   if (args.taxType == "VAT") {
+  //     const vatableSales = afterRegularDiscount / 1.12;
+  //     specialDiscountAmount = vatableSales * SPECIAL_DISCOUNT_RATE
+  //   } else if (args.taxType === "NON_VAT") {
+  //     specialDiscountAmount = afterRegularDiscount * SPECIAL_DISCOUNT_RATE
+  //   } // TODO handle other tax types 
+  // }
+
+  // const netAmount = afterRegularDiscount - specialDiscountAmount;
+
+  // let taxAmount = 0;
+  // let vatableSales = 0;
+  // let vatExemptSales = 0;
+
+  // if (args.taxType === "VAT") {
+  //   if (args.specialDiscountType) {
+  //     const totalVatableSales = afterRegularDiscount / 1.12;
+  //     vatExemptSales = specialDiscountAmount // discounted portion daw ay vat exempt
+  //     vatableSales = totalVatableSales - (specialDiscountAmount / 1.12)
+  //     taxAmount = vatableSales * VAT_RATE
+  //   } else {
+  //     // Regular VAT calculation
+  //     vatableSales = netAmount / 1.12;
+  //     taxAmount = vatableSales * VAT_RATE;
+  //   }
+  // }
+
+  // const totalAmount = netAmount + taxAmount;
+
+  // return {
+  //   subTotal,
+  //   discountAmount,
+  //   specialDiscountAmount,
+  //   netAmount,
+  //   taxAmount,
+  //   vatableSales,
+  //   vatExemptSales,
+  //   totalAmount,
+  // }
+}

@@ -2,6 +2,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { mutation, query } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
 import { VAT_RATE } from "@/../../lib/VAT_RATE"
+import { calculateInvoiceAmounts } from "@/../../lib/utils"
 
 // COUNTER SYNTAX:
 // INVOCE - TYPE OF INVOICE - BUSINESS ID - YEAR
@@ -78,6 +79,8 @@ export const createInvoice = mutation({
             v.literal("MIXED"),
             v.literal("PAYMENT_RECEIPT")
         ),
+
+        // discounts
         discountType: v.optional(v.union(v.literal("PERCENT"), v.literal("FIXED"))),
         discountValue: v.optional(v.number()),
         specialDiscountType: v.optional(
@@ -91,12 +94,18 @@ export const createInvoice = mutation({
         ),
         specialDiscountId: v.optional(v.string()),
 
-        // items
         items: v.array(v.object({
-            description: v.string(), // from item catalog
-            quantity: v.number(), // from frontend
-            unitPrice: v.number(), // from item catalog
-            amount: v.number(), // from frontend
+            description: v.string(),
+            quantity: v.number(),
+            unitPrice: v.number(),
+            amount: v.number(),
+
+            vatType: v.union(
+                v.literal("VATABLE"),
+                v.literal("VAT_EXEMPT"),
+                v.literal("ZERO_RATED"),
+                v.literal("NON_VAT"),
+            ),
         })),
 
         // status
@@ -125,27 +134,36 @@ export const createInvoice = mutation({
             throw new Error("Client not found or unauthorized")
         }
 
-        let subTotal = 0;
+        // let subTotal = 0;
 
-        for (const item of args.items) {
-            const itemAmount = item.unitPrice * item.quantity
-            subTotal += itemAmount
-        }
+        // for (const item of args.items) {
+        //     const itemAmount = item.unitPrice * item.quantity
+        //     subTotal += itemAmount
+        // }
 
-        let taxAmount = 0;
+        // let taxAmount = 0;
 
-        // for VAT
-        if (args.taxType === "VAT") {
-            taxAmount = subTotal * VAT_RATE;
-        }
+        // // for VAT
+        // if (args.taxType === "VAT") {
+        //     taxAmount = subTotal * VAT_RATE;
+        // }
 
-        // TODO OTHER TAXTYPE (IF IBA YUNG COMPUTATION)
+        // // TODO OTHER TAXTYPE (IF IBA YUNG COMPUTATION)
 
-        const totalAmount = subTotal + taxAmount;
+        // const totalAmount = subTotal + taxAmount;
+
+        const amounts = calculateInvoiceAmounts({
+            items: args.items,
+            taxType: args.taxType,
+            discountType: args.discountType,
+            discountValue: args.discountValue,
+            specialDiscountType: args.specialDiscountType,
+        });
 
         // SERIAL/INVOICE NUMBER GENERATION:
         const currentYear = new Date().getFullYear()
         const counterName = getCounterName(user._id, currentYear, args.invoiceType)
+        let serialNumber: number;
 
         // counter table
         const existingCounter = await ctx.db
@@ -153,15 +171,15 @@ export const createInvoice = mutation({
             .withIndex("by_name", q => q.eq("name", counterName))
             .first()
 
-        let serialNumber: number;
 
         if (existingCounter) {
             serialNumber = existingCounter.value + 1;
+
             await ctx.db.patch(existingCounter._id, {
                 value: serialNumber
             })
         } else {
-            serialNumber = 1; ``
+            serialNumber = 1;
             await ctx.db.insert("invoiceCounters", {
                 name: counterName,
                 value: serialNumber, // this means first invoice
@@ -201,10 +219,27 @@ export const createInvoice = mutation({
                 // items
                 items: args.items,
 
+                // discount fields
+                discountType: args.discountType,
+                discountValue: args.discountValue,
+                discountAmount: amounts.regularDiscountAmount,
+                specialDiscountType: args.specialDiscountType,
+                specialDiscountId: args.specialDiscountId,
+                specialDiscountAmount: amounts.specialDiscountAmount,
+
                 // totals
-                subTotal,
-                taxAmount,
-                totalAmount,
+                grossTotal: amounts.grossTotal,
+                lessDiscount: amounts.regularDiscountAmount,
+                lessSpecialDiscount: amounts.specialDiscountAmount,
+
+                vatableSales: amounts.vatableSales,
+                vatExemptSales: amounts.vatExemptSales,
+                zeroRatedSales: amounts.zeroRatedSales,
+
+                vatAmount: amounts.vatAmount,
+
+                netAmount: amounts.netAmount,
+                totalAmount: amounts.totalAmount,
 
                 // miscs.
                 status: args.status ?? "DRAFT",
