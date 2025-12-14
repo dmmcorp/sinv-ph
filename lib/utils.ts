@@ -1,7 +1,9 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { SPECIAL_DISCOUNT_RATE } from "./SPECIAL_DISCOUNT_RATE"
-import { VAT_RATE } from "./VAT_RATE";
+import { SPECIAL_DISCOUNT_RATE } from "./constants/SPECIAL_DISCOUNT_RATE"
+import { VAT_RATE } from "./constants/VAT_RATE";
+import type { TaxType } from "./constants/TAX_TYPES";
+import type { DiscountType, SpecialDiscountType } from "./constants/DISCOUNT_TYPES";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -17,10 +19,10 @@ export const formatCurrency = (value: number, currency: string): string => {
 
 export const calculateInvoiceAmounts = (args: {
   items: { unitPrice: number; quantity: number; vatType: "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED" | "NON_VAT"; }[];
-  taxType: "VAT" | "NON_VAT" | "VAT_EXEMPT" | "ZERO_RATED" | "MIXED" | "PAYMENT_RECEIPT";
-  discountType?: "PERCENT" | "FIXED";
+  taxType: TaxType;
+  discountType?: DiscountType;
   discountValue?: number;
-  specialDiscountType?: "SC" | "PWD" | "NAAC" | "MOV" | "SP";
+  specialDiscountType?: SpecialDiscountType;
 }) => {
   let vatablesTotal = 0;
   let vatExemptTotal = 0;
