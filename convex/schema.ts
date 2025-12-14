@@ -115,6 +115,9 @@ export default defineSchema({
         buyerTin: v.optional(v.string()), // if b2c usually no tin.
         buyerAddress: v.optional(v.string()), // same case if b2c usually no tin.
 
+        // currency
+        currency: v.optional(v.string()), // currency used in invoice
+
         // totality
         vatableSales: v.number(), // products without tax
         vatAmount: v.number(), // 12% of vatable sales (vatableSales * 0.12)
