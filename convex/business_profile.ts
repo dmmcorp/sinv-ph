@@ -18,7 +18,7 @@ export const getBusinessProfile = query({
     );
     return {
       ...businessProfile,
-      logoUrl: logoUrl,
+      logoUrl: logoUrl === null ? "" : logoUrl,
     };
   },
 });

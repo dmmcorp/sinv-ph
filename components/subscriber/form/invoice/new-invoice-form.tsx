@@ -13,30 +13,13 @@ import { UseFormReturn } from "react-hook-form";
 import { InvoiceFormValues } from "@/lib/types";
 import Image from "next/image";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
+import { VAT_RATE, VAT_RATE_PERCENTAGE } from "@/lib/constants/VAT_RATE";
 
 interface NewInvoiceFormProps {
   form: UseFormReturn<InvoiceFormValues>;
-  // currentItems: SelectedItemType[] | [];
-  // selectedCurrency: string;
-  // setSelectedItems: React.Dispatch<React.SetStateAction<SelectedItemType[]>>;
-  // setSelectedCurrency: React.Dispatch<React.SetStateAction<string>>;
-  // includeTax: boolean;
-  // includeDiscount: boolean;
-  // discountValue: string;
-  // isPercentage: boolean;
 }
 
-function NewInvoiceForm({
-  form,
-  // currentItems,
-  // selectedCurrency,
-  // setSelectedItems,
-  // setSelectedCurrency,
-  // includeTax,
-  // includeDiscount,
-  // discountValue,
-  // isPercentage,
-}: NewInvoiceFormProps) {
+function NewInvoiceForm({ form }: NewInvoiceFormProps) {
   const { businessProfile } = useBusinessProfileSync();
   const {
     selectedCurrency,
@@ -80,7 +63,16 @@ function NewInvoiceForm({
   const subtotal = calculateSubTotal();
 
   const calculateTaxAmount = () => {
-    return 0.12 * subtotal;
+    const totalVATAmount = selectedItems.reduce((total, item) => {
+      if (item.vatType === "VATABLE") {
+        console.log("item Pric:", item.price);
+        return item.price * VAT_RATE + total;
+      }
+      return total;
+    }, 0);
+
+    console.log(totalVATAmount);
+    return totalVATAmount;
   };
   const calculateDiscountAmount = () => {
     const disc = isPercentage
@@ -215,21 +207,6 @@ function NewInvoiceForm({
             </div>
           </div>
         </div>
-
-        {/* <FormField
-              control={form.control}
-              name="clientTIN"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>TIN (Optional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter TIN" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            /> */}
-
         <div className="border-x border-y border-black rounded-lg pb-5">
           <div className="grid grid-cols-12 gap-x-1 py-1  font-semibold border-b border-black text-sm">
             <div className="col-span-[0.5] text-center">#</div>
@@ -251,24 +228,7 @@ function NewInvoiceForm({
                     {formatCurrency(selectedItem.price, selectedCurrency)}
                   </div>
                   <div className="col-span-[1.5] flex items-center justify-center gap-2">
-                    {/* <Button
-                      onClick={() => onSetQuantity("sub", selectedItem.id)}
-                      disabled={selectedItem.quantity > 0 ? false : true}
-                      type="button"
-                      size={"icon-sm"}
-                      variant={"outline"}
-                    >
-                      -
-                    </Button> */}
                     {selectedItem.quantity}
-                    {/* <Button
-                      onClick={() => onSetQuantity("add", selectedItem.id)}
-                      type="button"
-                      size={"icon-sm"}
-                      variant={"outline"}
-                    >
-                      +
-                    </Button> */}
                   </div>
                   <div className="col-span-2">
                     {}
@@ -309,7 +269,9 @@ function NewInvoiceForm({
                 <div className="grid grid-cols-12 gap-x-1  font-semibold text-xs">
                   <div className="col-span-8 "></div>
                   <div className="col-span-2 text-right font-light"> Tax%:</div>
-                  <div className="col-span-2 text-center font-light">12%</div>
+                  <div className="col-span-2 text-center font-light">
+                    {VAT_RATE_PERCENTAGE}%
+                  </div>
                 </div>
                 <div className="grid grid-cols-12 gap-x-1  font-semibold text-xs">
                   <div className="col-span-8 "></div>
