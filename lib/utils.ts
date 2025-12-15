@@ -1,9 +1,12 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { SPECIAL_DISCOUNT_RATE } from "./constants/SPECIAL_DISCOUNT_RATE"
+import { SPECIAL_DISCOUNT_RATE } from "./constants/SPECIAL_DISCOUNT_RATE";
 import { VAT_RATE } from "./constants/VAT_RATE";
 import type { TaxType } from "./constants/TAX_TYPES";
-import type { DiscountType, SpecialDiscountType } from "./constants/DISCOUNT_TYPES";
+import type {
+  DiscountType,
+  SpecialDiscountType,
+} from "./constants/DISCOUNT_TYPES";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -18,8 +21,12 @@ export const formatCurrency = (value: number, currency: string): string => {
 };
 
 export const calculateInvoiceAmounts = (args: {
-  items: { unitPrice: number; quantity: number; vatType: "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED" | "NON_VAT"; }[];
-  taxType: TaxType;
+  items: {
+    unitPrice: number;
+    quantity: number;
+    vatType: "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED" | "NON_VAT";
+  }[];
+  taxType?: TaxType;
   discountType?: DiscountType;
   discountValue?: number;
   specialDiscountType?: SpecialDiscountType;
@@ -30,7 +37,7 @@ export const calculateInvoiceAmounts = (args: {
   let nonVatTotal = 0;
 
   for (const item of args.items) {
-    const itemTotal = item.unitPrice * item.quantity
+    const itemTotal = item.unitPrice * item.quantity;
 
     switch (item.vatType) {
       case "VATABLE":
@@ -43,12 +50,13 @@ export const calculateInvoiceAmounts = (args: {
         zeroRatedTotal += itemTotal;
         break;
       case "NON_VAT":
-        nonVatTotal += itemTotal;;
+        nonVatTotal += itemTotal;
         break;
     }
   }
 
-  const grossTotal = vatablesTotal + vatExemptTotal + zeroRatedTotal + nonVatTotal;
+  const grossTotal =
+    vatablesTotal + vatExemptTotal + zeroRatedTotal + nonVatTotal;
 
   const vatableExclusiveAmount = vatablesTotal > 0 ? vatablesTotal / 1.12 : 0;
   const originalVatAmount = vatableExclusiveAmount * VAT_RATE;
@@ -81,16 +89,20 @@ export const calculateInvoiceAmounts = (args: {
     // ang pag compute ng special discount ay depende sa item if inclusive or exclusive. Separate ang pag discount ng 20%
     const scDiscountOnVatable = vatableAfterRegularDisc * SPECIAL_DISCOUNT_RATE;
     const scDiscountOnExempt = exemptAfterRegularDisc * SPECIAL_DISCOUNT_RATE;
-    const scDiscountOnZeroRated = zeroRatedAfterRegularDisc * SPECIAL_DISCOUNT_RATE;
+    const scDiscountOnZeroRated =
+      zeroRatedAfterRegularDisc * SPECIAL_DISCOUNT_RATE;
 
-    specialDiscountAmount = scDiscountOnVatable + scDiscountOnExempt + scDiscountOnZeroRated;
+    specialDiscountAmount =
+      scDiscountOnVatable + scDiscountOnExempt + scDiscountOnZeroRated;
 
     // BIR Rule: ALL sales become VAT-EXEMPT for SC/PWD
     vatableSales = 0;
     vatAmount = 0;
 
-    // vat exempt na mapuounta after special discount 
-    vatExemptSales = (vatableAfterRegularDisc - scDiscountOnVatable) +
+    // vat exempt na mapuounta after special discount
+    vatExemptSales =
+      vatableAfterRegularDisc -
+      scDiscountOnVatable +
       (exemptAfterRegularDisc - scDiscountOnExempt);
     zeroRatedSales = zeroRatedAfterRegularDisc - scDiscountOnZeroRated;
   } else {
@@ -101,26 +113,28 @@ export const calculateInvoiceAmounts = (args: {
     zeroRatedSales = zeroRatedAfterRegularDisc;
   }
 
-  const netAmount = vatExemptSales + vatableSales + zeroRatedSales + nonVatAfterRegularDisc;
+  const netAmount =
+    vatExemptSales + vatableSales + zeroRatedSales + nonVatAfterRegularDisc;
+  console.log(netAmount, vatAmount);
   const totalAmount = netAmount + vatAmount;
 
   return {
     // Gross amounts
-    grossTotal,                           // Total before any discounts
+    grossTotal, // Total before any discounts
 
     // Discounts
-    regularDiscountAmount,                // Regular discount (percent/fixed)
-    specialDiscountAmount,                // SC/PWD discount (20%)
+    regularDiscountAmount, // Regular discount (percent/fixed)
+    specialDiscountAmount, // SC/PWD discount (20%)
 
     // BIR-required sales breakdown
-    vatableSales,                         // Sales subject to VAT (0 if SC/PWD)
-    vatAmount,                            // VAT amount (0 if SC/PWD)
-    vatExemptSales,                       // VAT-exempt sales
-    zeroRatedSales,                       // Zero-rated sales
+    vatableSales, // Sales subject to VAT (0 if SC/PWD)
+    vatAmount, // VAT amount (0 if SC/PWD)
+    vatExemptSales, // VAT-exempt sales
+    zeroRatedSales, // Zero-rated sales
 
     // Totals
-    netAmount,                            // After discounts, before VAT
-    totalAmount,                          // Final amount to pay
+    netAmount, // After discounts, before VAT
+    totalAmount, // Final amount to pay
   };
 
   // // gross after deductions
@@ -189,14 +203,13 @@ export const calculateInvoiceAmounts = (args: {
   //   totalAmount,                // Final amount
   // };
 
-
   // if (args.specialDiscountType) {
   //   if (args.taxType == "VAT") {
   //     const vatableSales = afterRegularDiscount / 1.12;
   //     specialDiscountAmount = vatableSales * SPECIAL_DISCOUNT_RATE
   //   } else if (args.taxType === "NON_VAT") {
   //     specialDiscountAmount = afterRegularDiscount * SPECIAL_DISCOUNT_RATE
-  //   } // TODO handle other tax types 
+  //   } // TODO handle other tax types
   // }
 
   // const netAmount = afterRegularDiscount - specialDiscountAmount;
@@ -230,4 +243,4 @@ export const calculateInvoiceAmounts = (args: {
   //   vatExemptSales,
   //   totalAmount,
   // }
-}
+};
