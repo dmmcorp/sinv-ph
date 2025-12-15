@@ -13,6 +13,7 @@ export const board = mutation({
             v.literal("Small Business"),
             v.literal("VAT-Registered Business"),
         ),
+        vatRegistration: v.boolean(),
     },
     handler: async (ctx, {
         address,
@@ -20,6 +21,7 @@ export const board = mutation({
         logoUrl,
         tin,
         businessType,
+        vatRegistration,
     }) => {
         const userId = await getAuthUserId(ctx)
         if (!userId) throw new ConvexError("No user found!");
@@ -28,6 +30,7 @@ export const board = mutation({
             address,
             businessName,
             businessType,
+            vatRegistration,
             logoUrl,
             tin,
             userId,

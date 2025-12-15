@@ -24,7 +24,6 @@ export default defineSchema({
 
         // nature of business
         // BIR REGISTERED OR NOT?
-        // birRegistered: v.boolean(),
         // items have category (if vege vat exempt)
         // businessTaxType: v.union(
         //     v.literal("NON_VAT"), // 
@@ -38,13 +37,14 @@ export default defineSchema({
         // nature of business
         businessType: v.union(
             v.literal("Freelancer/Individual"),
-            v.literal("Small Business"),
+            v.literal("Small Business"), // create validation for backend
             v.literal("VAT-Registered Business"),
         ),
+        vatRegistration: v.boolean(),
 
         // business infos
         businessName: v.string(),
-        tin: v.string(),
+        tin: v.optional(v.string()), //
         address: v.string(),
         logoUrl: v.string(),
 
