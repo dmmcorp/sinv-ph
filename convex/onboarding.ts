@@ -8,12 +8,18 @@ export const board = mutation({
         tin: v.string(),
         address: v.string(),
         logoUrl: v.string(),
+        businessType: v.union(
+            v.literal("Freelancer/Individual"),
+            v.literal("Small Business"),
+            v.literal("VAT-Registered Business"),
+        ),
     },
     handler: async (ctx, {
         address,
         businessName,
         logoUrl,
         tin,
+        businessType,
     }) => {
         const userId = await getAuthUserId(ctx)
         if (!userId) throw new ConvexError("No user found!");
@@ -21,6 +27,7 @@ export const board = mutation({
         const businessProfile = await ctx.db.insert("business_profile", {
             address,
             businessName,
+            businessType,
             logoUrl,
             tin,
             userId,
