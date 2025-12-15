@@ -18,8 +18,21 @@ export default defineSchema({
     // bussiness profile
     business_profile: defineTable({
 
-        //onboarding todo flow: add a selection for type of business / individual.
+        // onboarding todo flow: add a selection for type of business / individual.
         userId: v.id("users"), // business or subscriber ID
+
+
+        // nature of business
+        // BIR REGISTERED OR NOT?
+        // items have category (if vege vat exempt)
+        businessTaxType: v.union(
+            v.literal("NON_VAT"), // 
+            v.literal("VAT"), // 
+            v.literal("VAT_EXEMPT"),
+            v.literal("ZERO_RATED"),
+            v.literal("MIXED"), // some items vat, some exempt
+            v.literal("PAYMENT_RECEIPT")
+        ),
 
         // business infos
         businessName: v.string(),
@@ -64,12 +77,12 @@ export default defineSchema({
 
         // tax infos
         taxType: v.union(
-            v.literal("NON_VAT"), //
+            v.literal("NON_VAT"), // 
             v.literal("VAT"), // 
-            v.literal("VAT_EXEMPT"),
-            v.literal("ZERO_RATED"),
+            v.literal("VAT_EXEMPT"), // 
+            v.literal("ZERO_RATED"), // 
             v.literal("MIXED"), // some items vat, some exempt
-            v.literal("PAYMENT_RECEIPT")
+            v.literal("PAYMENT_RECEIPT") // 
         ),
 
         // discounts
@@ -103,9 +116,9 @@ export default defineSchema({
                 amount: v.number(),
                 vatType: v.union(
                     v.literal("VATABLE"),
-                    v.literal("VAT_EXEMPT"),
+                    v.literal("VAT_EXEMPT"),  // VAT-EXEMPT = “This sale is exempt from VAT even though the business is VAT-registered.”
                     v.literal("ZERO_RATED"),
-                    v.literal("NON_VAT"),
+                    v.literal("NON_VAT"), // NON-VAT = “This business does not deal with VAT at all.”
                 ),
             })
         ),
@@ -158,6 +171,7 @@ export default defineSchema({
             v.literal("VAT_EXEMPT"), // No VAT (usually educational services, books, newspapers)
             v.literal("ZERO_RATED"), // 0% VAT (for export / international transport) 
         ),
+        //
 
         // isSpecialDiscountEligible: v.boolean(),
     })
