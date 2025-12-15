@@ -14,6 +14,7 @@ import { InvoiceFormValues } from "@/lib/types";
 import Image from "next/image";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
 import { VAT_RATE, VAT_RATE_PERCENTAGE } from "@/lib/constants/VAT_RATE";
+import { useCalculateInvioceAmount } from "@/hooks/use-calculate-invoice-amount";
 
 interface NewInvoiceFormProps {
   form: UseFormReturn<InvoiceFormValues>;
@@ -21,6 +22,7 @@ interface NewInvoiceFormProps {
 
 function NewInvoiceForm({ form }: NewInvoiceFormProps) {
   const { businessProfile } = useBusinessProfileSync();
+  const total = useCalculateInvioceAmount();
   const {
     selectedCurrency,
     includeTax,
@@ -29,29 +31,6 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
     isPercentage,
     selectedItems,
   } = useInvoiceStore();
-
-  // const onSetQuantity = (process: "add" | "sub", itemId: number) => {
-  //   const itemToModify = currentItems.find((i) => i.id === itemId);
-
-  //   if (process === "add" && itemToModify) {
-  //     setSelectedItems((prev) =>
-  //       prev.map((item) =>
-  //         item.id === itemToModify.id
-  //           ? { ...item, quantity: item.quantity + 1 }
-  //           : item
-  //       )
-  //     );
-  //   }
-  //   if (process === "sub" && itemToModify) {
-  //     setSelectedItems((prev) =>
-  //       prev.map((item) =>
-  //         item.id === itemToModify.id
-  //           ? { ...item, quantity: item.quantity - 1 }
-  //           : item
-  //       )
-  //     );
-  //   }
-  // };
 
   const calculateSubTotal = () => {
     return selectedItems.reduce((total, item) => {
@@ -71,7 +50,6 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
       return total;
     }, 0);
 
-    console.log(totalVATAmount);
     return totalVATAmount;
   };
   const calculateDiscountAmount = () => {
@@ -261,7 +239,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
               <div className="col-span-8 "></div>
               <div className="col-span-2 text-right"> Subtotal:</div>
               <div className="col-span-2 text-center ">
-                {formatCurrency(subtotal, selectedCurrency)}
+                {formatCurrency(total.grossTotal, selectedCurrency)}
               </div>
             </div>
             {includeTax && (
@@ -280,7 +258,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                     Tax Amount:
                   </div>
                   <div className="col-span-2 text-center font-light">
-                    {formatCurrency(taxAmount, selectedCurrency)}
+                    {formatCurrency(total.vatAmount, selectedCurrency)}
                   </div>
                 </div>
               </>
@@ -316,7 +294,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
               <div className="col-span-8 "></div>
               <div className="col-span-2 text-right"> Total Amount:</div>
               <div className="col-span-2 text-center ">
-                {formatCurrency(totalAmount, selectedCurrency)}
+                {formatCurrency(total.totalAmount, selectedCurrency)}
               </div>
             </div>
           </div>
