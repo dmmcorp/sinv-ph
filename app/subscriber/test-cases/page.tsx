@@ -41,10 +41,10 @@ function TestCasesPage() {
     // TEST CASE 5: Mixed: VATABLE + NON-VAT — No discount
     const testCase5 = calculateInvoiceAmounts({
       items: [
-        { unitPrice: 1120, quantity: 1, vatType: "VATABLE" },
-        { unitPrice: 500, quantity: 1, vatType: "NON_VAT" },
+        { unitPrice: 300, quantity: 1, vatType: "VATABLE" },
+        { unitPrice: 200, quantity: 1, vatType: "VATABLE" },
       ],
-      taxType: "MIXED",
+      taxType: "VAT",
     });
     console.log(
       "TEST CASE 5: Mixed: VATABLE + NON-VAT — No discount",

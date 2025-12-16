@@ -19,10 +19,12 @@ export default function OnboardingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className={`min-h-screen bg-gray-200 ${poppinsFont.className}`}>
+    <div
+      className={`flex flex-col min-h-screen bg-gray-200 ${poppinsFont.className}`}
+    >
       <OnboardingNavbar />
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="w-full">{children}</div>
+      <div className="flex-1 flex flex-col items-center justify-center p-4">
+        <div className="flex-1 w-full">{children}</div>
       </div>
       <Toaster />
     </div>

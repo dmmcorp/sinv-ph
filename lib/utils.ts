@@ -271,3 +271,10 @@ export const calculateInvoiceAmounts = (args: {
   //   totalAmount,
   // }
 };
+
+export function formatTIN(value: string) {
+  return value
+    .replace(/\D/g, "") // remove non-digits
+    .slice(0, 12) // max 12 digits
+    .replace(/(\d{3})(?=\d)/g, "$1-");
+}

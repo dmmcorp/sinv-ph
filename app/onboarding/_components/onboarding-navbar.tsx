@@ -14,7 +14,7 @@ export const OnboardingNavbar = () => {
     <nav className="flex justify-between py-2 px-12 w-full border-b border-gray-300 shadow-sm bg-white">
       <h1>SINVPH</h1>
 
-      <div className="flex gap-12 items-center">
+      <div className="hidden lg:flex gap-12 items-center">
         <p className="text-muted-foreground">{user!.email}</p>
         <div className="border-r border-gray-300 h-7" />
         <Button onClick={async () => await signOut()}>Logout</Button>

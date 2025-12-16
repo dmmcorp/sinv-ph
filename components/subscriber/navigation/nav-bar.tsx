@@ -3,6 +3,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import React from "react";
 import MobileNavigation from "./mobile-navigation";
 import { FileBox, LayoutDashboardIcon, Receipt, Users } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import UserAvatar from "./user-avatar";
 
 function NavBar() {
   const isMobile = useIsMobile();
@@ -30,6 +32,9 @@ function NavBar() {
             <FileBox /> Items & Services
           </li>
         </ul>
+      </div>
+      <div className="hidden lg:block">
+        <UserAvatar />
       </div>
       <div className="">
         {isMobile ? (

@@ -253,10 +253,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                 </div>
                 <div className="grid grid-cols-12 gap-x-1  font-semibold text-xs">
                   <div className="col-span-8 "></div>
-                  <div className="col-span-2 text-right font-light">
-                    {" "}
-                    Tax Amount:
-                  </div>
+                  <div className="col-span-2 text-right font-light"> VAT:</div>
                   <div className="col-span-2 text-center font-light">
                     {formatCurrency(total.vatAmount, selectedCurrency)}
                   </div>

@@ -13,12 +13,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeClosed } from "lucide-react";
+import { Eye, EyeClosed, Loader } from "lucide-react";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useAuthActions } from "@convex-dev/auth/react";
+import { toast } from "sonner";
 
 const signInFormSchema = z.object({
   email: z
@@ -36,6 +37,8 @@ const signInFormSchema = z.object({
 function SignInForm() {
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [hidden, setIsHidden] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
   const form = useForm<z.infer<typeof signInFormSchema>>({
     resolver: zodResolver(signInFormSchema),
     defaultValues: {
@@ -46,11 +49,29 @@ function SignInForm() {
 
   const { signIn } = useAuthActions();
 
-  function onSubmit(values: z.infer<typeof signInFormSchema>) {
-    signIn("password", {
-      flow: "signIn",
-      ...values,
-    });
+  async function onSubmit(values: z.infer<typeof signInFormSchema>) {
+    setIsLoading(true);
+    setError("");
+    try {
+      await signIn("password", {
+        ...values,
+        flow: "signIn",
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message.includes("Failed to fetch")) {
+          setError(
+            "Connection error. Please check your internet connection and try again."
+          );
+        } else {
+          setError("Invalid email or password");
+        }
+      } else {
+        setError("Invalid email or password");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }
   return (
     <Form {...form}>
@@ -100,6 +121,8 @@ function SignInForm() {
             </FormItem>
           )}
         />
+        {error !== "" && <div className="text-red-600 text-sm">{error}</div>}
+
         <div className=" flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Checkbox id="rememberMe" />
@@ -114,9 +137,15 @@ function SignInForm() {
         <div className="w-full flex items-center justify-center">
           <Button
             type="submit"
+            variant={"default"}
+            disabled={isLoading}
             className="mx-auto rounded-full px-10 py-3 font-normal"
           >
-            Sign In
+            {isLoading ? (
+              <Loader className="animate-spin size-6" />
+            ) : (
+              <> Sign In</>
+            )}
           </Button>
         </div>
       </form>
