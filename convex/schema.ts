@@ -160,7 +160,9 @@ export default defineSchema({
         ),
         pdfUrl: v.optional(v.string()),
         updatedAt: v.number(),
-    }).index("by_user", ["userId"]),
+    })
+        .index("by_user", ["userId"])
+        .index("by_client", ["clientId"]),
 
     // items catalog table
     itemCatalog: defineTable({

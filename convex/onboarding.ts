@@ -5,7 +5,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 export const board = mutation({
     args: {
         businessName: v.string(),
-        tin: v.string(),
+        tin: v.optional(v.string()),
         address: v.string(),
         logoUrl: v.string(),
         businessType: v.union(
