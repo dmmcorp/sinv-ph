@@ -103,7 +103,7 @@ export const createInvoice = mutation({
                 v.literal("VATABLE"),
                 v.literal("VAT_EXEMPT"),
                 v.literal("ZERO_RATED"),
-                v.literal("NON_VAT"),
+                // v.literal("NON_VAT"),
             ),
         })),
 

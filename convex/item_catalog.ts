@@ -11,7 +11,16 @@ export const createItem = mutation({
       v.literal("VATABLE"), // Subject to 12% VAT
       v.literal("VAT_EXEMPT"), // Legally exempt (fresh goods, books, etc.)
       v.literal("ZERO_RATED"), // 0% VAT (exports)
-      v.literal("NON_VAT") // Not subject to VAT
+      // v.literal("NON_VAT") // Not subject to VAT
+    ),
+
+    category: v.union(
+      v.literal("GOODS"),
+      v.literal("SERVICE"),
+      v.literal("PROFESSIONAL_FEE"),
+      v.literal("VEGETABLES"),
+      v.literal("FRUITS"),
+      v.literal("OTHER")
     ),
   },
   handler: async (ctx, args) => {

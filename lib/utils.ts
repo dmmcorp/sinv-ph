@@ -27,7 +27,7 @@ export const calculateInvoiceAmounts = (args: {
   items: {
     unitPrice: number;
     quantity: number;
-    vatType: "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED" | "NON_VAT";
+    vatType: "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED"
   }[];
   taxType?: TaxType;
   discountType?: DiscountType;
@@ -37,7 +37,11 @@ export const calculateInvoiceAmounts = (args: {
   let vatablesTotal = 0;
   let vatExemptTotal = 0;
   let zeroRatedTotal = 0;
-  let nonVatTotal = 0;
+  // let nonVatTotal = 0;
+
+  if ((args.discountType || args.discountValue) && args.specialDiscountType) {
+    throw Error("You can't mix regular discount and special discount.")
+  }
 
   for (const item of args.items) {
     const itemTotal = item.unitPrice * item.quantity;
@@ -52,20 +56,21 @@ export const calculateInvoiceAmounts = (args: {
       case "ZERO_RATED":
         zeroRatedTotal += itemTotal;
         break;
-      case "NON_VAT":
-        nonVatTotal += itemTotal;
-        break;
+      // case "NON_VAT":
+      //   nonVatTotal += itemTotal;
+      //   break;
     }
   }
 
   const grossTotal = round(
-    vatablesTotal + vatExemptTotal + zeroRatedTotal + nonVatTotal
+    vatablesTotal + vatExemptTotal + zeroRatedTotal
+    // + nonVatTotal
   );
 
   const vatableExclusiveAmount = round(
     vatablesTotal > 0 ? vatablesTotal / 1.12 : 0
   );
-  const originalVatAmount = round(vatableExclusiveAmount * VAT_RATE);
+  // const originalVatAmount = round(vatableExclusiveAmount * VAT_RATE);
 
   let regularDiscountAmount = 0;
   if (args.discountType && args.discountValue) {
@@ -83,14 +88,14 @@ export const calculateInvoiceAmounts = (args: {
   );
   const exemptAfterRegularDisc = round(vatExemptTotal * (1 - discountRatio));
   const zeroRatedAfterRegularDisc = round(zeroRatedTotal * (1 - discountRatio));
-  const nonVatAfterRegularDisc = round(nonVatTotal * (1 - discountRatio));
+  // const nonVatAfterRegularDisc = round(nonVatTotal * (1 - discountRatio));
 
   // special discounts logic
   let specialDiscountAmount = 0;
   let vatableSales = 0;
   let vatExemptSales = 0;
   let zeroRatedSales = 0;
-  let nonVatSales = 0;
+  // let nonVatSales = 0;
   let vatAmount = 0;
 
   if (args.specialDiscountType) {
@@ -105,15 +110,15 @@ export const calculateInvoiceAmounts = (args: {
     const scDiscountOnZeroRated = round(
       zeroRatedAfterRegularDisc * SPECIAL_DISCOUNT_RATE
     );
-    const scDiscountOnNonVat = round(
-      nonVatAfterRegularDisc * SPECIAL_DISCOUNT_RATE
-    );
+    // const scDiscountOnNonVat = round(
+    //   nonVatAfterRegularDisc * SPECIAL_DISCOUNT_RATE
+    // );
 
     specialDiscountAmount = round(
       scDiscountOnVatable +
-        scDiscountOnExempt +
-        scDiscountOnZeroRated +
-        scDiscountOnNonVat
+      scDiscountOnExempt +
+      scDiscountOnZeroRated
+      // + scDiscountOnNonVat
     );
 
     // BIR Rule: ALL sales become VAT-EXEMPT for SC/PWD
@@ -123,23 +128,24 @@ export const calculateInvoiceAmounts = (args: {
     // vat exempt na mapuounta after special discount
     vatExemptSales = round(
       vatableAfterRegularDisc -
-        scDiscountOnVatable +
-        (exemptAfterRegularDisc - scDiscountOnExempt) +
-        (nonVatAfterRegularDisc - scDiscountOnNonVat)
+      scDiscountOnVatable +
+      (exemptAfterRegularDisc - scDiscountOnExempt)
+      // + (nonVatAfterRegularDisc - scDiscountOnNonVat)
     );
     zeroRatedSales = round(zeroRatedAfterRegularDisc - scDiscountOnZeroRated);
-    nonVatSales = 0;
+    // nonVatSales = 0;
   } else {
     // Regular transaction (no SC/PWD)
     vatableSales = vatableAfterRegularDisc;
     vatAmount = round(vatableSales * VAT_RATE);
     vatExemptSales = exemptAfterRegularDisc;
     zeroRatedSales = zeroRatedAfterRegularDisc;
-    nonVatSales = nonVatAfterRegularDisc;
+    // nonVatSales = nonVatAfterRegularDisc;
   }
 
   const netAmount = round(
-    vatExemptSales + vatableSales + zeroRatedSales + nonVatSales
+    vatExemptSales + vatableSales + zeroRatedSales
+    // + nonVatSales
   );
   const totalAmount = round(netAmount + vatAmount);
 
@@ -157,7 +163,7 @@ export const calculateInvoiceAmounts = (args: {
     vatAmount, // VAT amount (0 if SC/PWD)
     vatExemptSales, // VAT-exempt sales
     zeroRatedSales, // Zero-rated sales
-    nonVatSales, // NON-VAT sales
+    // nonVatSales, // NON-VAT sales
 
     // Totals
     netAmount, // After discounts, before VAT

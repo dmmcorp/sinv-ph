@@ -42,7 +42,7 @@ function TestCasesPage() {
     const testCase5 = calculateInvoiceAmounts({
       items: [
         { unitPrice: 1120, quantity: 1, vatType: "VATABLE" },
-        { unitPrice: 500, quantity: 1, vatType: "NON_VAT" },
+        { unitPrice: 500, quantity: 1, vatType: "VAT_EXEMPT" },
       ],
       taxType: "MIXED",
     });
@@ -55,7 +55,7 @@ function TestCasesPage() {
     const testCase6 = calculateInvoiceAmounts({
       items: [
         { unitPrice: 1120, quantity: 1, vatType: "VATABLE" },
-        { unitPrice: 500, quantity: 1, vatType: "NON_VAT" },
+        { unitPrice: 500, quantity: 1, vatType: "VAT_EXEMPT" },
       ],
       taxType: "MIXED",
       specialDiscountType: "PWD",
@@ -86,8 +86,8 @@ function TestCasesPage() {
     // TEST CASE 9: Multiple NON-VAT items — No discount (PASSED)
     const testCase9 = calculateInvoiceAmounts({
       items: [
-        { unitPrice: 300, quantity: 1, vatType: "NON_VAT" },
-        { unitPrice: 200, quantity: 1, vatType: "NON_VAT" },
+        { unitPrice: 300, quantity: 1, vatType: "VAT_EXEMPT" },
+        { unitPrice: 200, quantity: 1, vatType: "VAT_EXEMPT" },
       ],
       taxType: "NON_VAT",
     });
@@ -134,7 +134,7 @@ function TestCasesPage() {
 
     // TEST CASE 14 — NON_VAT, 20% discount
     const testCase14 = calculateInvoiceAmounts({
-      items: [{ unitPrice: 400, quantity: 1, vatType: "NON_VAT" }],
+      items: [{ unitPrice: 400, quantity: 1, vatType: "VAT_EXEMPT" }],
       taxType: "NON_VAT",
       discountType: "PERCENT",
       discountValue: 20,
@@ -143,7 +143,7 @@ function TestCasesPage() {
 
     // TEST CASE 15 — NON_VAT, FIXED discount
     const testCase15 = calculateInvoiceAmounts({
-      items: [{ unitPrice: 250, quantity: 2, vatType: "NON_VAT" }],
+      items: [{ unitPrice: 250, quantity: 2, vatType: "VAT_EXEMPT" }],
       taxType: "NON_VAT",
       discountType: "FIXED",
       discountValue: 50,
@@ -154,13 +154,50 @@ function TestCasesPage() {
     const testCase16 = calculateInvoiceAmounts({
       items: [
         { unitPrice: 300, quantity: 1, vatType: "VATABLE" },
-        { unitPrice: 200, quantity: 1, vatType: "NON_VAT" },
+        { unitPrice: 200, quantity: 1, vatType: "VAT_EXEMPT" },
       ],
       taxType: "MIXED",
       discountType: "PERCENT",
       discountValue: 10,
     });
     console.log("TEST CASE 16 — Mixed, 10% discount", testCase16);
+
+    // TEST CASE 17 - Mixed, FIXED discount (flat)
+    const testCase17 = calculateInvoiceAmounts({
+      items: [
+        { unitPrice: 560, quantity: 1, vatType: "VATABLE" },
+        { unitPrice: 240, quantity: 1, vatType: "VAT_EXEMPT" },
+      ],
+      taxType: "MIXED",
+      discountType: "FIXED",
+      discountValue: 100,
+    });
+    console.log("TEST CASE 17 - Mixed, FIXED discount (flat)", testCase17);
+
+    // TEST CASE 18 — VATABLE, small price + percent
+    const testCase18 = calculateInvoiceAmounts({
+      items: [{ unitPrice: 56, quantity: 1, vatType: "VATABLE" }],
+      taxType: "VAT",
+      discountType: "PERCENT",
+      discountValue: 10,
+    });
+    console.log("TEST CASE 18 — VATABLE, small price + percent", testCase18);
+
+    // TEST CASE 19 - VATABLE, quantity + fixed
+    const testCase19 = calculateInvoiceAmounts({
+      items: [{ unitPrice: 120, quantity: 3, vatType: "VATABLE" }],
+      taxType: "VAT",
+      discountType: "FIXED",
+      discountValue: 60,
+    });
+    console.log("TEST CASE 19 - VATABLE, quantity + fixed", testCase19);
+
+    // TEST CASE 20 - NO DISCOUNT (CONTROL)
+    const testCase20 = calculateInvoiceAmounts({
+      items: [{ unitPrice: 180, quantity: 2, vatType: "VAT_EXEMPT" }],
+      taxType: "NON_VAT",
+    });
+    console.log("TEST CASE 20 - NO DISCOUNT (CONTOL)", testCase20);
   }, []);
 
   return (
