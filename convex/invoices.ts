@@ -138,7 +138,21 @@ export const createInvoice = mutation({
 
     const client = await ctx.db.get(args.clientId);
     if (!client || client.userId !== user._id) {
-      throw new Error("Client not found or unauthorized");
+      throw new ConvexError("Client not found or unauthorized");
+    }
+
+    if (!args.items) {
+      throw new ConvexError("An invoice should have atleast 1 item to create.");
+    }
+
+    if (!args.taxType) {
+      throw new ConvexError("A tax type is required for an invoice");
+    }
+
+    if (!args.invoiceType) {
+      throw new ConvexError(
+        `Sales invoice format required. i.e "Sales", "Commercial" or "Service"  `
+      );
     }
 
     // let subTotal = 0;
@@ -255,5 +269,47 @@ export const createInvoice = mutation({
     });
 
     return invoiceId;
+  },
+});
+
+export const getAllInvoices = query({
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new ConvexError("Not authenticated!");
+    }
+
+    return await ctx.db
+      .query("invoices")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .order("desc")
+      .collect();
+  },
+});
+
+export const getSpecificInvoiceFromClient = query({
+  args: {
+    clientId: v.id("clients"),
+  },
+  handler: async (ctx, { clientId }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new ConvexError("Not authenticated!");
+    }
+
+    const client = await ctx.db.get(clientId);
+    if (!client) {
+      throw new ConvexError("Client not found!");
+    }
+
+    if (client.userId !== userId) {
+      throw new ConvexError("Error: Unauthorized!");
+    }
+
+    return await ctx.db
+      .query("invoices")
+      .withIndex("by_client", (q) => q.eq("clientId", clientId))
+      .order("desc")
+      .collect();
   },
 });
