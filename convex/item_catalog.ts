@@ -7,26 +7,40 @@ export const createItem = mutation({
     unitPrice: v.number(),
     description: v.string(), // goods or nature of service
 
-    vatType: v.union(
-      v.literal("VATABLE"), // Subject to 12% VAT
-      v.literal("VAT_EXEMPT"), // Legally exempt (fresh goods, books, etc.)
-      v.literal("ZERO_RATED"), // 0% VAT (exports)
-      // v.literal("NON_VAT") // Not subject to VAT
+    vatType: v.optional(
+      v.union(
+        v.literal("VATABLE"), // Subject to 12% VAT
+        v.literal("VAT_EXEMPT"), // Legally exempt (fresh goods, books, etc.)
+        v.literal("ZERO_RATED") // 0% VAT (exports)
+        // v.literal("NON_VAT") // Not subject to VAT
+      )
     ),
 
-    category: v.union(
-      v.literal("GOODS"),
-      v.literal("SERVICE"),
-      v.literal("PROFESSIONAL_FEE"),
-      v.literal("VEGETABLES"),
-      v.literal("FRUITS"),
-      v.literal("OTHER")
+    category: v.optional(
+      v.union(
+        v.literal("GOODS"),
+        v.literal("SERVICE"),
+        v.literal("PROFESSIONAL_FEE"),
+        v.literal("VEGETABLES"),
+        v.literal("FRUITS"),
+        v.literal("OTHER")
+      )
     ),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
       throw new ConvexError("Not authenticated!");
+    }
+
+    let businessType = "Freelancer/Individual"; //default if the user is skip the onboarding process
+
+    const user = await ctx.db.get(userId);
+    if (user && user.businessProfileId) {
+      const userBusinessProfile = await ctx.db.get(user.businessProfileId);
+      if (userBusinessProfile) {
+        businessType = userBusinessProfile?.businessType;
+      }
     }
     const id = await ctx.db.insert("itemCatalog", {
       userId,
@@ -68,21 +82,18 @@ export const getAllItem = query({
 export const changeItemCatalogStatus = mutation({
   args: {
     itemCatalogId: v.id("itemCatalog"),
-    status: v.boolean()
+    status: v.boolean(),
   },
-  handler: async (ctx, {
-    itemCatalogId,
-    status,
-  }) => {
+  handler: async (ctx, { itemCatalogId, status }) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
       throw new ConvexError("Not authenticated!");
     }
 
     // does item exist
-    const itemCatalog = await ctx.db.get(itemCatalogId)
+    const itemCatalog = await ctx.db.get(itemCatalogId);
     if (!itemCatalog) {
-      throw new ConvexError("Error: Item not found")
+      throw new ConvexError("Error: Item not found");
     }
 
     // check ownership if it is their item or not
@@ -92,7 +103,6 @@ export const changeItemCatalogStatus = mutation({
 
     return await ctx.db.patch(itemCatalogId, {
       isActive: status,
-    })
-
-  }
-})
+    });
+  },
+});

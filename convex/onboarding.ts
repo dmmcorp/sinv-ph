@@ -5,7 +5,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 export const board = mutation({
   args: {
     businessName: v.string(),
-    tin: v.string(),
+    tin: v.optional(v.string()),
     address: v.string(),
     logoUrl: v.string(),
     businessType: v.union(
@@ -38,5 +38,17 @@ export const board = mutation({
         updatedAt: Math.floor(Date.now() / 1000), // unix timestamp today
         onboarding: true,
       });
+  },
+});
+
+export const skip = mutation({
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new ConvexError("No user found!");
+
+    await ctx.db.patch(userId, {
+      updatedAt: Math.floor(Date.now() / 1000), // unix timestamp today
+      onboarding: true,
+    });
   },
 });

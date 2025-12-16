@@ -27,7 +27,7 @@ export const calculateInvoiceAmounts = (args: {
   items: {
     unitPrice: number;
     quantity: number;
-    vatType: "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED"
+    vatType?: "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED";
   }[];
   taxType?: TaxType;
   discountType?: DiscountType;
@@ -37,10 +37,11 @@ export const calculateInvoiceAmounts = (args: {
   let vatablesTotal = 0;
   let vatExemptTotal = 0;
   let zeroRatedTotal = 0;
+  let noVatTypeTotal = 0;
   // let nonVatTotal = 0;
 
   if ((args.discountType || args.discountValue) && args.specialDiscountType) {
-    throw Error("You can't mix regular discount and special discount.")
+    throw Error("You can't mix regular discount and special discount.");
   }
 
   for (const item of args.items) {
@@ -55,6 +56,8 @@ export const calculateInvoiceAmounts = (args: {
         break;
       case "ZERO_RATED":
         zeroRatedTotal += itemTotal;
+      case undefined:
+        noVatTypeTotal += itemTotal;
         break;
       // case "NON_VAT":
       //   nonVatTotal += itemTotal;
@@ -63,7 +66,7 @@ export const calculateInvoiceAmounts = (args: {
   }
 
   const grossTotal = round(
-    vatablesTotal + vatExemptTotal + zeroRatedTotal
+    vatablesTotal + vatExemptTotal + zeroRatedTotal + noVatTypeTotal
     // + nonVatTotal
   );
 
@@ -89,13 +92,14 @@ export const calculateInvoiceAmounts = (args: {
   const exemptAfterRegularDisc = round(vatExemptTotal * (1 - discountRatio));
   const zeroRatedAfterRegularDisc = round(zeroRatedTotal * (1 - discountRatio));
   // const nonVatAfterRegularDisc = round(nonVatTotal * (1 - discountRatio));
+  const noVatTypeAfterRegularDisc = round(noVatTypeTotal * (1 - discountRatio));
 
   // special discounts logic
   let specialDiscountAmount = 0;
   let vatableSales = 0;
   let vatExemptSales = 0;
   let zeroRatedSales = 0;
-  // let nonVatSales = 0;
+  let noVatTypeSales = 0;
   let vatAmount = 0;
 
   if (args.specialDiscountType) {
@@ -110,14 +114,12 @@ export const calculateInvoiceAmounts = (args: {
     const scDiscountOnZeroRated = round(
       zeroRatedAfterRegularDisc * SPECIAL_DISCOUNT_RATE
     );
-    // const scDiscountOnNonVat = round(
-    //   nonVatAfterRegularDisc * SPECIAL_DISCOUNT_RATE
-    // );
+    const scDiscountOnNoVat = round(
+      noVatTypeAfterRegularDisc * SPECIAL_DISCOUNT_RATE
+    );
 
     specialDiscountAmount = round(
-      scDiscountOnVatable +
-      scDiscountOnExempt +
-      scDiscountOnZeroRated
+      scDiscountOnVatable + scDiscountOnExempt + scDiscountOnZeroRated
       // + scDiscountOnNonVat
     );
 
@@ -128,9 +130,9 @@ export const calculateInvoiceAmounts = (args: {
     // vat exempt na mapuounta after special discount
     vatExemptSales = round(
       vatableAfterRegularDisc -
-      scDiscountOnVatable +
-      (exemptAfterRegularDisc - scDiscountOnExempt)
-      // + (nonVatAfterRegularDisc - scDiscountOnNonVat)
+        scDiscountOnVatable +
+        (exemptAfterRegularDisc - scDiscountOnExempt) +
+        (noVatTypeAfterRegularDisc - scDiscountOnNoVat)
     );
     zeroRatedSales = round(zeroRatedAfterRegularDisc - scDiscountOnZeroRated);
     // nonVatSales = 0;
@@ -140,12 +142,11 @@ export const calculateInvoiceAmounts = (args: {
     vatAmount = round(vatableSales * VAT_RATE);
     vatExemptSales = exemptAfterRegularDisc;
     zeroRatedSales = zeroRatedAfterRegularDisc;
-    // nonVatSales = nonVatAfterRegularDisc;
+    noVatTypeSales = noVatTypeAfterRegularDisc;
   }
 
   const netAmount = round(
-    vatExemptSales + vatableSales + zeroRatedSales
-    // + nonVatSales
+    vatExemptSales + vatableSales + zeroRatedSales + noVatTypeSales
   );
   const totalAmount = round(netAmount + vatAmount);
 

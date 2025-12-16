@@ -4,9 +4,11 @@ import { useState } from "react";
 import { ClientSelector } from "../_components/client-selector";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Created from "./_components/created";
+import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
 
 function Page() {
-  const [step, setStep] = useState<number>(0);
+  const { step, setStep } = useInvoiceStore();
   return (
     <div className="">
       {step === 0 && (
@@ -33,6 +35,8 @@ function Page() {
           <CreateNewInvoiceGuard onSetCurrentStep={setStep} />
         </div>
       )}
+
+      {step === 3 && <Created />}
     </div>
   );
 }

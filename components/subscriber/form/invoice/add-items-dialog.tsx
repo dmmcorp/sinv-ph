@@ -32,41 +32,15 @@ import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
 import { useItemsCatalog } from "@/hooks/use-items-catalog";
 import { Id } from "@/convex/_generated/dataModel";
 import { toast } from "sonner";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { VATTYPE } from "@/lib/types";
-import { TAX_TYPES } from "@/lib/constants/TAX_TYPES";
 
 export type Item = {
   _id: Id<"itemCatalog">;
   unitPrice: number;
   description: string;
-  vatType: "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED" | "ZERO_RATED" | "NON_VAT";
+  vatType: "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED" | undefined;
 };
 
-// const ItemsDummy: Item[] = [
-//   { id: 1, description: "Web Development Services", price: 5000 },
-//   { id: 2, description: "UI/UX Design", price: 3000 },
-//   { id: 3, description: "Mobile App Development", price: 8000 },
-//   { id: 4, description: "Consulting", price: 2000 },
-//   { id: 5, description: "Maintenance & Support", price: 1500 },
-// ];
-// interface AddItemsDialogProps {
-//   currentItems: SelectedItemType[];
-//   setSelectedItems: (items: SelectedItemType[]) => void;
-// }
-
-export function AddItemsDialog(
-  {
-    // currentItems,
-    // setSelectedItems,
-  }
-) {
+export function AddItemsDialog() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [open, setOpen] = useState(false);
@@ -75,9 +49,7 @@ export function AddItemsDialog(
   const [item, setItem] = useState<Item | undefined>();
   const { itemsCatalog, loading, addItemToDB } = useItemsCatalog();
   const [description, setDescription] = useState("");
-  const [vatType, setVatType] = useState<
-    "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED" | "ZERO_RATED" | "NON_VAT"
-  >("VATABLE");
+
   const [price, setPrice] = useState(0);
   const { selectedItems, addItem, updateItemQuantity } = useInvoiceStore();
 
@@ -115,7 +87,7 @@ export function AddItemsDialog(
       //step 3 - display it to the list in the ui
 
       //add item to the db
-      const result = await addItemToDB(description, price, vatType);
+      const result = await addItemToDB(description, price, undefined);
 
       if (!result) {
         toast.error("Error: result not found");
@@ -286,9 +258,9 @@ export function AddItemsDialog(
                   placeholder="Enter custom price"
                 />
               </div>
-              <div className="space-y-2 mb-2">
+              {/* <div className="space-y-2 mb-2">
                 <Label className="text-sm text-muted-foreground">
-                  Currency
+                  Vat
                 </Label>
                 <Select
                   defaultValue={vatType}
@@ -311,7 +283,7 @@ export function AddItemsDialog(
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
             </>
           )}
         </div>

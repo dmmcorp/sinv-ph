@@ -13,8 +13,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { api } from "@/convex/_generated/api";
+import useBusinessProfileStore from "@/stores/business-profile/useBusinessProfileStore";
+import useClientSelection from "@/stores/client/useClientSelection";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
+import { useMutation } from "convex/react";
 import { FileText, Save } from "lucide-react";
+import { toast } from "sonner";
 
 const currencies = [
   { value: "PHP", label: "Philippine Peso", symbol: "₱" },
@@ -23,19 +28,72 @@ const currencies = [
 
 function ActionsCard() {
   const {
+    selectedItems,
     selectedCurrency,
     includeTax,
     includeDiscount,
     discountValue,
     isPercentage,
+    setStep,
     setCurrency,
     toggleTax,
     toggleDiscount,
     setDiscountValue,
     setIsPercentage,
   } = useInvoiceStore();
+  const { businessProfile } = useBusinessProfileStore();
+  const { selectedClient } = useClientSelection();
+  const saveInvoice = useMutation(api.invoices.createInvoice);
+  const handleSaveInvoice = () => {
+    let vatStatus: "NON_VAT" | "VAT" = "NON_VAT";
 
-  const handleSaveInvoice = () => {};
+    if (businessProfile?.businessType === "VAT-Registered Business") {
+      vatStatus = "VAT";
+    }
+
+    const processedItems = selectedItems.map((item) => {
+      const amount = item.price * item.quantity;
+      return {
+        unitPrice: item.price,
+        description: item.description,
+        quantity: item.quantity,
+        amount,
+        vatType: item.vatType,
+      };
+    });
+    try {
+      if (selectedClient && businessProfile) {
+        toast.promise(
+          saveInvoice({
+            sellerTin: businessProfile.tin,
+            sellerAddress: businessProfile.address,
+            discountType: undefined, // to be add
+            discountValue: undefined, // to be add
+            specialDiscountType: undefined, // to be add
+            specialDiscountId: undefined, // to be add
+            buyerTin: undefined, // to be add
+            buyerAddress: undefined, // to be add
+            status: "DRAFT",
+            clientId: selectedClient._id,
+            sellerBusinessName: businessProfile?.businessName || "",
+            sellerVatStatus: vatStatus,
+            invoiceType: "SALES", // need to have a dynamic value
+            items: processedItems,
+            buyerName: selectedClient.name || "",
+          }),
+          {
+            loading: "Saving invoice...",
+            success: "Invoice saved successfully!",
+            error: "Failed to save invoice.",
+          }
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setStep(2);
+    }
+  };
   const handlePreviewPDF = () => {};
   return (
     <Card className="col-span-1 lg:col-span-3   h-fit">

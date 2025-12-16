@@ -11,6 +11,7 @@ export default defineSchema({
 
     onboarding: v.boolean(),
     updatedAt: v.number(),
+    businessProfileId: v.optional(v.id("business_profile")), // para madaling makuha ang business profile ni user hindi na mag fifilter sa buong list
   }).index("by_email", ["email"]),
   // bussiness profile
   business_profile: defineTable({
@@ -76,13 +77,15 @@ export default defineSchema({
     invoiceNumber: v.string(), // serial number
 
     // tax infos
-    taxType: v.union(
-      v.literal("NON_VAT"), //
-      v.literal("VAT"), //
-      v.literal("VAT_EXEMPT"), //
-      v.literal("ZERO_RATED"), //
-      v.literal("MIXED"), // some items vat, some exempt
-      v.literal("PAYMENT_RECEIPT") //
+    taxType: v.optional(
+      v.union(
+        v.literal("NON_VAT"), //
+        v.literal("VAT"), //
+        v.literal("VAT_EXEMPT"), //
+        v.literal("ZERO_RATED"), //
+        v.literal("MIXED"), // some items vat, some exempt
+        v.literal("PAYMENT_RECEIPT") //
+      )
     ),
 
     // discounts
@@ -109,11 +112,13 @@ export default defineSchema({
         description: v.string(),
         quantity: v.number(),
         amount: v.number(),
-        vatType: v.union(
-          v.literal("VATABLE"),
-          v.literal("VAT_EXEMPT"), // VAT-EXEMPT = “This sale is exempt from VAT even though the business is VAT-registered.”
-          v.literal("ZERO_RATED")
-          // v.literal("NON_VAT"), // NON-VAT = “This business does not deal with VAT at all.” this is a seller status not a vat item type
+        vatType: v.optional(
+          v.union(
+            v.literal("VATABLE"),
+            v.literal("VAT_EXEMPT"), // VAT-EXEMPT = “This sale is exempt from VAT even though the business is VAT-registered.”
+            v.literal("ZERO_RATED")
+            // v.literal("NON_VAT"), // NON-VAT = “This business does not deal with VAT at all.” this is a seller status not a vat item type
+          )
         ),
       })
     ),
@@ -160,21 +165,25 @@ export default defineSchema({
     // quantity: v.number(),
     // amount: v.number(), // quantity * unitPrice = amount vlaue
 
-    vatType: v.union(
-      v.literal("VATABLE"), // Subject to 12% VAT
-      // v.literal("NON_VAT"), // Seller not VAT-registered (usually for small businesses < 3MPHP ANNUAL SALES)
-      v.literal("VAT_EXEMPT"), // No VAT (usually educational services, books, newspapers)
-      v.literal("ZERO_RATED") // 0% VAT (for export / international transport)
+    vatType: v.optional(
+      v.union(
+        v.literal("VATABLE"), // Subject to 12% VAT
+        // v.literal("NON_VAT"), // Seller not VAT-registered (usually for small businesses < 3MPHP ANNUAL SALES)
+        v.literal("VAT_EXEMPT"), // No VAT (usually educational services, books, newspapers)
+        v.literal("ZERO_RATED") // 0% VAT (for export / international transport)
+      )
     ),
 
     // TODO: Need to assess how to handle category properly and check if it is needed to be put in invoice
-    category: v.union(
-      v.literal("GOODS"),
-      v.literal("SERVICE"),
-      v.literal("PROFESSIONAL_FEE"),
-      v.literal("VEGETABLES"),
-      v.literal("FRUITS"),
-      v.literal("OTHER")
+    category: v.optional(
+      v.union(
+        v.literal("GOODS"),
+        v.literal("SERVICE"),
+        v.literal("PROFESSIONAL_FEE"),
+        v.literal("VEGETABLES"),
+        v.literal("FRUITS"),
+        v.literal("OTHER")
+      )
     ),
     //
 

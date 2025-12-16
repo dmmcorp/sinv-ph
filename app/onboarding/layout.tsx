@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 const poppinsFont = Poppins({
   subsets: ["latin"],
-  weight: ["400"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 export default function OnboardingLayout({
@@ -20,12 +20,29 @@ export default function OnboardingLayout({
 }) {
   return (
     <div
-      className={`flex flex-col min-h-screen bg-gray-200 ${poppinsFont.className}`}
+      className={`flex flex-col justify-between min-h-dvh max-h-dvh  ${poppinsFont.className}`}
     >
       <OnboardingNavbar />
-      <div className="flex-1 flex flex-col items-center justify-center p-4">
-        <div className="flex-1 w-full">{children}</div>
-      </div>
+
+      {children}
+      <footer className="w-full border-t bg-background">
+        <div className="mx-auto max-w-7xl px-4 py-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs text-muted-foreground">
+          {/* Left */}
+          <p>© {new Date().getFullYear()} YourCompany. All rights reserved.</p>
+
+          {/* Right */}
+          <div className="flex items-center gap-4">
+            <button className="hover:text-foreground transition">
+              Privacy Policy
+            </button>
+            <button className="hover:text-foreground transition">
+              Terms of Service
+            </button>
+            <span className="hidden sm:inline">•</span>
+            <span>BIR-compliant invoices</span>
+          </div>
+        </div>
+      </footer>
       <Toaster />
     </div>
   );

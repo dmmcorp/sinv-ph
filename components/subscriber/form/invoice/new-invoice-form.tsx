@@ -77,7 +77,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
   // 2. Define a submit handler.
 
   return (
-    <div className=" border-2 border-black/60 p-5 rounded-2xl space-y-10 ">
+    <div className=" border-2 shadow-lg p-10 rounded-2xl space-y-10 bg-white">
       <div className="flex justify-between">
         <div className="">
           {businessProfile && (
