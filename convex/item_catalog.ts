@@ -64,3 +64,35 @@ export const getAllItem = query({
       .collect();
   },
 });
+
+export const changeItemCatalogStatus = mutation({
+  args: {
+    itemCatalogId: v.id("itemCatalog"),
+    status: v.boolean()
+  },
+  handler: async (ctx, {
+    itemCatalogId,
+    status,
+  }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new ConvexError("Not authenticated!");
+    }
+
+    // does item exist
+    const itemCatalog = await ctx.db.get(itemCatalogId)
+    if (!itemCatalog) {
+      throw new ConvexError("Error: Item not found")
+    }
+
+    // check ownership if it is their item or not
+    if (itemCatalog.userId !== userId) {
+      throw new ConvexError("Not authorized to modify this item");
+    }
+
+    return await ctx.db.patch(itemCatalogId, {
+      isActive: status,
+    })
+
+  }
+})
