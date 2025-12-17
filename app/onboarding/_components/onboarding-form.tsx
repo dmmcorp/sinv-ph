@@ -43,14 +43,27 @@ const BUSINESSTYPE = [
   {
     type: "Small Business",
     icon: <Store />,
-    description:
-      "For registered businesses that don’t charge VAT but need more structured invoices, records, and basic reporting.",
+    description: (
+      <p>
+        Registered businesses{" "}
+        <span className="italic font-semibold">(under PHP 3M revenue)</span>{" "}
+        that don’t charge VAT but need structured invoices and basic reporting.
+      </p>
+    ),
   },
   {
     type: "VAT-Registered Business",
     icon: <FileText />,
-    description:
-      "For BIR-registered businesses VAT-registered with the BIR, required to charge 12% VAT, issue VAT-compliant ORs, and file VAT returns.",
+    description: (
+      <p>
+        For BIR-registered businesses{" "}
+        <span className="italic font-semibold">
+          exceeding the PHP 3,000,000 annual revenue threshold
+        </span>
+        , required to charge 12% VAT, issue VAT-compliant official receipts
+        (ORs), and file VAT returns.
+      </p>
+    ),
   },
 ];
 type BusinessType =
@@ -69,16 +82,19 @@ const onboardingFormSchema = z
     ),
 
     //step 2
-    businessName: z.string().min(2, {
-      message: "Business name must be at least 2 characters.",
+    businessName: z.string().optional(),
+    sellerName: z.string().min(2, {
+      message: "Seller name must be at least 2 characters.",
     }),
     logoFile: z.instanceof(File).optional(),
-    address: z.union([
-      z.literal(""),
-      z.string().min(5, {
+    address: z
+      .string({
+        error: (iss) =>
+          iss.input === undefined ? "Field is required." : "Invalid input.",
+      })
+      .min(5, {
         message: "Address must be at least 5 characters.",
       }),
-    ]),
     tin: z.string().optional(), // start optional, then enforce conditionally
     vatRegistration: z.boolean(),
   })
@@ -114,7 +130,8 @@ export const OnboardingForm = () => {
     resolver: zodResolver(onboardingFormSchema),
     defaultValues: {
       address: "",
-      businessName: "",
+      businessName: "", // business
+      sellerName: "", // person
       logoFile: undefined,
       tin: "",
       businessType: selectedBType ?? "Freelancer/Individual",
@@ -203,7 +220,8 @@ export const OnboardingForm = () => {
       }
 
       await board({
-        businessName: values.businessName,
+        businessName: values.businessName, // optional lang to kung gusto at meron nilagay si user
+        sellerName: values.sellerName, // ito ang dapat palaging nasa invoice
         tin: values.tin, // dapat sa schema optional na si tin
         address: values.address,
         logoUrl: logoUrl ?? "",
@@ -280,7 +298,7 @@ export const OnboardingForm = () => {
           Skip for now
         </button>
       </div>
-      <div className="flex flex-col items-center gap-y-5 h-full">
+      <div className="flex flex-col items-center gap-y-5 h-full ">
         <div className="text-center text-xs sm:text-lg space-y-5">
           <h3 className="uppercase font-semibold  text-primary">
             Step {step} of 2
@@ -317,9 +335,9 @@ export const OnboardingForm = () => {
                       <h2 className="text-xl lg:text-2xl font-black tracking-wider truncate">
                         {bt.type}
                       </h2>
-                      <p className="text-[0.6rem] sm:text-xs lg:text-sm leading-loose">
+                      <div className="text-[0.6rem] sm:text-xs lg:text-sm leading-loose">
                         {bt.description}
-                      </p>
+                      </div>
                     </div>
                   </div>
                 </button>
@@ -334,7 +352,7 @@ export const OnboardingForm = () => {
               onSubmit={form.handleSubmit(onSubmit)}
               className=" "
             >
-              <div className="flex flex-col lg:flex-row gap-10 bg-white p-10">
+              <div className="flex flex-col lg:flex-row gap-10 p-10">
                 <div className="">
                   <FormField
                     control={form.control}
@@ -419,14 +437,44 @@ export const OnboardingForm = () => {
                       : "hidden"
                   }
                 >
-                  <div className="col-span-2">
+                  <div className="col-span-1">
+                    <FormField
+                      control={form.control}
+                      name="sellerName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-semibold text-sm md:text-lg">
+                            Seller Full Name
+                          </FormLabel>
+
+                          <FormControl>
+                            <Input
+                              placeholder="e.g. Juan Dela Cruz"
+                              {...field}
+                              className="bg-white h-11"
+                            />
+                          </FormControl>
+                          <p className="text-gray-600 text-[0.6rem] md:text-sm ">
+                            Your personal name as it will appear on all invoices
+                            and client documents. For freelancers, this is
+                            usually your legal name.
+                          </p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="col-span-2 lg:col-span-1">
                     <FormField
                       control={form.control}
                       name="businessName"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="font-semibold text-sm md:text-lg">
-                            Your Business Name
+                            Business/Brand Name{" "}
+                            <span className="text-sm text-muted-foreground">
+                              (optional)
+                            </span>
                           </FormLabel>
 
                           <FormControl>
@@ -437,14 +485,16 @@ export const OnboardingForm = () => {
                             />
                           </FormControl>
                           <p className="text-gray-600 text-[0.6rem] md:text-sm ">
-                            The official name that will appear on all invoices
-                            and client documents.
+                            Your business or brand name. This will appear on
+                            invoices alongside your seller name. Leave blank if
+                            you don’t have a separate business name.
                           </p>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
+
                   {selectedBType !== "Freelancer/Individual" && (
                     <div className="col-span-2">
                       <FormField

@@ -76,6 +76,35 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
   const totalAmount = calculateTotalAmount();
   // 2. Define a submit handler.
 
+  const formatedTin = () => {
+    const businessType = businessProfile?.businessType;
+    switch (businessType) {
+      case "Freelancer/Individual":
+        // Logic for freelancers / individuals
+        return businessProfile?.tin;
+
+      case "Small Business":
+        // Logic for small businesses (non-VAT)
+        if (businessProfile?.tin) {
+          return "NON-VAT REG TIN " + businessProfile?.tin;
+        } else {
+          return "";
+        }
+
+      case "VAT-Registered Business":
+        // Logic for VAT-registered businesses
+        if (businessProfile?.tin) {
+          return "VAT REG TIN " + businessProfile?.tin;
+        } else {
+          return "";
+        }
+
+      default:
+        // Fallback if businessType is undefined or unexpected
+        return businessProfile?.tin;
+    }
+    return;
+  };
   return (
     <div className=" border-2 shadow-lg p-10 rounded-2xl space-y-10 bg-white">
       <div className="flex justify-between">
@@ -90,9 +119,9 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
             />
           )}
           <h3 className="text-lg font-bold">{businessProfile?.businessName}</h3>
-          <p>{businessProfile?.businessName}</p>
-          <h5>email@email.com</h5>
-          <h5>+63 921 2135 124</h5>
+          <p>{businessProfile?.sellerName}</p>
+          <h5>{formatedTin()}</h5>
+          <h5>{businessProfile?.address}</h5>
         </div>
         <h1>INVOICE</h1>
       </div>
