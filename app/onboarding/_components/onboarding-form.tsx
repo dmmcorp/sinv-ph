@@ -229,7 +229,7 @@ export const OnboardingForm = () => {
         vatRegistration:
           selectedBType !== "VAT-Registered Business" ? false : true, // not sure if pag small business ay dapat registered na agad
       });
-      setJustCompleted(true);
+      setJustCompleted(true); // to proceed to
       router.push("/onboarding/success");
       // clean up preview url blob
       if (logoPreview) {

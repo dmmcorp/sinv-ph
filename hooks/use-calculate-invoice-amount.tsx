@@ -7,8 +7,8 @@ import { calculateInvoiceAmounts } from "@/lib/utils";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
 
 export const useCalculateInvioceAmount = () => {
-  const { selectedItems } = useInvoiceStore();
-  const removeIds = selectedItems.map((item) => {
+  const invoice = useInvoiceStore();
+  const removeIds = invoice.selectedItems.map((item) => {
     return {
       description: item.description,
       quantity: item.quantity,
@@ -16,8 +16,11 @@ export const useCalculateInvioceAmount = () => {
       vatType: item.vatType,
     };
   });
+  const discountType = invoice.isPercentage ? "PERCENT" : "FIXED";
   const data = {
     items: removeIds,
+    discountType: discountType as DiscountType,
+    discountValue: Number(invoice.discountValue) ?? 0,
   };
   const {
     grossTotal,

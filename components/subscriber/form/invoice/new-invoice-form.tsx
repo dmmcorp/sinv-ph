@@ -13,7 +13,7 @@ import { UseFormReturn } from "react-hook-form";
 import { InvoiceFormValues } from "@/lib/types";
 import Image from "next/image";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
-import { VAT_RATE, VAT_RATE_PERCENTAGE } from "@/lib/constants/VAT_RATE";
+import { VAT_RATE_PERCENTAGE } from "@/lib/constants/VAT_RATE";
 import { useCalculateInvioceAmount } from "@/hooks/use-calculate-invoice-amount";
 
 interface NewInvoiceFormProps {
@@ -23,6 +23,7 @@ interface NewInvoiceFormProps {
 function NewInvoiceForm({ form }: NewInvoiceFormProps) {
   const { businessProfile } = useBusinessProfileSync();
   const total = useCalculateInvioceAmount();
+
   const {
     selectedCurrency,
     includeTax,
@@ -32,50 +33,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
     selectedItems,
   } = useInvoiceStore();
 
-  const calculateSubTotal = () => {
-    return selectedItems.reduce((total, item) => {
-      const lineTotal = (item.quantity || 0) * (item.price || 0);
-      return total + lineTotal;
-    }, 0);
-  };
-
-  const subtotal = calculateSubTotal();
-
-  const calculateTaxAmount = () => {
-    const totalVATAmount = selectedItems.reduce((total, item) => {
-      if (item.vatType === "VATABLE") {
-        console.log("item Pric:", item.price);
-        return item.price * VAT_RATE + total;
-      }
-      return total;
-    }, 0);
-
-    return totalVATAmount;
-  };
-  const calculateDiscountAmount = () => {
-    const disc = isPercentage
-      ? subtotal * (Number(discountValue) / 100)
-      : Number(discountValue);
-
-    return disc;
-  };
-  const calculateTotalAmount = () => {
-    let total = subtotal;
-    if (includeTax) {
-      total += taxAmount;
-    }
-
-    if (includeDiscount) {
-      total -= discountAmount;
-    }
-
-    return total;
-  };
-  const discountAmount = calculateDiscountAmount();
-  const taxAmount = calculateTaxAmount();
-  const totalAmount = calculateTotalAmount();
   // 2. Define a submit handler.
-
   const formatedTin = () => {
     const businessType = businessProfile?.businessType;
     switch (businessType) {
@@ -310,7 +268,10 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                     Discount Amount:
                   </div>
                   <div className="col-span-2 text-center font-light">
-                    {formatCurrency(discountAmount, selectedCurrency)}
+                    {formatCurrency(
+                      total.regularDiscountAmount,
+                      selectedCurrency
+                    )}
                   </div>
                 </div>
               </>
