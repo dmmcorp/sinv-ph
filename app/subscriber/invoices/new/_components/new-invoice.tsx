@@ -105,17 +105,7 @@ function NewInvoice({ invoiceNo }: { invoiceNo: string }) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 min-h-screen w-full gap-10">
           <div className="col-span-1 lg:col-span-9">
-            <NewInvoiceForm
-              form={form}
-              // selectedCurrency={selectedCurrency}
-              // setSelectedCurrency={setSelectedCurrency}
-              // currentItems={selectedItems}
-              // setSelectedItems={setSelectedItems}
-              // includeDiscount={includeDiscount}
-              // includeTax={includeTax}
-              // discountValue={discountValue}
-              // isPercentage={isPercentage}
-            />
+            <NewInvoiceForm form={form} />
           </div>
           <ActionsCard />
         </div>

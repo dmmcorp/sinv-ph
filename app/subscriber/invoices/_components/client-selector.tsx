@@ -129,39 +129,40 @@ export function ClientSelector({ onSetStep }: ClientSelector) {
         </div>
 
         {/* Client List */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-5 space-y-2 max-h-[500px] overflow-y-auto ">
-          {filteredClients?.map((client) => (
-            <button
-              key={client._id}
-              onClick={() => setSelectedClient(client)}
-              className={`max-h-40 w-full text-left p-3 rounded-lg border transition-all flex flex-col ${
-                selectedClient?._id === client._id
-                  ? "border-primary bg-primary/5 ring-1 ring-primary"
-                  : "border-border hover:border-primary/50 hover:bg-muted/50"
-              }`}
-            >
-              <div className="flex items-start justify-between gap-2 ">
-                <div className="space-y-1 min-w-0">
-                  <p className="font-semibold truncate">{client.name}</p>
-                  <p className="text-sm text-muted-foreground truncate">
-                    {client.email}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {client.address}
-                  </p>
-                </div>
-                {selectedClient?._id === client._id && (
-                  <div className="shrink-0 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
-                    <Check className="h-3 w-3 text-primary-foreground" />
+        <div className="">
+          {filteredClients && filteredClients?.length > 0 ? (
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-5 space-y-2 w-full overflow-y-auto ">
+              {filteredClients?.map((client) => (
+                <button
+                  key={client._id}
+                  onClick={() => setSelectedClient(client)}
+                  className={`max-h-40 w-full text-left p-3 rounded-lg border transition-all flex flex-col ${
+                    selectedClient?._id === client._id
+                      ? "border-primary bg-primary/5 ring-1 ring-primary"
+                      : "border-border hover:border-primary/50 hover:bg-muted/50"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2 ">
+                    <div className="space-y-1 min-w-0">
+                      <p className="font-semibold truncate">{client.name}</p>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {client.email}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {client.address}
+                      </p>
+                    </div>
+                    {selectedClient?._id === client._id && (
+                      <div className="shrink-0 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                        <Check className="h-3 w-3 text-primary-foreground" />
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </button>
-          ))}
-
-          {/* No Results - Engaging prompt to add new client */}
-          {showNoResults && (
-            <div className="text-center py-8 px-4 border-2 border-dashed border-muted-foreground/25 rounded-lg">
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center self-center w-full py-8 px-4 border-2 border-dashed border-muted-foreground/25 rounded-lg">
               <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
                 <UserPlus className="h-6 w-6 text-muted-foreground" />
               </div>

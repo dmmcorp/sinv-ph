@@ -59,7 +59,8 @@ export const createInvoice = mutation({
     // invoiceNumber: v.string(), // This is auto generated and incremental (CHECK DOCS MHF for rules)
 
     // seller infos (subscribers)
-    sellerBusinessName: v.string(),
+    sellerBusinessName: v.optional(v.string()), //nadadag 12/17/2025
+    sellerName: v.string(), //nadadag 12/17/2025
     sellerTin: v.optional(v.string()),
     sellerAddress: v.optional(v.string()),
     sellerVatStatus: v.union(v.literal("VAT"), v.literal("NON_VAT")),
@@ -144,9 +145,9 @@ export const createInvoice = mutation({
       throw new ConvexError("An invoice should have atleast 1 item to create.");
     }
 
-    if (!args.taxType) {
-      throw new ConvexError("A tax type is required for an invoice");
-    }
+    // if (!args.taxType) {
+    //   throw new ConvexError("A tax type is required for an invoice"); //nadadag 12/17/2025
+    // }
 
     if (!args.invoiceType) {
       throw new ConvexError(
@@ -221,6 +222,7 @@ export const createInvoice = mutation({
 
       // seller (subscriber infos)
       sellerBusinessName: args.sellerBusinessName,
+      selerName: args.sellerName, //nadadag 12/17/2025
       sellerTin: args.sellerTin,
       sellerAddress: args.sellerAddress,
       sellerVatStatus: args.sellerVatStatus,

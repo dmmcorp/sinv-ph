@@ -44,7 +44,7 @@ interface InvoiceStoreType {
 
 export const useInvoiceStore = create<InvoiceStoreType>((set) => ({
   selectedCurrency: "PHP",
-  includeTax: true,
+  includeTax: false,
   includeDiscount: false,
   step: 0,
   discountValue: "",
