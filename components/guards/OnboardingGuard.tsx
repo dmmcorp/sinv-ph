@@ -32,3 +32,66 @@ export const OnboardingGuard = ({
 
   return <>{children}</>;
 };
+
+// "use client";
+
+// import { useHasUserBoarded } from "@/hooks/use-has-user-boarded";
+// import { useOnboardingStore } from "@/stores/onboarding/useOnboardingStore";
+// import { usePathname, useRouter } from "next/navigation";
+// import { useEffect } from "react";
+
+// const ONBOARDING_ROUTES = new Set(["/onboarding", "/onboarding/success"]);
+
+// export const OnboardingGuard = ({
+//   children,
+// }: {
+//   children: React.ReactNode;
+// }) => {
+//   const { justCompleted, setJustCompleted } = useOnboardingStore();
+//   const { hasUserBoarded, isLoading } = useHasUserBoarded();
+//   const pathname = usePathname();
+//   const router = useRouter();
+
+//   const isOnboardingRoute = ONBOARDING_ROUTES.has(pathname);
+
+//   useEffect(() => {
+//     if (isLoading) return;
+
+//     if (justCompleted && pathname === "/onboarding/success") {
+//       setJustCompleted(false); // reset
+//       return;
+//     }
+
+//     // 🚫 User NOT onboarded → force onboarding
+//     if (!hasUserBoarded && !isOnboardingRoute) {
+//       setJustCompleted(false);
+//       router.push("/onboarding");
+//       return;
+//     }
+
+//     // 🚫 User onboarded → block onboarding form
+//     //onboarder = true
+//     if (hasUserBoarded && pathname === "/onboarding") {
+//       console.log(justCompleted);
+//       if (justCompleted) {
+//         return;
+//       } else {
+//         router.push("/subscriber");
+//       }
+//     }
+//   }, [
+//     justCompleted,
+//     setJustCompleted,
+//     hasUserBoarded,
+//     isLoading,
+//     isOnboardingRoute,
+//     pathname,
+//     router,
+//   ]);
+
+//   if (isLoading) {
+//     return <div>Loading...</div>;
+//   }
+
+//   return <>{children}</>;
+// };

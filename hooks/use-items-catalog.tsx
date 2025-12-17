@@ -20,7 +20,7 @@ export const useItemsCatalog = () => {
   const addItemToDB = async (
     description: string,
     unitPrice: number,
-    vatType: VATTYPE
+    vatType?: VATTYPE
   ) => {
     try {
       const item = await createItem({
