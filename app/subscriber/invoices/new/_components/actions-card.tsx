@@ -15,6 +15,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { api } from "@/convex/_generated/api";
 import { useCalculateInvioceAmount } from "@/hooks/use-calculate-invoice-amount";
+import { INVOICE_TYPES } from "@/lib/constants/INVOICE_TYPES";
+import { INVOiCETYPE } from "@/lib/types";
 import useBusinessProfileStore from "@/stores/business-profile/useBusinessProfileStore";
 import useClientSelection from "@/stores/client/useClientSelection";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
@@ -67,12 +69,12 @@ function ActionsCard() {
             specialDiscountType: undefined, // to be add
             specialDiscountId: undefined, // to be add
             buyerTin: undefined, // to be add
-            buyerAddress: undefined, // to be add
+            buyerAddress: selectedClient.address, // to be add
             status: "DRAFT",
             clientId: selectedClient._id,
             sellerBusinessName: businessProfile?.businessName || "",
             sellerVatStatus: vatStatus,
-            invoiceType: "SALES", // need to have a dynamic value
+            invoiceType: invoice.invoiceType, // need to have a dynamic value
             items: processedItems,
             buyerName: selectedClient.name || "",
           }),
@@ -127,6 +129,30 @@ function ActionsCard() {
         <CardTitle>Actions</CardTitle>
       </CardHeader>
       <CardContent>
+        <div className="space-y-2 mb-2">
+          <Label className="text-sm text-muted-foreground">Invoice Type</Label>
+          <Select
+            defaultValue={invoice.selectedCurrency}
+            onValueChange={(value) =>
+              invoice.setInvoiceType(value as INVOiCETYPE)
+            }
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={"Select Invoice Type"}>
+                <span>{invoice.invoiceType}</span>
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {INVOICE_TYPES.map((type) => (
+                <SelectItem key={type} value={type}>
+                  <span className="flex items-center gap-2">
+                    <span>{type}</span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <div className="space-y-2">
           <Label className="text-sm text-muted-foreground">
             Item/Service Selection

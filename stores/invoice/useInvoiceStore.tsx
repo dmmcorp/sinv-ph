@@ -1,5 +1,5 @@
 import { Id } from "@/convex/_generated/dataModel";
-import { VATTYPE } from "@/lib/types";
+import { INVOiCETYPE, VATTYPE } from "@/lib/types";
 import { create } from "zustand";
 
 export type SelectedItemType = {
@@ -16,6 +16,7 @@ export type SelectedItemType = {
 //   price: number;
 
 interface InvoiceStoreType {
+  invoiceType: INVOiCETYPE;
   selectedCurrency: string;
   includeTax: boolean;
   includeDiscount: boolean;
@@ -32,6 +33,7 @@ interface InvoiceStoreType {
   toggleDiscount: () => void;
 
   setStep: (value: number) => void;
+  setInvoiceType: (value: INVOiCETYPE) => void;
   setDiscountValue: (value: string) => void;
   setIsPercentage: (value: boolean) => void;
 
@@ -43,6 +45,7 @@ interface InvoiceStoreType {
 }
 
 export const useInvoiceStore = create<InvoiceStoreType>((set) => ({
+  invoiceType: "SALES",
   selectedCurrency: "PHP",
   includeTax: false,
   includeDiscount: false,
@@ -53,7 +56,7 @@ export const useInvoiceStore = create<InvoiceStoreType>((set) => ({
   selectedItems: [],
 
   // ACTIONS
-
+  setInvoiceType: (value) => set({ invoiceType: value }),
   setCurrency: (value) => set({ selectedCurrency: value }),
   toggleTax: () => set((state) => ({ includeTax: !state.includeTax })),
   toggleDiscount: () =>

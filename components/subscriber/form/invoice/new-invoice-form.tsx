@@ -25,6 +25,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
   const total = useCalculateInvioceAmount();
 
   const {
+    invoiceType,
     selectedCurrency,
     includeTax,
     includeDiscount,
@@ -81,7 +82,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
           <h5>{formatedTin()}</h5>
           <h5>{businessProfile?.address}</h5>
         </div>
-        <h1>INVOICE</h1>
+        <h1> {invoiceType} INVOICE</h1>
       </div>
       <div className="space-y-8">
         <div className="flex justify-between">
