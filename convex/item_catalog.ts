@@ -1,12 +1,36 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, QueryCtx } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
+import { Id } from "./_generated/dataModel";
+
+const inferVatTypeFromSellerProfile = async (
+  ctx: QueryCtx,
+  businessProfileId: Id<"business_profile"> | undefined,
+): Promise<"VATABLE" | "VAT_EXEMPT"> => {
+
+  // meaning hindi nag onboarding
+  if (!businessProfileId) {
+    return "VAT_EXEMPT"
+  }
+
+  const userBusinessProfile = await ctx.db.get(businessProfileId)
+  if (!userBusinessProfile) {
+    return "VAT_EXEMPT"
+  }
+
+  // meaning freelancer or small business
+  if (userBusinessProfile.vatRegistration === false) {
+    return "VAT_EXEMPT"
+  }
+
+  // else VAT Registered Business
+  return "VATABLE"
+}
 
 export const createItem = mutation({
   args: {
     unitPrice: v.number(),
     description: v.string(), // goods or nature of service
-
     vatType: v.optional(
       v.union(
         v.literal("VATABLE"), // Subject to 12% VAT
@@ -15,8 +39,6 @@ export const createItem = mutation({
         // v.literal("NON_VAT") // Not subject to VAT
       ),
     )
-
-
     // category: v.optional(
     //   v.union(
     //     v.literal("GOODS"),
@@ -38,40 +60,140 @@ export const createItem = mutation({
       throw new ConvexError("Not authenticated!");
     }
 
-    // if vat type is existing in the arguments then .....
-    if (vatType) {
-      const id = await ctx.db.insert("itemCatalog", {
-        userId,
-        description,
-        unitPrice,
-        vatType,
-        isActive: true,
-      });
-
-      if (id) {
-        const newItem = await ctx.db.get(id);
-        if (!newItem) {
-          return {
-            messeage: "Can't Find the newly created item id in the db.",
-            newItem: null,
-          };
-        }
-        return { messeage: "Success", newItem: newItem };
-      }
-    } else {
-      // else ... for freelancer / small business
-      // if the user has not finished onboarding PARA MAKUHA YUNG VAT TYPE BUMASE SA BUSINESS TYPE
+    // unit price and description validation
+    if (unitPrice < 0) {
+      throw new ConvexError("Value cannot be negative.")
     }
 
-    let businessType = "Freelancer/Individual"; // default if the user is skip the onboarding process
+    if (!description.trim()) {
+      throw new ConvexError("Description is required.")
+    }
 
     const user = await ctx.db.get(userId);
-    if (user && user.businessProfileId) {
-      const userBusinessProfile = await ctx.db.get(user.businessProfileId);
-      if (userBusinessProfile) {
-        businessType = userBusinessProfile?.businessType;
-      }
+    if (!user) {
+      throw new ConvexError("No user found.")
     }
+
+    let inferredVatType = vatType
+    if (!inferredVatType) {
+      inferredVatType = await inferVatTypeFromSellerProfile(
+        ctx,
+        user.businessProfileId,
+      )
+    }
+
+    const businessProfile = user.businessProfileId
+      ? await ctx.db.get(user.businessProfileId)
+      : null
+
+    // user has not completed onboarding then he cant create vatable sales and zero rated sales
+    if (!user.businessProfileId && inferredVatType === "VATABLE") {
+      throw new ConvexError("Please complete onboarding to create a vatable item.")
+    }
+
+    // user has completed onboarding but they are a freelancer or small business that somehow bypassed the system to get an input of VATABLE
+    if (businessProfile && businessProfile.vatRegistration === false && (inferredVatType === "VATABLE" || inferredVatType === "ZERO_RATED")) {
+      throw new ConvexError(
+        "Your business is not VAT-registered; you cannot create a VATABLE item. Update your business profile or choose a different VAT type."
+      )
+    }
+
+    const itemId = await ctx.db.insert("itemCatalog", {
+      userId,
+      description,
+      unitPrice,
+      vatType: inferredVatType,
+      isActive: true,
+    });
+
+    if (itemId) {
+      const newItem = await ctx.db.get(itemId);
+      if (!newItem) {
+        return {
+          message: "Can't Find the newly created item id in the db.",
+          newItem: null,
+        };
+      }
+      return { message: "Success", newItem: newItem };
+    }
+
+
+    return { messeage: "Error Creating new item", newItem: null };
+
+    // return { message: "Failed to create an item." }
+
+    // if vat type is existing in the arguments then .....
+    // if (vatType) {
+    //   const id = await ctx.db.insert("itemCatalog", {
+    //     userId,
+    //     description,
+    //     unitPrice,
+    //     vatType,
+    //     isActive: true,
+    //   });
+
+    //   if (id) {
+    //     const newItem = await ctx.db.get(id);
+    //     if (!newItem) {
+    //       return {
+    //         messeage: "Can't Find the newly created item id in the db.",
+    //         newItem: null,
+    //       };
+    //     }
+    //     return { messeage: "Success", newItem: newItem };
+    //   }
+    // } 
+    // else {
+    //   // else ... for freelancer / small business
+    //   // if the user has not finished onboarding PARA MAKUHA YUNG VAT TYPE BUMASE SA BUSINESS TYPE
+    //   // let businessType = "Freelancer/Individual"; // default if the user is skip the onboarding process
+
+    //   // if user has not completed onboarding DEFAULT to Freelancer/Individual
+    //   if (!user.businessProfileId) {
+    //     const id = await ctx.db.insert("itemCatalog", {
+    //       userId,
+    //       description,
+    //       unitPrice,
+    //       vatType: "VAT_EXEMPT",
+    //       isActive: true,
+    //     });
+
+    //     if (id) {
+    //       const newItem = await ctx.db.get(id);
+    //       if (!newItem) {
+    //         return {
+    //           messeage: "Can't Find the newly created item id in the db.",
+    //           newItem: null,
+    //         };
+    //       }
+    //       return { messeage: "Success", newItem: newItem };
+    //     }
+    //   } else if (user && user.businessProfileId) {
+    //     const userBusinessProfile = await ctx.db.get(user.businessProfileId);
+    //     if (userBusinessProfile?.businessType === "Small Business") {
+    //       const id = await ctx.db.insert("itemCatalog", {
+    //         userId,
+    //         description,
+    //         unitPrice,
+    //         vatType: "VAT_EXEMPT",
+    //         isActive: true,
+    //       });
+
+    //       if (id) {
+    //         const newItem = await ctx.db.get(id);
+    //         if (!newItem) {
+    //           return {
+    //             messeage: "Can't Find the newly created item id in the db.",
+    //             newItem: null,
+    //           };
+    //         }
+    //         return { messeage: "Success", newItem: newItem };
+    //       }
+    //     }
+    //   }
+    // }
+
+
 
     // const id = await ctx.db.insert("itemCatalog", {
     //   userId,
@@ -88,8 +210,6 @@ export const createItem = mutation({
     //   }
     //   return { messeage: "Success", newItem: newItem };
     // }
-
-    return { messeage: "Error Creating new item", newItem: null };
   },
 });
 

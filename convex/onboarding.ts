@@ -22,7 +22,7 @@ export const board = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new ConvexError("No user found!");
 
-    const businessProfile = await ctx.db.insert("business_profile", {
+    const businessProfileId = await ctx.db.insert("business_profile", {
       address,
       businessName,
       businessType,
@@ -33,10 +33,11 @@ export const board = mutation({
       updatedAt: Math.floor(Date.now() / 1000), // unix timestamp today
     });
 
-    if (businessProfile)
+    if (businessProfileId)
       await ctx.db.patch(userId, {
         updatedAt: Math.floor(Date.now() / 1000), // unix timestamp today
         onboarding: true,
+        businessProfileId,
       });
   },
 });
