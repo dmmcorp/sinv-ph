@@ -42,7 +42,8 @@ export const getNextInvoiceNumber = query({
     const prefix =
       invoiceType === "SALES" ? "SI" : invoiceType === "SERVICE" ? "SV" : "CM";
 
-    return `${prefix}-${currentYear}-${nextSerialNumber.toString().padStart(5, "0")}`;
+    // return `${prefix}-${currentYear}-${nextSerialNumber.toString().padStart(5, "0")}`;
+    return `${prefix}-${nextSerialNumber.toString().padStart(8, "0")}`
   },
 });
 
@@ -195,9 +196,9 @@ export const createInvoice = mutation({
       }
     }
 
-    // if (!args.taxType) {
-    //   throw new ConvexError("A tax type is required for an invoice"); //nadadag 12/17/2025
-    // }
+    if (!taxType) {
+      throw new ConvexError("A tax type is required for an invoice"); //nadadag 12/17/2025
+    }
 
     if (!args.invoiceType) {
       throw new ConvexError(
@@ -263,7 +264,9 @@ export const createInvoice = mutation({
           ? "SV"
           : "CM";
 
-    const invoiceNumber = `${prefix}-${currentYear}-${serialNumber.toString().padStart(5, "0")}`;
+    // !! Changed to a more robust and bir compliant invoice numbering
+    // const invoiceNumber = `${prefix}-${currentYear}-${serialNumber.toString().padStart(5, "0")}`;
+    const invoiceNumber = `${prefix}-${serialNumber.toString().padStart(8, "0")}`
 
     const invoiceId = await ctx.db.insert("invoices", {
       // relationships

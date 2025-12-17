@@ -79,7 +79,7 @@ function TestCasesPage() {
         { unitPrice: 560, quantity: 1, vatType: "VATABLE" },
       ],
       taxType: "VAT",
-      specialDiscountType: "SC",
+      specialDiscountType: "SC", // senior citizen
     });
     console.log("TEST CASE 8: Multiple VATABLE items — SC / PWD", testCase8);
 
@@ -198,6 +198,46 @@ function TestCasesPage() {
       taxType: "NON_VAT",
     });
     console.log("TEST CASE 20 - NO DISCOUNT (CONTOL)", testCase20);
+
+    // TEST CASE 21 - ZERO RATED SALES
+    const testCase21 = calculateInvoiceAmounts({
+      items: [{ unitPrice: 100000, quantity: 1, vatType: "ZERO_RATED" }],
+      taxType: "ZERO_RATED",
+    });
+    console.log("TEST CASE 21: Zero-Rated Export Service", testCase21);
+
+    // TEST CASE 22 - MIXED SALES NON VAT AND VATABLE
+    const testCase22 = calculateInvoiceAmounts({
+      items: [
+        { unitPrice: 20000, quantity: 1, vatType: "VATABLE" },
+        { unitPrice: 50000, quantity: 1, vatType: "ZERO_RATED" },
+      ],
+      taxType: "MIXED",
+    });
+    console.log("TEST CASE 22: Mixed VATABLE + Zero-Rated", testCase22);
+
+    // TEST CASE 23 - MIXED WITH ZERO RATED SPECIAL DISCOUNT
+    // const testCase23 = calculateInvoiceAmounts({
+    //   items: [
+    //     { unitPrice: 20000, quantity: 1, vatType: "VATABLE" },
+    //     { unitPrice: 50000, quantity: 1, vatType: "ZERO_RATED" },
+    //   ],
+    //   taxType: "MIXED",
+    //   specialDiscountType: "SC",
+    // });
+    // console.log("TEST CASE 23: Mixed VATABLE + Zero-Rated", testCase23);
+
+    // TEST CASE 24 - MIXED WITH ZERO RATED REGULAR DISCOUNT
+    const testCase24 = calculateInvoiceAmounts({
+      items: [
+        { unitPrice: 20000, quantity: 1, vatType: "VATABLE" },
+        { unitPrice: 50000, quantity: 1, vatType: "ZERO_RATED" },
+      ],
+      taxType: "MIXED",
+      discountType: "PERCENT",
+      discountValue: 20,
+    });
+    console.log("TEST CASE 24: Mixed VATABLE + Zero-Rated", testCase24);
   }, []);
 
   return (
