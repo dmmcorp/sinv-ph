@@ -183,9 +183,9 @@ export const createInvoice = mutation({
       }
     }
 
-    // if (!args.taxType) {
-    //   throw new ConvexError("A tax type is required for an invoice"); //nadadag 12/17/2025
-    // }
+    if (!taxType) {
+      throw new ConvexError("A tax type is required for an invoice"); //nadadag 12/17/2025
+    }
 
     if (!args.invoiceType) {
       throw new ConvexError(

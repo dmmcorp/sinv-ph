@@ -44,7 +44,12 @@ export const calculateInvoiceAmounts = (args: {
     throw Error("You can't mix regular discount and special discount.");
   }
 
+
   for (const item of args.items) {
+    if (item.vatType === "ZERO_RATED" && args.specialDiscountType) {
+      throw new Error("SC/PWD discount not allowed on zero-rated sales");
+    }
+
     const itemTotal = item.unitPrice * item.quantity;
 
     switch (item.vatType) {
@@ -56,14 +61,17 @@ export const calculateInvoiceAmounts = (args: {
         break;
       case "ZERO_RATED":
         zeroRatedTotal += itemTotal;
-      case undefined:
-        noVatTypeTotal += itemTotal;
         break;
+      // case undefined:
+      //   noVatTypeTotal += itemTotal;
+      //   break;
       // case "NON_VAT":
       //   nonVatTotal += itemTotal;
       //   break;
     }
   }
+
+  console.log(vatablesTotal, vatExemptTotal, zeroRatedTotal, noVatTypeTotal)
 
   const grossTotal = round(
     vatablesTotal + vatExemptTotal + zeroRatedTotal + noVatTypeTotal
@@ -130,9 +138,9 @@ export const calculateInvoiceAmounts = (args: {
     // vat exempt na mapuounta after special discount
     vatExemptSales = round(
       vatableAfterRegularDisc -
-        scDiscountOnVatable +
-        (exemptAfterRegularDisc - scDiscountOnExempt) +
-        (noVatTypeAfterRegularDisc - scDiscountOnNoVat)
+      scDiscountOnVatable +
+      (exemptAfterRegularDisc - scDiscountOnExempt) +
+      (noVatTypeAfterRegularDisc - scDiscountOnNoVat)
     );
     zeroRatedSales = round(zeroRatedAfterRegularDisc - scDiscountOnZeroRated);
     // nonVatSales = 0;
@@ -141,7 +149,7 @@ export const calculateInvoiceAmounts = (args: {
     vatableSales = vatableAfterRegularDisc;
     vatAmount = round(vatableSales * VAT_RATE);
     vatExemptSales = exemptAfterRegularDisc;
-    zeroRatedSales = zeroRatedAfterRegularDisc;
+    zeroRatedSales = zeroRatedAfterRegularDisc; // no vat rate applied
     noVatTypeSales = noVatTypeAfterRegularDisc;
   }
 

@@ -86,6 +86,8 @@ export const createItem = mutation({
       ? await ctx.db.get(user.businessProfileId)
       : null
 
+    // freelancer = !complete onboarding
+
     // user has not completed onboarding then he cant create vatable sales and zero rated sales
     if (!user.businessProfileId && inferredVatType === "VATABLE") {
       throw new ConvexError("Please complete onboarding to create a vatable item.")
