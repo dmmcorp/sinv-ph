@@ -100,7 +100,7 @@ export const createItem = mutation({
 
     const itemId = await ctx.db.insert("itemCatalog", {
       userId,
-      description,
+      description: description.trim(),
       unitPrice,
       vatType: inferredVatType,
       isActive: true,
@@ -213,7 +213,7 @@ export const createItem = mutation({
   },
 });
 
-export const getAllItem = query({
+export const getAllItems = query({
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
@@ -256,3 +256,75 @@ export const changeItemCatalogStatus = mutation({
     });
   },
 });
+
+export const updateItem = mutation({
+  args: {
+    itemCatalogId: v.id("itemCatalog"),
+    unitPrice: v.number(),
+    description: v.string(), // goods or nature of service
+    vatType: v.union(
+      v.literal("VATABLE"), // Subject to 12% VAT
+      v.literal("VAT_EXEMPT"), // Legally exempt (fresh goods, books, etc.)
+      v.literal("ZERO_RATED") // 0% VAT (exports)
+      // v.literal("NON_VAT") // Not subject to VAT
+    ),
+  },
+  handler: async (ctx, {
+    description,
+    itemCatalogId,
+    unitPrice,
+    vatType,
+  }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new ConvexError("Not authenticated!");
+    }
+
+    const user = await ctx.db.get(userId)
+    if (!user) {
+      throw new ConvexError("No user found.")
+    }
+
+    const businessProfile = user.businessProfileId ?
+      await ctx.db.get(user.businessProfileId)
+      : null
+
+    // unit price and description validation
+    if (unitPrice < 0) {
+      throw new ConvexError("Value cannot be negative.")
+    }
+
+    if (!description.trim()) {
+      throw new ConvexError("Description is required.")
+    }
+
+    // does item exist
+    const itemCatalog = await ctx.db.get(itemCatalogId);
+    if (!itemCatalog) {
+      throw new ConvexError("Error: Item not found");
+    }
+
+    // check ownership if it is their item or not
+    if (itemCatalog.userId !== userId) {
+      throw new ConvexError("Not authorized to modify this item");
+    }
+
+    let inferredVatType = vatType
+    // if user is trying to update the item to vatable or zero rated but they have not completed onboarding.
+    if ((inferredVatType === "VATABLE" || inferredVatType === "ZERO_RATED") && !user.businessProfileId) {
+      throw new ConvexError(`Cant update this item to ${inferredVatType}, you have not completed onboarding yet.`)
+    }
+
+    // if user is trying to update the item to vatable and they have completed onboarding BUT is freelancer or small business.
+    if (businessProfile && businessProfile.vatRegistration === false && (inferredVatType === "VATABLE" || inferredVatType === "ZERO_RATED")) {
+      throw new ConvexError(`Cant update this item to ${inferredVatType}. Only VAT-Registered Businesses can do this.`)
+    }
+
+    return await ctx.db.patch(itemCatalog._id, {
+      description: description.trim(),
+      unitPrice,
+      vatType: inferredVatType,
+    })
+
+  }
+})

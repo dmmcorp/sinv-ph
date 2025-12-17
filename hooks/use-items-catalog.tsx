@@ -10,7 +10,7 @@ import { toast } from "sonner";
 export const useItemsCatalog = () => {
   const { itemsCatalog } = useItemCatalogStore();
   const createItem = useMutation(api.item_catalog.createItem);
-  const items = useQuery(api.item_catalog.getAllItem);
+  const items = useQuery(api.item_catalog.getAllItems);
   const setItemCatalog = useItemCatalogStore((s) => s.setItemCatalog);
 
   useEffect(() => {
