@@ -355,3 +355,48 @@ export const getSpecificInvoiceFromClient = query({
       .collect();
   },
 });
+
+export const handleInvoiceStatus = mutation({
+  args: {
+    invoiceId: v.id("invoices"),
+    status: v.union(
+      v.literal("DRAFT"),
+      v.literal("SENT"),
+      v.literal("PAID"),
+      v.literal("UNPAID")
+    ),
+  },
+  handler: async (ctx, {
+    invoiceId,
+    status,
+  }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new ConvexError("Not authenticated!");
+    }
+
+    const invoice = await ctx.db.get(invoiceId)
+    if (!invoice) {
+      throw new ConvexError("Invoice not found");
+    }
+
+    if (invoice.userId !== userId) {
+      throw new ConvexError("You are unauthorized to modify this invoice.")
+    }
+
+    // const client = await ctx.db.get(clientId);
+    // if (!client) {
+    //   throw new ConvexError("Client not found!");
+    // }
+
+    // // if this loggedin user is not authorized to modify this client then throw an error
+    // if (client.userId !== userId) {
+    //   throw new ConvexError("You are unauthorized to modify this invoice.")
+    // }
+
+    return await ctx.db.patch(invoiceId, {
+      status,
+      updatedAt: Math.floor(Date.now() / 1000), // unix timestamp today
+    })
+  }
+})
