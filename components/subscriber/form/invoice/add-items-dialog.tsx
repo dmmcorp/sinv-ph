@@ -32,6 +32,16 @@ import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
 import { useItemsCatalog } from "@/hooks/use-items-catalog";
 import { Id } from "@/convex/_generated/dataModel";
 import { toast } from "sonner";
+import useBusinessProfileStore from "@/stores/business-profile/useBusinessProfileStore";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { VATTYPE, VATTYPE_UNDEFINED } from "@/lib/types";
+import { TAX_TYPES } from "@/lib/constants/TAX_TYPES";
 
 export type Item = {
   _id: Id<"itemCatalog">;
@@ -40,6 +50,8 @@ export type Item = {
   vatType: "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED";
 };
 
+const VAT = ["VAT_EXEMPT", "ZERO_RATED", "MIXED"];
+
 export function AddItemsDialog() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [step, setStep] = useState(0);
@@ -47,9 +59,10 @@ export function AddItemsDialog() {
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [item, setItem] = useState<Item | undefined>();
+  const [vatType, setVatType] = useState<VATTYPE_UNDEFINED>(undefined);
   const { itemsCatalog, loading, addItemToDB } = useItemsCatalog();
   const [description, setDescription] = useState("");
-
+  const { businessProfile } = useBusinessProfileStore();
   const [price, setPrice] = useState(0);
   const { selectedItems, addItem, updateItemQuantity } = useInvoiceStore();
 
@@ -87,7 +100,7 @@ export function AddItemsDialog() {
       //step 3 - display it to the list in the ui
 
       //add item to the db
-      const result = await addItemToDB(description, price);
+      const result = await addItemToDB(description, price, vatType);
 
       if (!result) {
         toast.error("Error: result not found");
@@ -97,7 +110,7 @@ export function AddItemsDialog() {
         toast.error("Error: " + result.newItem);
         return;
       }
-      console.log("result:", result.newItem);
+
       const curItem = {
         _id: result.newItem._id,
         description: result.newItem.description,
@@ -258,6 +271,32 @@ export function AddItemsDialog() {
                   placeholder="Enter custom price"
                 />
               </div>
+              {businessProfile?.businessType === "VAT-Registered Business" && (
+                <div className="space-y-2 mb-2">
+                  <Label className="text-sm text-muted-foreground">Vat</Label>
+                  <Select
+                    defaultValue={vatType}
+                    onValueChange={(value) => setVatType(value as VATTYPE)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue>
+                        <span className="flex items-center gap-2">
+                          <span>{vatType}</span>
+                        </span>
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {VAT.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          <span className="flex items-center gap-2">
+                            <span>{type}</span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               {/* <div className="space-y-2 mb-2">
                 <Label className="text-sm text-muted-foreground">
                   Vat

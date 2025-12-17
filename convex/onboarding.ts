@@ -4,7 +4,8 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const board = mutation({
   args: {
-    businessName: v.string(),
+    businessName: v.optional(v.string()), // brand name optional lang
+    sellerName: v.string(), // eto yung name na nakaregister sa bir if bir registered
     tin: v.optional(v.string()),
     address: v.string(),
     logoUrl: v.string(),
@@ -17,7 +18,15 @@ export const board = mutation({
   },
   handler: async (
     ctx,
-    { address, businessName, logoUrl, tin, businessType, vatRegistration }
+    {
+      address,
+      businessName,
+      sellerName,
+      logoUrl,
+      tin,
+      businessType,
+      vatRegistration,
+    }
   ) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new ConvexError("No user found!");
@@ -25,6 +34,7 @@ export const board = mutation({
     const businessProfile = await ctx.db.insert("business_profile", {
       address,
       businessName,
+      sellerName,
       businessType,
       vatRegistration,
       logoUrl,

@@ -138,22 +138,24 @@ function ActionsCard() {
             </SelectContent>
           </Select>
         </div>
+
         <div className="space-y-2">
           {/* Tax Switch */}
-          <div className="flex items-center justify-between">
-            <Label
-              htmlFor="tax-switch"
-              className="text-sm text-muted-foreground"
-            >
-              Include Tax
-            </Label>
-            <Switch
-              id="tax-switch"
-              checked={includeTax}
-              onCheckedChange={toggleTax}
-            />
-          </div>
-
+          {businessProfile?.businessType === "VAT-Registered Business" && (
+            <div className="flex items-center justify-between">
+              <Label
+                htmlFor="tax-switch"
+                className="text-sm text-muted-foreground"
+              >
+                Include Tax
+              </Label>
+              <Switch
+                id="tax-switch"
+                checked={includeTax}
+                onCheckedChange={toggleTax}
+              />
+            </div>
+          )}
           {/* Discount Switch */}
           <div className="flex items-center justify-between">
             <Label
