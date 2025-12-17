@@ -13,27 +13,57 @@ export const createItem = mutation({
         v.literal("VAT_EXEMPT"), // Legally exempt (fresh goods, books, etc.)
         v.literal("ZERO_RATED") // 0% VAT (exports)
         // v.literal("NON_VAT") // Not subject to VAT
-      )
-    ),
+      ),
+    )
 
-    category: v.optional(
-      v.union(
-        v.literal("GOODS"),
-        v.literal("SERVICE"),
-        v.literal("PROFESSIONAL_FEE"),
-        v.literal("VEGETABLES"),
-        v.literal("FRUITS"),
-        v.literal("OTHER")
-      )
-    ),
+
+    // category: v.optional(
+    //   v.union(
+    //     v.literal("GOODS"),
+    //     v.literal("SERVICE"),
+    //     v.literal("PROFESSIONAL_FEE"),
+    //     v.literal("VEGETABLES"),
+    //     v.literal("FRUITS"),
+    //     v.literal("OTHER")
+    //   )
+    // ),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, {
+    description,
+    unitPrice,
+    vatType,
+  }) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
       throw new ConvexError("Not authenticated!");
     }
 
-    let businessType = "Freelancer/Individual"; //default if the user is skip the onboarding process
+    // if vat type is existing in the arguments then .....
+    if (vatType) {
+      const id = await ctx.db.insert("itemCatalog", {
+        userId,
+        description,
+        unitPrice,
+        vatType,
+        isActive: true,
+      });
+
+      if (id) {
+        const newItem = await ctx.db.get(id);
+        if (!newItem) {
+          return {
+            messeage: "Can't Find the newly created item id in the db.",
+            newItem: null,
+          };
+        }
+        return { messeage: "Success", newItem: newItem };
+      }
+    } else {
+      // else ... for freelancer / small business
+      // if the user has not finished onboarding PARA MAKUHA YUNG VAT TYPE BUMASE SA BUSINESS TYPE
+    }
+
+    let businessType = "Freelancer/Individual"; // default if the user is skip the onboarding process
 
     const user = await ctx.db.get(userId);
     if (user && user.businessProfileId) {
@@ -42,22 +72,22 @@ export const createItem = mutation({
         businessType = userBusinessProfile?.businessType;
       }
     }
-    const id = await ctx.db.insert("itemCatalog", {
-      userId,
-      isActive: true,
-      ...args,
-    });
 
-    if (id) {
-      const newItem = await ctx.db.get(id);
-      if (!newItem) {
-        return {
-          messeage: "Can't Find the newly created item id in the db.",
-          newItem: null,
-        };
-      }
-      return { messeage: "Success", newItem: newItem };
-    }
+    // const id = await ctx.db.insert("itemCatalog", {
+    //   userId,
+    //   isActive: true,
+    // });
+
+    // if (id) {
+    //   const newItem = await ctx.db.get(id);
+    //   if (!newItem) {
+    //     return {
+    //       messeage: "Can't Find the newly created item id in the db.",
+    //       newItem: null,
+    //     };
+    //   }
+    //   return { messeage: "Success", newItem: newItem };
+    // }
 
     return { messeage: "Error Creating new item", newItem: null };
   },

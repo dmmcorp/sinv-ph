@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { api } from "@/convex/_generated/api";
-import { VATTYPE } from "@/lib/types";
+import { VATTYPE_UNDEFINED } from "@/lib/types";
 import useItemCatalogStore from "@/stores/items/useItemsCatalogStore";
 import { useMutation, useQuery } from "convex/react";
 import { useEffect } from "react";
@@ -20,7 +20,7 @@ export const useItemsCatalog = () => {
   const addItemToDB = async (
     description: string,
     unitPrice: number,
-    vatType: VATTYPE
+    vatType?: VATTYPE_UNDEFINED
   ) => {
     try {
       const item = await createItem({

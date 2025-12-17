@@ -7,7 +7,7 @@ export type SelectedItemType = {
   description: string;
   quantity: number;
   price: number;
-  vatType?: VATTYPE;
+  vatType: VATTYPE;
 };
 
 //  id: number;

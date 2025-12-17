@@ -37,7 +37,7 @@ export type Item = {
   _id: Id<"itemCatalog">;
   unitPrice: number;
   description: string;
-  vatType: "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED" | undefined;
+  vatType: "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED";
 };
 
 export function AddItemsDialog() {
