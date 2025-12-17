@@ -1,6 +1,7 @@
 "use client";
 
 import { useHasUserBoarded } from "@/hooks/use-has-user-boarded";
+import { useOnboardingStore } from "@/stores/onboarding/useOnboardingStore";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -9,6 +10,7 @@ export const OnboardingGuard = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const { justCompleted, setJustCompleted } = useOnboardingStore();
   const { hasUserBoarded, isLoading } = useHasUserBoarded();
   const pathname = usePathname();
   const router = useRouter();
@@ -19,12 +21,27 @@ export const OnboardingGuard = ({
       if (hasUserBoarded === false && pathname !== "/onboarding") {
         router.push("/onboarding");
       }
+      console.log(justCompleted);
+
+      //User that just submitted the onboarding information
+      if (
+        hasUserBoarded === true &&
+        pathname === "/onboarding" &&
+        justCompleted
+      ) {
+        router.push("/onboarding/success");
+      }
+      // Not a fresh acount
       // If user has boarded and on onboarding page, redirect to home
-      if (hasUserBoarded === true && pathname === "/onboarding") {
+      if (
+        hasUserBoarded === true &&
+        pathname === "/onboarding" &&
+        !justCompleted
+      ) {
         router.push("/subscriber");
       }
     }
-  }, [hasUserBoarded, isLoading, pathname, router]);
+  }, [justCompleted, hasUserBoarded, isLoading, pathname, router]);
 
   if (isLoading || (hasUserBoarded === false && pathname !== "/onboarding")) {
     return <div>Loading...</div>; // Or your loading component

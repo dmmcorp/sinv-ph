@@ -1,0 +1,1 @@
+export const INVOICE_TYPES = ["SALES", "SERVICE", "COMMERCIAL"];

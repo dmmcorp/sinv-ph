@@ -71,7 +71,7 @@ export default defineSchema({
 
     // sellers (store pa rin, because as per BIR old invoices should remain the same business name even if that specific business changed its name, address or tin already.)
     sellerBusinessName: v.optional(v.string()), //nadadag 12/17/2025
-    selerName: v.string(), //nadadag 12/17/2025
+    sellerName: v.string(), //nadadag 12/17/2025 //fix spelling 12/18/2025
     sellerTin: v.optional(v.string()),
     sellerAddress: v.optional(v.string()),
     sellerVatStatus: v.union(v.literal("VAT"), v.literal("NON_VAT")),

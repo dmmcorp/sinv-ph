@@ -80,7 +80,7 @@ export const createInvoice = mutation({
     // vat if and only if all items are VATABLE
     // vat_exempt if and only if all items are VAT_EXEMPT
     // zero_rated if and only if all items are ZERO_RATED
-    // mixed if and only if the items are VATABLE with VAT_EXEMPT or VATABLE with ZERO_RATED or VAT_EXEMPT with ZERO_RATED 
+    // mixed if and only if the items are VATABLE with VAT_EXEMPT or VATABLE with ZERO_RATED or VAT_EXEMPT with ZERO_RATED
     // taxType: v.optional(
     //   v.union(
     //     v.literal("NON_VAT"),
@@ -153,34 +153,46 @@ export const createInvoice = mutation({
       throw new ConvexError("An invoice must have at least one item.");
     }
 
-    const businessProfile = user.businessProfileId ?
-      await ctx.db.get(user.businessProfileId)
-      : null
-    const isSellerVatRegistered = Boolean(businessProfile && businessProfile.vatRegistration)
+    const businessProfile = user.businessProfileId
+      ? await ctx.db.get(user.businessProfileId)
+      : null;
+    const isSellerVatRegistered = Boolean(
+      businessProfile && businessProfile.vatRegistration
+    );
 
-    const itemTypes = new Set(args.items.map(i => i.vatType))
-    let taxType: TaxType
+    const itemTypes = new Set(args.items.map((i) => i.vatType));
+    let taxType: TaxType;
     for (const item of args.items) {
       // normal checks
-      if (item.unitPrice < 0) throw new ConvexError("Price cannot be negative.")
-      if (item.quantity <= 0) throw new ConvexError("Quantity cannot be less than 0")
-      if (!item.description.trim()) throw new ConvexError("Description cannot be empty on an item")
+      if (item.unitPrice < 0)
+        throw new ConvexError("Price cannot be negative.");
+      if (item.quantity <= 0)
+        throw new ConvexError("Quantity cannot be less than 0");
+      if (!item.description.trim())
+        throw new ConvexError("Description cannot be empty on an item");
     }
 
     if (!isSellerVatRegistered) {
       // if seller is not vat-registered they cant create vat or zero-rated sales (ITEM-BASED)
       if (itemTypes.has("VATABLE") || itemTypes.has("ZERO_RATED")) {
-        throw new ConvexError("Seller is not VAT-registered; items cannot be VATABLE or ZERO_RATED.")
+        throw new ConvexError(
+          "Seller is not VAT-registered; items cannot be VATABLE or ZERO_RATED."
+        );
       }
 
-      taxType = "NON_VAT"
+      taxType = "NON_VAT";
     } else {
       if (itemTypes.size === 1) {
-        const only = [...itemTypes][0] // just get the value of first element dahil sure naman na tayo na iisa lang ang item type dahil sa code na itemTypes.size === 1
-        taxType = only === "VATABLE" ? "VAT" : only === "VAT_EXEMPT" ? "VAT_EXEMPT" : "ZERO_RATED"
+        const only = [...itemTypes][0]; // just get the value of first element dahil sure naman na tayo na iisa lang ang item type dahil sa code na itemTypes.size === 1
+        taxType =
+          only === "VATABLE"
+            ? "VAT"
+            : only === "VAT_EXEMPT"
+              ? "VAT_EXEMPT"
+              : "ZERO_RATED";
       } else {
         // else mixed na kaagad since type size is 2 or many
-        taxType = "MIXED"
+        taxType = "MIXED";
       }
     }
 
@@ -263,7 +275,7 @@ export const createInvoice = mutation({
 
       // seller (subscriber infos)
       sellerBusinessName: args.sellerBusinessName,
-      selerName: args.sellerName, //nadadag 12/17/2025
+      sellerName: args.sellerName, //nadadag 12/17/2025 //fix spelling 12/18/2025
       sellerTin: args.sellerTin,
       sellerAddress: args.sellerAddress,
       sellerVatStatus: args.sellerVatStatus,
