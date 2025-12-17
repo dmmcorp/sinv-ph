@@ -2,6 +2,7 @@ import { calculateInvoiceAmounts } from "@/../../lib/utils";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { TaxType } from "../lib/constants/TAX_TYPES";
 
 // COUNTER SYNTAX:
 // INVOCE - TYPE OF INVOICE - BUSINESS ID - YEAR
@@ -70,18 +71,25 @@ export const createInvoice = mutation({
     buyerTin: v.optional(v.string()),
     buyerAddress: v.optional(v.string()),
 
-    // tax infos
-    //freelancer // non-vat
-    taxType: v.optional(
-      v.union(
-        v.literal("NON_VAT"),
-        v.literal("VAT"),
-        v.literal("VAT_EXEMPT"),
-        v.literal("ZERO_RATED"),
-        v.literal("MIXED"),
-        v.literal("PAYMENT_RECEIPT")
-      )
-    ),
+    // tax infos - this is auto generated here in the backend. Will depend on the items
+    // freelancer = non_vat
+    // small business = non_vat
+
+    // vat-registered businesses
+    // vat if and only if all items are VATABLE
+    // vat_exempt if and only if all items are VAT_EXEMPT
+    // zero_rated if and only if all items are ZERO_RATED
+    // mixed if and only if the items are VATABLE with VAT_EXEMPT or VATABLE with ZERO_RATED or VAT_EXEMPT with ZERO_RATED 
+    // taxType: v.optional(
+    //   v.union(
+    //     v.literal("NON_VAT"),
+    //     v.literal("VAT"),
+    //     v.literal("VAT_EXEMPT"),
+    //     v.literal("ZERO_RATED"),
+    //     v.literal("MIXED"),
+    //     v.literal("PAYMENT_RECEIPT")
+    //   )
+    // ),
 
     // discounts
     discountType: v.optional(v.union(v.literal("PERCENT"), v.literal("FIXED"))),
@@ -131,7 +139,6 @@ export const createInvoice = mutation({
     }
 
     const user = await ctx.db.get(userId);
-
     if (!user) {
       throw new ConvexError("User not found");
     }
@@ -141,8 +148,39 @@ export const createInvoice = mutation({
       throw new ConvexError("Client not found or unauthorized");
     }
 
-    if (!args.items) {
-      throw new ConvexError("An invoice should have atleast 1 item to create.");
+    if (!args.items || args.items.length === 0) {
+      throw new ConvexError("An invoice must have at least one item.");
+    }
+
+    const businessProfile = user.businessProfileId ?
+      await ctx.db.get(user.businessProfileId)
+      : null
+    const isSellerVatRegistered = Boolean(businessProfile && businessProfile.vatRegistration)
+
+    const itemTypes = new Set(args.items.map(i => i.vatType))
+    let taxType: TaxType
+    for (const item of args.items) {
+      // normal checks
+      if (item.unitPrice < 0) throw new ConvexError("Price cannot be negative.")
+      if (item.quantity <= 0) throw new ConvexError("Quantity cannot be less than 0")
+      if (!item.description.trim()) throw new ConvexError("Description cannot be empty on an item")
+    }
+
+    if (!isSellerVatRegistered) {
+      // if seller is not vat-registered they cant create vat or zero-rated sales (ITEM-BASED)
+      if (itemTypes.has("VATABLE") || itemTypes.has("ZERO_RATED")) {
+        throw new ConvexError("Seller is not VAT-registered; items cannot be VATABLE or ZERO_RATED.")
+      }
+
+      taxType = "NON_VAT"
+    } else {
+      if (itemTypes.size === 1) {
+        const only = [...itemTypes][0] // just get the value of first element dahil sure naman na tayo na iisa lang ang item type dahil sa code na itemTypes.size === 1
+        taxType = only === "VATABLE" ? "VAT" : only === "VAT_EXEMPT" ? "VAT_EXEMPT" : "ZERO_RATED"
+      } else {
+        // else mixed na kaagad since type size is 2 or many
+        taxType = "MIXED"
+      }
     }
 
     // if (!args.taxType) {
@@ -175,7 +213,7 @@ export const createInvoice = mutation({
 
     const amounts = calculateInvoiceAmounts({
       items: args.items,
-      taxType: args.taxType,
+      taxType,
       discountType: args.discountType,
       discountValue: args.discountValue,
       specialDiscountType: args.specialDiscountType,
@@ -232,7 +270,7 @@ export const createInvoice = mutation({
       invoiceNumber: invoiceNumber,
 
       // if vat, nonvat, etc.
-      taxType: args.taxType,
+      taxType,
 
       // buyer infos
       buyerName: args.buyerName,
