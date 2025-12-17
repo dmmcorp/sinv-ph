@@ -80,7 +80,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
     <div className=" border-2 shadow-lg p-10 rounded-2xl space-y-10 bg-white">
       <div className="flex justify-between">
         <div className="">
-          {businessProfile && (
+          {businessProfile && businessProfile.logoUrl !== "" && (
             <Image
               width={70}
               height={70}

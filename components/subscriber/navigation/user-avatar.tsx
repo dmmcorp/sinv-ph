@@ -10,7 +10,6 @@ import {
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { LogOut } from "lucide-react";
-import React from "react";
 
 function UserAvatar() {
   const { user, isLoading } = useCurrentUser();
@@ -30,11 +29,11 @@ function UserAvatar() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-56 bg-brand-black border-gray-800"
+        className="w-56 bg-white border-gray-800"
       >
         <DropdownMenuItem
           onClick={async () => await signOut()}
-          className="text-gray-300 focus:text-white focus:bg-gray-800"
+          className="text-gray-600 focus:text-white focus:bg-accent"
         >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>

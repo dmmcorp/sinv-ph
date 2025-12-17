@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { api } from "@/convex/_generated/api";
 import { formatTIN } from "@/lib/utils";
+import { useOnboardingStore } from "@/stores/onboarding/useOnboardingStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "convex/react";
 import {
@@ -105,6 +106,8 @@ export const OnboardingForm = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const board = useMutation(api.onboarding.board);
   const router = useRouter();
+  const setJustCompleted = useOnboardingStore((s) => s.setJustCompleted);
+
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const skip = useMutation(api.onboarding.skip);
   const form = useForm<z.infer<typeof onboardingFormSchema>>({
@@ -208,7 +211,8 @@ export const OnboardingForm = () => {
         vatRegistration:
           selectedBType !== "VAT-Registered Business" ? false : true, // not sure if pag small business ay dapat registered na agad
       });
-
+      setJustCompleted(true);
+      router.push("/onboarding/success");
       // clean up preview url blob
       if (logoPreview) {
         URL.revokeObjectURL(logoPreview);
@@ -219,8 +223,6 @@ export const OnboardingForm = () => {
       toast.error("Failed to create business profile");
       console.error(error);
     } finally {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
       setIsSubmitting(true);
     }
   }

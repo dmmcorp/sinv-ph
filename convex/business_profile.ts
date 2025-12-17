@@ -13,12 +13,18 @@ export const getBusinessProfile = query({
     if (!businessProfile) {
       return null;
     }
-    const logoUrl = await ctx.storage.getUrl(
-      businessProfile.logoUrl as Id<"_storage">
-    );
+
+    if (businessProfile.logoUrl) {
+      const logoUrl = await ctx.storage.getUrl(
+        businessProfile.logoUrl as Id<"_storage">
+      );
+      return {
+        ...businessProfile,
+        logoUrl: logoUrl === null ? "" : logoUrl,
+      };
+    }
     return {
       ...businessProfile,
-      logoUrl: logoUrl === null ? "" : logoUrl,
     };
   },
 });

@@ -87,7 +87,7 @@ export function AddItemsDialog() {
       //step 3 - display it to the list in the ui
 
       //add item to the db
-      const result = await addItemToDB(description, price, undefined);
+      const result = await addItemToDB(description, price);
 
       if (!result) {
         toast.error("Error: result not found");

@@ -70,6 +70,7 @@ export const createInvoice = mutation({
     buyerAddress: v.optional(v.string()),
 
     // tax infos
+    //freelancer // non-vat
     taxType: v.optional(
       v.union(
         v.literal("NON_VAT"),
