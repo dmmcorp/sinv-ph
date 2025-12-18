@@ -65,7 +65,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
     return;
   };
   return (
-    <div className=" border-2 shadow-lg p-10 rounded-2xl space-y-10 bg-white">
+    <div className="relative flex flex-col min-h-185  lg:min-h-312 mx-auto border-2 shadow-lg p-4 lg:p-10 rounded-2xl space-y-5 lg:space-y-10 bg-white">
       <div className="flex justify-between">
         <div className="">
           {businessProfile && businessProfile.logoUrl !== "" && (
@@ -74,20 +74,30 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
               height={70}
               src={businessProfile?.logoUrl}
               alt={businessProfile?.businessName ?? ""}
-              className="object-contain"
+              className="object-contain size-10 sm:size-12.5 md:size-15 lg:size-17.5"
             />
           )}
-          <h3 className="text-lg font-bold">{businessProfile?.businessName}</h3>
-          <p>{businessProfile?.sellerName}</p>
-          <h5>{formatedTin()}</h5>
-          <h5>{businessProfile?.address}</h5>
+          <h3 className="text-xs lg:text-lg font-bold mt-1 sm:mt-3">
+            {businessProfile?.businessName}
+          </h3>
+          <p className="text-[0.6rem] sm:text-xs lg:text-lg">
+            {businessProfile?.sellerName}
+          </p>
+          <h5 className="text-[0.6rem] sm:text-xs lg:text-lg">
+            {formatedTin()}
+          </h5>
+          <h5 className="text-[0.6rem] sm:text-xs lg:text-lg">
+            {businessProfile?.address}
+          </h5>
         </div>
-        <h1> {invoiceType} INVOICE</h1>
+        <h1 className="text-lg lg:text-2xl"> {invoiceType} INVOICE</h1>
       </div>
-      <div className="space-y-8">
+      <div className="flex-1 space-y-4 lg:space-y-8 ">
         <div className="flex justify-between">
           <div className="">
-            <h3 className="text-md font-bold">Bill To</h3>
+            <h3 className="text-[0.6rem] sm:text-xs lgtext-base font-normal">
+              Bill To
+            </h3>
             <div className="">
               <FormField
                 control={form.control}
@@ -97,7 +107,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                     {/* <FormLabel>Client Name</FormLabel> */}
                     <FormControl>
                       <Input
-                        className="border-none font-semibold shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
+                        className="border-none font-semibold text-[0.6rem] sm:text-xs lg:text-lg shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
                         placeholder="Enter client name"
                         disabled
                         {...field}
@@ -118,7 +128,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                     <FormControl>
                       <Input
                         disabled
-                        className="border-none shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
+                        className="border-none shadow-none text-[0.5rem] sm:text-xs lg:text-lg focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
                         placeholder="Enter address"
                         {...field}
                       />
@@ -130,9 +140,11 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
             </div>
           </div>
           <div className="">
-            <h3 className="text-md font-bold opacity-0">1</h3>
-            <div className="flex items-center gap-x-2">
-              Invoice No.
+            <h3 className=" font-bold opacity-0 text-[0.6rem] sm:text-xs lg:text-lg">
+              1
+            </h3>
+            <div className="flex items-center justify-end gap-x-2 text-[0.6rem] sm:text-xs lg:text-lg text-nowrap">
+              <h3 className="text-nowrap">Invoice No.</h3>
               <FormField
                 control={form.control}
                 name="invoiceNo"
@@ -141,7 +153,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                     {/* <FormLabel>Invoice Number</FormLabel> */}
                     <FormControl>
                       <Input
-                        className="border-none text-base shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
+                        className="border-none max-w-14 sm:max-w-fit  text-[0.5rem] sm:text-xs lg:text-lg shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
                         placeholder="0001"
                         disabled
                         {...field}
@@ -152,7 +164,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                 )}
               />
             </div>
-            <div className="flex items-center gap-x-2">
+            <div className="flex items-center gap-x-2 text-[0.6rem] sm:text-xs lg:text-lg">
               Date Issued:
               <FormField
                 control={form.control}
@@ -162,7 +174,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                     {/* <FormLabel>Date</FormLabel> */}
                     <FormControl>
                       <Input
-                        className="border-none shadow-none  focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
+                        className="border-none max-w-14  sm:max-w-fit   shadow-none text-[0.5rem] sm:text-xs lg:text-lg  focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
                         {...field}
                       />
                     </FormControl>
@@ -173,8 +185,8 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
             </div>
           </div>
         </div>
-        <div className="border-x border-y border-black rounded-lg pb-5">
-          <div className="grid grid-cols-12 gap-x-1 py-1  font-semibold border-b border-black text-sm">
+        <div className="border-x border-y border-black rounded-lg pb-2 lg:pb-5">
+          <div className="grid grid-cols-12 gap-x-1 py-1  lg:py-1 text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-lg font-semibold border-b border-black ">
             <div className="col-span-[0.5] text-center">#</div>
             <div className="col-span-6 text-center">Description</div>
             <div className="col-span-2 text-center">Unit Price</div>
@@ -186,7 +198,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
             ? selectedItems.map((selectedItem, index) => (
                 <div
                   key={selectedItem.description}
-                  className="grid grid-cols-12 text-center  gap-x-1 text-xs items-center border-t border-t-black/70 py-2 border-b border-b-black"
+                  className="grid grid-cols-12 text-center   gap-x-1 text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-xs  items-center border-t border-t-black/70 py-1 lg:py-2 border-b border-b-black"
                 >
                   <div className="col-span-[0.5]">{index + 1}</div>
                   <div className="col-span-6">{selectedItem.description}</div>
@@ -222,8 +234,8 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                   </div>
                 </div>
               ))}
-          <div className="mt-4">
-            <div className="grid grid-cols-12 gap-x-1  font-semibold text-sm">
+          <div className="mt-2 lg:mt-4">
+            <div className="grid grid-cols-12 gap-x-1  font-semibold text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-sm">
               <div className="col-span-8 "></div>
               <div className="col-span-2 text-right"> Subtotal:</div>
               <div className="col-span-2 text-center ">
@@ -232,14 +244,14 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
             </div>
             {includeTax && (
               <>
-                <div className="grid grid-cols-12 gap-x-1  font-semibold text-xs">
+                <div className="grid grid-cols-12 gap-x-1  font-semibold text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-xs">
                   <div className="col-span-8 "></div>
                   <div className="col-span-2 text-right font-light"> Tax%:</div>
                   <div className="col-span-2 text-center font-light">
                     {VAT_RATE_PERCENTAGE}%
                   </div>
                 </div>
-                <div className="grid grid-cols-12 gap-x-1  font-semibold text-xs">
+                <div className="grid grid-cols-12 gap-x-1  font-semibold text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-xs">
                   <div className="col-span-8 "></div>
                   <div className="col-span-2 text-right font-light"> VAT:</div>
                   <div className="col-span-2 text-center font-light">
@@ -251,7 +263,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
             {includeDiscount && (
               <>
                 {isPercentage && (
-                  <div className="grid grid-cols-12 gap-x-1  font-semibold text-xs">
+                  <div className="grid grid-cols-12 gap-x-1  font-semibold text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-xs">
                     <div className="col-span-6 "></div>
                     <div className="col-span-4 text-right font-light">
                       {" "}
@@ -262,7 +274,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                     </div>
                   </div>
                 )}
-                <div className="grid grid-cols-12 gap-x-1  font-semibold text-xs">
+                <div className="grid grid-cols-12 gap-x-1  font-semibold text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-xs">
                   <div className="col-span-6 "></div>
                   <div className="col-span-4 text-right font-light">
                     {" "}
@@ -278,23 +290,27 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
               </>
             )}
 
-            <div className="grid grid-cols-12 gap-x-1  font-semibold text-sm mt-5">
+            <div className="grid grid-cols-12 gap-x-1  font-semibold text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-sm mt-2 lg:mt-5">
               <div className="col-span-8 "></div>
-              <div className="col-span-2 text-right"> Total Amount:</div>
+              <div className="col-span-2 text-right text-nowrap">
+                {" "}
+                Total Amount:
+              </div>
               <div className="col-span-2 text-center ">
                 {formatCurrency(total.totalAmount, selectedCurrency)}
               </div>
             </div>
           </div>
         </div>
-        {!includeTax && (
-          <div className="">
-            <h1 className="text-red-600 text-xl uppercase text-center">
-              &quot;This document is not valid for claim of input tax.&quot;
-            </h1>
-          </div>
-        )}
       </div>
+
+      {!includeTax && (
+        <div className="mt-auto  w-fit mx-auto">
+          <h1 className="text-red-600 text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-xl uppercase text-center">
+            &quot;This document is not valid for claim of input tax.&quot;
+          </h1>
+        </div>
+      )}
     </div>
   );
 }

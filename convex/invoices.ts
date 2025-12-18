@@ -16,18 +16,18 @@ const getCounterName = (
 
 export const getNextInvoiceNumber = query({
   args: {
-    invoiceType: v.union(
-      v.literal("SALES"),
-      v.literal("SERVICE"),
-      v.literal("COMMERCIAL")
-    ),
+    invoiceType: v.optional(
+      v.union(v.literal("SALES"), v.literal("SERVICE"), v.literal("COMMERCIAL"))
+    ), // 12/16/2025
   },
   handler: async (ctx, { invoiceType }) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
       throw new ConvexError("Not authenticated!");
     }
-
+    if (!invoiceType) {
+      return;
+    } // 12/16/2025
     const currentYear = new Date().getFullYear();
     const counterName = getCounterName(userId, currentYear, invoiceType);
 
@@ -43,7 +43,7 @@ export const getNextInvoiceNumber = query({
       invoiceType === "SALES" ? "SI" : invoiceType === "SERVICE" ? "SV" : "CM";
 
     // return `${prefix}-${currentYear}-${nextSerialNumber.toString().padStart(5, "0")}`;
-    return `${prefix}-${nextSerialNumber.toString().padStart(8, "0")}`
+    return `${prefix}-${nextSerialNumber.toString().padStart(8, "0")}`;
   },
 });
 
@@ -129,7 +129,7 @@ export const createInvoice = mutation({
         v.literal("DRAFT"),
         v.literal("SENT"),
         v.literal("PAID"),
-        v.literal("UNPAID"),
+        v.literal("UNPAID")
       )
     ),
   },
@@ -266,7 +266,7 @@ export const createInvoice = mutation({
 
     // !! Changed to a more robust and bir compliant invoice numbering
     // const invoiceNumber = `${prefix}-${currentYear}-${serialNumber.toString().padStart(5, "0")}`;
-    const invoiceNumber = `${prefix}-${serialNumber.toString().padStart(8, "0")}`
+    const invoiceNumber = `${prefix}-${serialNumber.toString().padStart(8, "0")}`;
 
     const invoiceId = await ctx.db.insert("invoices", {
       // relationships
@@ -326,6 +326,23 @@ export const createInvoice = mutation({
   },
 });
 
+export const getInvoiceById = query({
+  // 12/19/2025
+
+  args: {
+    invoiceId: v.optional(v.id("invoices")),
+  },
+  handler: async (ctx, { invoiceId }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new ConvexError("Not authenticated!");
+    }
+    if (!invoiceId) {
+      return;
+    }
+    return await ctx.db.get(invoiceId);
+  },
+});
 export const getAllInvoices = query({
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
@@ -378,22 +395,19 @@ export const handleInvoiceStatus = mutation({
       v.literal("UNPAID")
     ),
   },
-  handler: async (ctx, {
-    invoiceId,
-    status,
-  }) => {
+  handler: async (ctx, { invoiceId, status }) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
       throw new ConvexError("Not authenticated!");
     }
 
-    const invoice = await ctx.db.get(invoiceId)
+    const invoice = await ctx.db.get(invoiceId);
     if (!invoice) {
       throw new ConvexError("Invoice not found");
     }
 
     if (invoice.userId !== userId) {
-      throw new ConvexError("You are unauthorized to modify this invoice.")
+      throw new ConvexError("You are unauthorized to modify this invoice.");
     }
 
     // const client = await ctx.db.get(clientId);
@@ -409,6 +423,6 @@ export const handleInvoiceStatus = mutation({
     return await ctx.db.patch(invoiceId, {
       status,
       updatedAt: Math.floor(Date.now() / 1000), // unix timestamp today
-    })
-  }
-})
+    });
+  },
+});

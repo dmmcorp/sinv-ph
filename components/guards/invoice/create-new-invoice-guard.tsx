@@ -3,8 +3,7 @@
 import { useEffect } from "react";
 import useClientSelection from "@/stores/client/useClientSelection";
 import NewInvoice from "@/app/subscriber/invoices/new/_components/new-invoice";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useGetInvoiceNo } from "@/hooks/use-get-invoice-no";
 
 interface CreateNewInvoiceGuardType {
   onSetCurrentStep: (value: number) => void;
@@ -14,9 +13,7 @@ export default function CreateNewInvoiceGuard({
   onSetCurrentStep,
 }: CreateNewInvoiceGuardType) {
   const { selectedClient } = useClientSelection();
-  const getInvoiceNo = useQuery(api.invoices.getNextInvoiceNumber, {
-    invoiceType: "SALES",
-  });
+  const { invoiceNo } = useGetInvoiceNo();
   useEffect(() => {
     if (selectedClient === null) {
       onSetCurrentStep(0);
@@ -26,7 +23,7 @@ export default function CreateNewInvoiceGuard({
   // Avoid rendering invoice form before redirect check finishes
   if (selectedClient === null) return null;
 
-  if (getInvoiceNo === undefined) return null;
+  if (invoiceNo === undefined || invoiceNo === null) return null;
 
-  return <NewInvoice invoiceNo={getInvoiceNo} />;
+  return <NewInvoice invoiceNo={invoiceNo} />;
 }

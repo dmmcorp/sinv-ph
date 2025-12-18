@@ -10,7 +10,7 @@ import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
 function Page() {
   const { step, setStep } = useInvoiceStore();
   return (
-    <div className="">
+    <div className="pb-10">
       {step === 0 && (
         <>
           <div className="flex flex-col h-dvh max-h-[90vh] w-full ">

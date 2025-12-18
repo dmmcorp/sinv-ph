@@ -16,8 +16,11 @@ export type SelectedItemType = {
 //   price: number;
 
 interface InvoiceStoreType {
+  createdInvoiceId: Id<"invoices"> | undefined;
+
   invoiceType: INVOiCETYPE;
   selectedCurrency: string;
+  invoiceNo: string;
   includeTax: boolean;
   includeDiscount: boolean;
   step: number;
@@ -28,11 +31,13 @@ interface InvoiceStoreType {
 
   // ACTIONS
 
+  setCreatedInvoiceId: (value: Id<"invoices"> | undefined) => void;
   setCurrency: (value: string) => void;
   toggleTax: () => void;
   toggleDiscount: () => void;
 
   setStep: (value: number) => void;
+  setInvoiceNo: (value: string) => void;
   setInvoiceType: (value: INVOiCETYPE) => void;
   setDiscountValue: (value: string) => void;
   setIsPercentage: (value: boolean) => void;
@@ -45,6 +50,8 @@ interface InvoiceStoreType {
 }
 
 export const useInvoiceStore = create<InvoiceStoreType>((set) => ({
+  createdInvoiceId: undefined,
+  invoiceNo: "",
   invoiceType: "SALES",
   selectedCurrency: "PHP",
   includeTax: false,
@@ -56,6 +63,8 @@ export const useInvoiceStore = create<InvoiceStoreType>((set) => ({
   selectedItems: [],
 
   // ACTIONS
+  setCreatedInvoiceId: (value) => set({ createdInvoiceId: value }),
+  setInvoiceNo: (value) => set({ invoiceNo: value }),
   setInvoiceType: (value) => set({ invoiceType: value }),
   setCurrency: (value) => set({ selectedCurrency: value }),
   toggleTax: () => set((state) => ({ includeTax: !state.includeTax })),
