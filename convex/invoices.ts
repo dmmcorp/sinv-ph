@@ -129,7 +129,7 @@ export const createInvoice = mutation({
         v.literal("DRAFT"),
         v.literal("SENT"),
         v.literal("PAID"),
-        v.literal("UNPAID")
+        v.literal("UNPAID"),
       )
     ),
   },

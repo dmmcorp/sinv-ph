@@ -72,7 +72,8 @@ export const calculateInvoiceAmounts = (args: {
   }
 
   const grossTotal = round(
-    vatablesTotal + vatExemptTotal + zeroRatedTotal + noVatTypeTotal
+    vatablesTotal + vatExemptTotal + zeroRatedTotal
+    // + noVatTypeTotal
     // + nonVatTotal
   );
 
@@ -108,7 +109,7 @@ export const calculateInvoiceAmounts = (args: {
   let noVatTypeSales = 0;
   let vatAmount = 0;
 
-  if (args.specialDiscountType !== "SP") {
+  if (args.specialDiscountType) {
     // ang pag compute ng special discount ay depende sa item if inclusive or exclusive. Separate ang pag discount ng 20%
 
     const scDiscountOnVatable = round(
@@ -142,21 +143,23 @@ export const calculateInvoiceAmounts = (args: {
     );
     zeroRatedSales = round(zeroRatedAfterRegularDisc - scDiscountOnZeroRated);
     // nonVatSales = 0;
-  } else if (args.specialDiscountType === "SP") {
-    // SOLO PARENT Discount logic
-    const spDiscountOnVatable = round(vatableAfterRegularDisc * SOLO_PARENT_DISCOUNT_RATE)
-    const spDiscountOnExempt = round(exemptAfterRegularDisc * SOLO_PARENT_DISCOUNT_RATE);
-    const spDiscountOnZeroRated = round(zeroRatedAfterRegularDisc * SOLO_PARENT_DISCOUNT_RATE);
+  }
+  // else if (args.specialDiscountType === "SP") {
+  //   // SOLO PARENT Discount logic
+  //   const spDiscountOnVatable = round(vatableAfterRegularDisc * SOLO_PARENT_DISCOUNT_RATE)
+  //   const spDiscountOnExempt = round(exemptAfterRegularDisc * SOLO_PARENT_DISCOUNT_RATE);
+  //   const spDiscountOnZeroRated = round(zeroRatedAfterRegularDisc * SOLO_PARENT_DISCOUNT_RATE);
 
-    specialDiscountAmount = round(
-      spDiscountOnVatable + spDiscountOnExempt + spDiscountOnZeroRated
-    )
+  //   specialDiscountAmount = round(
+  //     spDiscountOnVatable + spDiscountOnExempt + spDiscountOnZeroRated
+  //   )
 
-    vatableSales = round(vatableAfterRegularDisc - spDiscountOnVatable);
-    vatAmount = round(vatableSales * VAT_RATE);
-    vatExemptSales = round(exemptAfterRegularDisc - spDiscountOnExempt);
-    zeroRatedSales = round(zeroRatedAfterRegularDisc - spDiscountOnZeroRated);
-  } else {
+  //   vatableSales = round(vatableAfterRegularDisc - spDiscountOnVatable);
+  //   vatAmount = round(vatableSales * VAT_RATE);
+  //   vatExemptSales = round(exemptAfterRegularDisc - spDiscountOnExempt);
+  //   zeroRatedSales = round(zeroRatedAfterRegularDisc - spDiscountOnZeroRated);
+  // }
+  else {
     // Regular transaction (no SC/PWD)
     vatableSales = vatableAfterRegularDisc;
     vatAmount = round(vatableSales * VAT_RATE);
