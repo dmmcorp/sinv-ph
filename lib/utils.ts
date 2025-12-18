@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { SPECIAL_DISCOUNT_RATE } from "./constants/SPECIAL_DISCOUNT_RATE";
+import { SOLO_PARENT_DISCOUNT_RATE, SPECIAL_DISCOUNT_RATE } from "./constants/SPECIAL_DISCOUNT_RATE";
 import { VAT_RATE } from "./constants/VAT_RATE";
 import type { TaxType } from "./constants/TAX_TYPES";
 import type {
@@ -71,8 +71,6 @@ export const calculateInvoiceAmounts = (args: {
     }
   }
 
-  console.log(vatablesTotal, vatExemptTotal, zeroRatedTotal, noVatTypeTotal)
-
   const grossTotal = round(
     vatablesTotal + vatExemptTotal + zeroRatedTotal + noVatTypeTotal
     // + nonVatTotal
@@ -110,7 +108,7 @@ export const calculateInvoiceAmounts = (args: {
   let noVatTypeSales = 0;
   let vatAmount = 0;
 
-  if (args.specialDiscountType) {
+  if (args.specialDiscountType !== "SP") {
     // ang pag compute ng special discount ay depende sa item if inclusive or exclusive. Separate ang pag discount ng 20%
 
     const scDiscountOnVatable = round(
@@ -144,6 +142,20 @@ export const calculateInvoiceAmounts = (args: {
     );
     zeroRatedSales = round(zeroRatedAfterRegularDisc - scDiscountOnZeroRated);
     // nonVatSales = 0;
+  } else if (args.specialDiscountType === "SP") {
+    // SOLO PARENT Discount logic
+    const spDiscountOnVatable = round(vatableAfterRegularDisc * SOLO_PARENT_DISCOUNT_RATE)
+    const spDiscountOnExempt = round(exemptAfterRegularDisc * SOLO_PARENT_DISCOUNT_RATE);
+    const spDiscountOnZeroRated = round(zeroRatedAfterRegularDisc * SOLO_PARENT_DISCOUNT_RATE);
+
+    specialDiscountAmount = round(
+      spDiscountOnVatable + spDiscountOnExempt + spDiscountOnZeroRated
+    )
+
+    vatableSales = round(vatableAfterRegularDisc - spDiscountOnVatable);
+    vatAmount = round(vatableSales * VAT_RATE);
+    vatExemptSales = round(exemptAfterRegularDisc - spDiscountOnExempt);
+    zeroRatedSales = round(zeroRatedAfterRegularDisc - spDiscountOnZeroRated);
   } else {
     // Regular transaction (no SC/PWD)
     vatableSales = vatableAfterRegularDisc;

@@ -1,1 +1,2 @@
 export const SPECIAL_DISCOUNT_RATE = 0.20;
+export const SOLO_PARENT_DISCOUNT_RATE = 0.10;

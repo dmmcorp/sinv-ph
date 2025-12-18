@@ -238,6 +238,36 @@ function TestCasesPage() {
       discountValue: 20,
     });
     console.log("TEST CASE 24: Mixed VATABLE + Zero-Rated", testCase24);
+
+    // TEST CASE 25: Solo Parent discount (10%)
+    const testCase25 = calculateInvoiceAmounts({
+      items: [{ unitPrice: 1120, quantity: 1, vatType: "VATABLE" }],
+      taxType: "VAT",
+      specialDiscountType: "SP",
+    });
+    console.log("TEST CASE 25: Solo Parent discount (10%)", testCase25);
+
+    // TEST CASE 26: Solo Parent - Mixed VAT types
+    const testCase26 = calculateInvoiceAmounts({
+      items: [
+        { unitPrice: 1120, quantity: 2, vatType: "VATABLE" },
+        { unitPrice: 500, quantity: 1, vatType: "VAT_EXEMPT" },
+      ],
+      taxType: "VAT",
+      specialDiscountType: "SP",
+    });
+    console.log("TEST CASE 26: Solo Parent - Mixed VAT types", testCase26);
+
+    // TEST CASE 27: Solo Parent - Multiple items with different quantities
+    const testCase27 = calculateInvoiceAmounts({
+      items: [
+        { unitPrice: 500, quantity: 3, vatType: "VATABLE" },
+        { unitPrice: 750, quantity: 2, vatType: "VATABLE" },
+      ],
+      taxType: "VAT",
+      specialDiscountType: "SP",
+    });
+    console.log("TEST CASE 27: Solo Parent - Multiple items", testCase27);
   }, []);
 
   return (
