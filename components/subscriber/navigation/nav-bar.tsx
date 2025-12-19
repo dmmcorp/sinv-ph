@@ -5,6 +5,7 @@ import MobileNavigation from "./mobile-navigation";
 import { FileBox, LayoutDashboardIcon, Receipt, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import UserAvatar from "./user-avatar";
+import Link from "next/link";
 
 function NavBar() {
   const isMobile = useIsMobile();
@@ -16,10 +17,12 @@ function NavBar() {
       </div>
       <div className="navtab hidden lg:block  w-fit px-10 rounded-full ">
         <ul className="flex items-start justify-evenly gap-y-2 ">
-          <li className="flex items-center gap-2 px-5 py-4 ">
-            <LayoutDashboardIcon />
-            Dashboard
-          </li>
+          <Link href={"/subscriber"}>
+            <li className="flex items-center gap-2 px-5 py-4 ">
+              <LayoutDashboardIcon />
+              Dashboard
+            </li>
+          </Link>
           <li className="flex items-center gap-2 px-5 py-4  ">
             <Receipt />
             Invoices

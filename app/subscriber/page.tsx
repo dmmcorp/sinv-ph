@@ -1,11 +1,7 @@
-import Dashboard from "@/components/subscriber/pages/dashboard/dashboard";
+import Dashboard from "./_components/dashboard/Dashboard";
 
 function Page() {
-  return (
-    <div>
-      <Dashboard />
-    </div>
-  );
+  return <Dashboard />;
 }
 
 export default Page;

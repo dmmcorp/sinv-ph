@@ -6,16 +6,23 @@ import useClientSelection from "@/stores/client/useClientSelection";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
 import { CheckCircle } from "lucide-react";
 import { motion } from "motion/react";
+import { usePathname, useRouter } from "next/navigation";
 
 function Created() {
   const invoiceState = useInvoiceStore();
-  const client = useClientSelection();
-  const { invoice: createdInvoice } = useGetInvoice();
+  // const client = useClientSelection();
+  // const { invoice: createdInvoice } = useGetInvoice();
+  const router = useRouter();
 
   const createNewInvoice = () => {
     invoiceState.clearInvoice();
   };
-  const goToDashboard = () => {};
+  const goToDashboard = () => {
+    router.push("/subscriber");
+    setTimeout(() => {
+      invoiceState.clearInvoice();
+    }, 1000);
+  };
   const viewInvoice = () => {};
   const sendInvoice = () => {};
   return (
