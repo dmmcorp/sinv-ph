@@ -70,6 +70,7 @@ function ActionsCard() {
             specialDiscountId: undefined, // to be add
             buyerTin: undefined, // to be add
             buyerAddress: selectedClient.address, // to be add
+            currency: invoice.selectedCurrency,
             status: "DRAFT",
             clientId: selectedClient._id,
             sellerBusinessName: businessProfile?.businessName || "",
@@ -124,35 +125,41 @@ function ActionsCard() {
   };
   const handlePreviewPDF = () => {};
   return (
-    <Card className="col-span-1 lg:col-span-3   h-fit">
+    <Card className="col-span-1 lg:col-span-3 max-h-fit">
       <CardHeader>
         <CardTitle>Actions</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2 mb-2">
-          <Label className="text-sm text-muted-foreground">Invoice Type</Label>
-          <Select
-            defaultValue={invoice.selectedCurrency}
-            onValueChange={(value) =>
-              invoice.setInvoiceType(value as INVOiCETYPE)
-            }
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={"Select Invoice Type"}>
-                <span>{invoice.invoiceType}</span>
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {INVOICE_TYPES.map((type) => (
-                <SelectItem key={type} value={type}>
-                  <span className="flex items-center gap-2">
-                    <span>{type}</span>
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {businessProfile?.businessType !== undefined ||
+          (businessProfile?.businessType !== "Freelancer/Individual" && (
+            <div className="space-y-2 mb-2">
+              <Label className="text-sm text-muted-foreground">
+                Invoice Type
+              </Label>
+              <Select
+                defaultValue={invoice.selectedCurrency}
+                onValueChange={(value) =>
+                  invoice.setInvoiceType(value as INVOiCETYPE)
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={"Select Invoice Type"}>
+                    <span>{invoice.invoiceType}</span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {INVOICE_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      <span className="flex items-center gap-2">
+                        <span>{type}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ))}
+
         <div className="space-y-2">
           <Label className="text-sm text-muted-foreground">
             Item/Service Selection

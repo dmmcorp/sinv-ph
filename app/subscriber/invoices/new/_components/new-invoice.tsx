@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import useClientSelection from "@/stores/client/useClientSelection";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
 import ActionsCard from "./actions-card";
+import { animate, motion } from "motion/react";
 
 export interface SelectedItemType {
   id: number;
@@ -75,9 +76,9 @@ const invoiceFormSchema = z.object({
     .min(0, "Total cannot be negative"),
 });
 
-function NewInvoice({ invoiceNo }: { invoiceNo: string }) {
+function NewInvoice() {
   const { selectedClient } = useClientSelection();
-  const { selectedItems } = useInvoiceStore();
+  const { selectedItems, invoiceNo } = useInvoiceStore();
 
   const form = useForm<z.infer<typeof invoiceFormSchema>>({
     resolver: zodResolver(invoiceFormSchema),
@@ -86,14 +87,13 @@ function NewInvoice({ invoiceNo }: { invoiceNo: string }) {
       clientAddress: selectedClient?.address ?? "",
       clientTIN: "",
       date: new Date().toISOString().split("T")[0],
-      invoiceNo: invoiceNo,
+      invoiceNo: "",
       items: selectedItems,
       subTotal: 0,
       discount: 0,
       total: 0,
     },
   });
-  console.log(invoiceNo);
 
   function onSubmit(values: z.infer<typeof invoiceFormSchema>) {
     // Do something with the form values.
@@ -103,12 +103,26 @@ function NewInvoice({ invoiceNo }: { invoiceNo: string }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-screen w-full gap-10">
-          <div className="col-span-1 lg:col-span-9">
+        <motion.div
+          initial={{ y: 10, opacity: 0 }}
+          animate={{
+            y: 0,
+            opacity: 1,
+            transition: {
+              duration: 1,
+              ease: "backInOut",
+            },
+          }}
+          className="grid grid-cols-1 lg:grid-cols-12 min-h-screen w-full gap-10"
+        >
+          <motion.div className="col-span-1 lg:col-span-9">
             <NewInvoiceForm form={form} />
-          </div>
-          <ActionsCard />
-        </div>
+          </motion.div>
+
+          <motion.div className="contents max-h-fit">
+            <ActionsCard />
+          </motion.div>
+        </motion.div>
       </form>
     </Form>
   );

@@ -1,3 +1,4 @@
+"use client";
 import { Id } from "@/convex/_generated/dataModel";
 import { INVOiCETYPE, VATTYPE } from "@/lib/types";
 import { create } from "zustand";
@@ -49,6 +50,19 @@ interface InvoiceStoreType {
   clearInvoice: () => void;
 }
 
+const initialInvoiceState = {
+  createdInvoiceId: undefined,
+  invoiceNo: "",
+  invoiceType: "SALES" as const,
+  selectedCurrency: "PHP",
+  includeTax: false,
+  includeDiscount: false,
+  step: 0,
+  discountValue: "",
+  isPercentage: false,
+  selectedItems: [],
+};
+
 export const useInvoiceStore = create<InvoiceStoreType>((set) => ({
   createdInvoiceId: undefined,
   invoiceNo: "",
@@ -92,13 +106,5 @@ export const useInvoiceStore = create<InvoiceStoreType>((set) => ({
       selectedItems: state.selectedItems.filter((i) => i._id !== id),
     })),
 
-  clearInvoice: () =>
-    set({
-      selectedCurrency: "PHP",
-      includeTax: false,
-      includeDiscount: false,
-      discountValue: "",
-      isPercentage: false,
-      selectedItems: [],
-    }),
+  clearInvoice: () => set(initialInvoiceState),
 }));

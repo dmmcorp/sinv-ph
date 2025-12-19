@@ -10,7 +10,8 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import AddNewClientDialog from "./add-new-client-dialog";
-
+import Box from "../new/_components/skeleton/box";
+import { motion } from "motion/react";
 export interface Client {
   id: string;
   name: string;
@@ -131,62 +132,81 @@ export function ClientSelector({ onSetStep }: ClientSelector) {
 
         {/* Client List */}
         <div className="">
-          {filteredClients && filteredClients?.length > 0 ? (
-            <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-5 space-y-2 w-full overflow-y-auto ">
-              {filteredClients?.map((client) => (
-                <div key={client._id} className="">
-                  <button
-                    onClick={() => setSelectedClient(client)}
-                    className={`h- w-full text-left p-3 rounded-lg border transition-all flex flex-col ${
-                      selectedClient?._id === client._id
-                        ? "border-primary bg-primary/5 ring-1 ring-primary"
-                        : "border-border hover:border-primary/50 hover:bg-muted/50"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2 ">
-                      <div className="space-y-1 min-w-0">
-                        <p className="font-semibold truncate">{client.name}</p>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {client.email}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {client.address}
-                        </p>
-                      </div>
-                      {selectedClient?._id === client._id && (
-                        <div className="shrink-0 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
-                          <Check className="h-3 w-3 text-primary-foreground" />
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center self-center w-full py-8 px-4 border-2 border-dashed border-muted-foreground/25 rounded-lg">
-              <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
-                <UserPlus className="h-6 w-6 text-muted-foreground" />
-              </div>
-              <h3 className="font-medium mb-1">
-                No client found for &quot;
-                <span className="font-semibold">{searchQuery}</span> &quot;
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Looks like this client isn&apos;t in your list yet. Would you
-                like to add them?
-              </p>
-              <Button
-                onClick={() => {
-                  setNewClient((prev) => ({ ...prev, name: searchQuery }));
-                  clientStore.setNewClientDialogOpen(true);
-                }}
-                size="sm"
+          {filteredClients ? (
+            filteredClients?.length > 0 ? (
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-5 space-y-2 w-full overflow-y-auto "
               >
-                <UserPlus className="h-4 w-4 mr-2" />
-                Add New Client
-              </Button>
-            </div>
+                {filteredClients?.map((client) => (
+                  <div key={client._id} className="">
+                    <button
+                      onClick={() => setSelectedClient(client)}
+                      className={`h- w-full text-left p-3 rounded-lg border transition-all flex flex-col ${
+                        selectedClient?._id === client._id
+                          ? "border-primary bg-primary/5 ring-1 ring-primary"
+                          : "border-border hover:border-primary/50 hover:bg-muted/50"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2 ">
+                        <div className="space-y-1 min-w-0">
+                          <p className="font-semibold truncate">
+                            {client.name}
+                          </p>
+                          <p className="text-sm text-muted-foreground truncate">
+                            {client.email}
+                          </p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {client.address}
+                          </p>
+                        </div>
+                        {selectedClient?._id === client._id && (
+                          <div className="shrink-0 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                            <Check className="h-3 w-3 text-primary-foreground" />
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  </div>
+                ))}
+              </motion.div>
+            ) : (
+              <div className="text-center self-center w-full py-8 px-4 border-2 border-dashed border-muted-foreground/25 rounded-lg">
+                <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                  <UserPlus className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h3 className="font-medium mb-1">
+                  No client found for &quot;
+                  <span className="font-semibold">{searchQuery}</span> &quot;
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Looks like this client isn&apos;t in your list yet. Would you
+                  like to add them?
+                </p>
+                <Button
+                  onClick={() => {
+                    setNewClient((prev) => ({ ...prev, name: searchQuery }));
+                    clientStore.setNewClientDialogOpen(true);
+                  }}
+                  size="sm"
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Add New Client
+                </Button>
+              </div>
+            )
+          ) : (
+            [1, 2, 3, 4].map((index) => (
+              <div
+                key={index}
+                className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-5 space-y-2 w-full overflow-y-auto "
+              >
+                <div className="col-span-1 h-6">
+                  <Box />
+                </div>
+              </div>
+            ))
           )}
         </div>
         <div className="mt-auto space-y-2">

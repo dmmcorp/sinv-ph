@@ -1,22 +1,37 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Id } from "@/convex/_generated/dataModel";
 import { useGetInvoice } from "@/hooks/use-get-invoice";
 import useClientSelection from "@/stores/client/useClientSelection";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
 import { CheckCircle } from "lucide-react";
-import React from "react";
+import { motion } from "motion/react";
 
 function Created() {
   const invoiceState = useInvoiceStore();
   const client = useClientSelection();
   const { invoice: createdInvoice } = useGetInvoice();
 
-  const createNewInvoice = () => {};
+  const createNewInvoice = () => {
+    invoiceState.clearInvoice();
+  };
   const goToDashboard = () => {};
   const viewInvoice = () => {};
   const sendInvoice = () => {};
   return (
-    <div className="flex flex-col items-center justify-center py-10 px-4 space-y-6">
+    <motion.div
+      initial={{
+        y: 10,
+        scaleX: 0.7,
+        opacity: 0.5,
+      }}
+      animate={{
+        y: 0,
+        scaleX: 1,
+        opacity: 1,
+      }}
+      className="flex flex-col items-center justify-center py-10 px-4 space-y-6"
+    >
       {/* Success Animation */}
       <div className="w-24 h-24 flex items-center justify-center rounded-full bg-green-100">
         <CheckCircle className="text-green-600 w-12 h-12" />
@@ -65,7 +80,7 @@ function Created() {
           Go to Dashboard
         </Button>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

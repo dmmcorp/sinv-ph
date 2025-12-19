@@ -33,24 +33,6 @@ export default function RootLayout({
         >
           <ConvexClientProvider>
             <OnboardingGuard>{children}</OnboardingGuard>
-            <footer className="w-full border-t bg-background">
-              <div className="mx-auto max-w-7xl px-4 py-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs text-muted-foreground">
-                {/* Left */}
-                <p>© {new Date().getFullYear()} SINVPH. All rights reserved.</p>
-
-                {/* Right */}
-                <div className="flex items-center gap-4">
-                  <button className="hover:text-foreground transition">
-                    Privacy Policy
-                  </button>
-                  <button className="hover:text-foreground transition">
-                    Terms of Service
-                  </button>
-                  <span className="hidden sm:inline">•</span>
-                  <span>BIR-compliant invoices</span>
-                </div>
-              </div>
-            </footer>
           </ConvexClientProvider>
         </body>
       </html>

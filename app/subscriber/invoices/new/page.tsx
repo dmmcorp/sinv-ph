@@ -1,27 +1,24 @@
 "use client";
-import CreateNewInvoiceGuard from "@/components/guards/invoice/create-new-invoice-guard";
-import { useState } from "react";
 import { ClientSelector } from "../_components/client-selector";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Created from "./_components/created";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
+import NewInvoice from "./_components/new-invoice";
 
 function Page() {
   const { step, setStep } = useInvoiceStore();
   return (
-    <div className="pb-10">
+    <div className="pb-10 w-full">
       {step === 0 && (
-        <>
-          <div className="flex flex-col h-dvh max-h-[90vh] w-full ">
-            <div className="flex-1 ">
-              <ClientSelector onSetStep={setStep} />
-            </div>
+        <div className="flex flex-col h-dvh max-h-[90vh] w-full  ">
+          <div className="flex-1 ">
+            <ClientSelector onSetStep={setStep} />
           </div>
-        </>
+        </div>
       )}
       {step === 1 && (
-        <div className="space-y-10">
+        <div className="space-y-10 ">
           <div className="">
             <Button
               variant={"secondary"}
@@ -32,11 +29,15 @@ function Page() {
               Select a Client
             </Button>
           </div>
-          <CreateNewInvoiceGuard onSetCurrentStep={setStep} />
+          <NewInvoice />
         </div>
       )}
 
-      {step === 3 && <Created />}
+      {step === 2 && (
+        <div className="flex-1">
+          <Created />
+        </div>
+      )}
     </div>
   );
 }

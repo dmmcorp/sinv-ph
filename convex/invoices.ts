@@ -122,7 +122,7 @@ export const createInvoice = mutation({
         ),
       })
     ),
-
+    currency: v.string(),
     // status
     status: v.optional(
       v.union(
@@ -294,7 +294,7 @@ export const createInvoice = mutation({
 
       // items
       items: args.items,
-
+      currency: args.currency, //12/19/2025
       // discount fields
       discountType: args.discountType,
       discountValue: args.discountValue,

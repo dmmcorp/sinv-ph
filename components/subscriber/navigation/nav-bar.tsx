@@ -33,10 +33,10 @@ function NavBar() {
           </li>
         </ul>
       </div>
-      <div className="hidden lg:block">
+      <div className="hidden lg:block ">
         <UserAvatar />
       </div>
-      <div className="">
+      <div className="block lg:hidden">
         {isMobile ? (
           <div className="">
             <MobileNavigation />

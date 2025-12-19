@@ -15,6 +15,7 @@ import Image from "next/image";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
 import { VAT_RATE_PERCENTAGE } from "@/lib/constants/VAT_RATE";
 import { useCalculateInvioceAmount } from "@/hooks/use-calculate-invoice-amount";
+import InvoiceNumber from "./invoice-no";
 
 interface NewInvoiceFormProps {
   form: UseFormReturn<InvoiceFormValues>;
@@ -145,24 +146,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
             </h3>
             <div className="flex items-center justify-end gap-x-2 text-[0.6rem] sm:text-xs lg:text-lg text-nowrap">
               <h3 className="text-nowrap">Invoice No.</h3>
-              <FormField
-                control={form.control}
-                name="invoiceNo"
-                render={({ field }) => (
-                  <FormItem>
-                    {/* <FormLabel>Invoice Number</FormLabel> */}
-                    <FormControl>
-                      <Input
-                        className="border-none max-w-14 sm:max-w-fit  text-[0.5rem] sm:text-xs lg:text-lg shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
-                        placeholder="0001"
-                        disabled
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <InvoiceNumber form={form} />
             </div>
             <div className="flex items-center gap-x-2 text-[0.6rem] sm:text-xs lg:text-lg">
               Date Issued:
