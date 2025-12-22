@@ -106,7 +106,7 @@ export default defineSchema({
         v.literal("PWD"),
         v.literal("NAAC"),
         v.literal("MOV"),
-        v.literal("SP")
+        v.literal("SP"),
       )
     ),
     specialDiscountId: v.optional(v.string()),
@@ -124,6 +124,16 @@ export default defineSchema({
           v.literal("VAT_EXEMPT"), // VAT-EXEMPT = “This sale is exempt from VAT even though the business is VAT-registered.”
           v.literal("ZERO_RATED")
           // v.literal("NON_VAT"), // NON-VAT = “This business does not deal with VAT at all.” this is a seller status not a vat item type
+        ),
+
+        // needed to identify if the item is eligible for special discount or not.
+        legalFlags: v.optional(
+          v.object({
+            scPwdEligible: v.optional(v.boolean()),
+            soloParentEligible: v.optional(v.boolean()),
+            naacEligible: v.optional(v.boolean()),
+            movEligible: v.optional(v.boolean()),
+          })
         ),
       })
     ),
@@ -177,6 +187,15 @@ export default defineSchema({
       // v.literal("NON_VAT"), // Seller not VAT-registered (usually for small businesses < 3MPHP ANNUAL SALES)
       v.literal("VAT_EXEMPT"), // No VAT (usually educational services, books, newspapers)
       v.literal("ZERO_RATED") // 0% VAT (for export / international transport)
+    ),
+    // bio flu
+    legalFlags: v.optional(
+      v.object({
+        scPwdEligible: v.optional(v.boolean()),
+        soloParentEligible: v.optional(v.boolean()),
+        naacEligible: v.optional(v.boolean()),
+        movEligible: v.optional(v.boolean()),
+      })
     ),
 
     // TODO: Need to assess how to handle category properly and check if it is needed to be put in invoice
