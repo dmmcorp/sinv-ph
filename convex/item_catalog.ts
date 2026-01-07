@@ -100,6 +100,7 @@ export const createItem = mutation({
       )
     }
 
+
     const itemId = await ctx.db.insert("itemCatalog", {
       userId,
       description: description.trim(),
