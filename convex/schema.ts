@@ -198,6 +198,9 @@ export default defineSchema({
       })
     ),
 
+    normalizedName: v.optional(v.string()),
+
+
     // TODO: Need to assess how to handle category properly and check if it is needed to be put in invoice
     // category: v.optional(
     //     v.union(
@@ -214,7 +217,8 @@ export default defineSchema({
     // isSpecialDiscountEligible: v.boolean(),
   })
     // .index("by_invoice", ["invoiceId"])
-    .index("by_user", ["userId"]),
+    .index("by_user", ["userId"])
+    .index("by_normalizedName", ["normalizedName"]),
   // branding
   branding: defineTable({
     userId: v.id("users"), //subscriber

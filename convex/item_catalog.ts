@@ -3,6 +3,20 @@ import { mutation, query, QueryCtx } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 
+const getNameValue = (
+  userId: string,
+  value: string,
+) => {
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_");
+
+  const normalizedName = `item_${normalized}_${userId}`;
+
+  return normalizedName
+};
+
 const inferVatTypeFromSellerProfile = async (
   ctx: QueryCtx,
   businessProfileId: Id<"business_profile"> | undefined,
@@ -74,6 +88,17 @@ export const createItem = mutation({
       throw new ConvexError("No user found.")
     }
 
+    const normalizedName = getNameValue(userId, description);
+
+    const existing = await ctx.db
+      .query("itemCatalog")
+      .withIndex("by_normalizedName", q => q.eq("normalizedName", normalizedName))
+      .first()
+
+    if (existing) {
+      throw new ConvexError(`An item named ${description} already exists in your catalog`);
+    }
+
     let inferredVatType = vatType
     if (!inferredVatType) {
       inferredVatType = await inferVatTypeFromSellerProfile(
@@ -107,6 +132,7 @@ export const createItem = mutation({
       unitPrice,
       vatType: inferredVatType,
       isActive: true,
+      normalizedName,
     });
 
     if (itemId) {
