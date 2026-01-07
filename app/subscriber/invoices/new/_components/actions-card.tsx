@@ -20,6 +20,7 @@ import { INVOiCETYPE } from "@/lib/types";
 import useBusinessProfileStore from "@/stores/business-profile/useBusinessProfileStore";
 import useClientSelection from "@/stores/client/useClientSelection";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
+import useItemCatalogStore from "@/stores/items/useItemsCatalogStore";
 import { useMutation } from "convex/react";
 import { FileText, Save } from "lucide-react";
 import { ChangeEvent, useState } from "react";
@@ -37,11 +38,17 @@ function ActionsCard() {
   const { selectedClient } = useClientSelection();
   const saveInvoice = useMutation(api.invoices.createInvoice);
   const [errors, setErrors] = useState<Set<ErrorType>>(new Set());
+
   const handleSaveInvoice = () => {
     let vatStatus: "NON_VAT" | "VAT" = "NON_VAT";
 
     if (businessProfile?.businessType === "VAT-Registered Business") {
       vatStatus = "VAT";
+    }
+
+    if(invoice.selectedItems.length === 0){
+      toast.error("Please add items to the invoice before saving.");
+      return;
     }
 
     const processedItems = invoice.selectedItems.map((item) => {
@@ -54,6 +61,7 @@ function ActionsCard() {
         vatType: item.vatType,
       };
     });
+
     try {
       if (selectedClient && businessProfile) {
         toast.promise(

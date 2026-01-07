@@ -50,7 +50,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
         } else {
           return "";
         }
-
+      
       case "VAT-Registered Business":
         // Logic for VAT-registered businesses
         if (businessProfile?.tin) {
@@ -66,8 +66,8 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
     return;
   };
   return (
-    <div className="relative flex flex-col min-h-185  lg:min-h-312 mx-auto border-2 shadow-lg p-4 lg:p-10 rounded-2xl space-y-5 lg:space-y-10 bg-white">
-      <div className="flex justify-between">
+    <div className="relative border-t-primary border-t-5 flex flex-col min-h-185 bg-primary  lg:min-h-312 mx-auto border-2 shadow-lg p-4 lg:p-10 rounded-2xl space-y-5 lg:space-y-10 bg-white">
+      <div className="flex justify-between ">
         <div className="">
           {businessProfile && businessProfile.logoUrl !== "" && (
             <Image
@@ -169,8 +169,8 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
             </div>
           </div>
         </div>
-        <div className="border-x border-y border-black rounded-lg pb-2 lg:pb-5">
-          <div className="grid grid-cols-12 gap-x-1 py-1  lg:py-1 text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-lg font-semibold border-b border-black ">
+        <div className="rounded-lg pb-2 lg:pb-5 ">
+          <div className="grid grid-cols-12 gap-x-1 py-1  lg:py-1 text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-lg font-semibold  bg-primary text-white">
             <div className="col-span-[0.5] text-center">#</div>
             <div className="col-span-6 text-center">Description</div>
             <div className="col-span-2 text-center">Unit Price</div>
