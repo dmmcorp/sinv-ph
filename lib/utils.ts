@@ -146,79 +146,90 @@ export const calculateInvoiceAmounts = (args: {
     };
   }
 
-  // const discountRatio = grossTotal > 0 ? regularDiscountAmount / grossTotal : 0;
-
-  // const vatableAfterRegularDisc = round(
-  //   vatableExclusiveAmount * (1 - discountRatio)
-  // );
-  // const exemptAfterRegularDisc = round(vatExemptTotal * (1 - discountRatio));
-  // const zeroRatedAfterRegularDisc = round(zeroRatedTotal * (1 - discountRatio));
-  // // const nonVatAfterRegularDisc = round(nonVatTotal * (1 - discountRatio));
-  // const noVatTypeAfterRegularDisc = round(noVatTypeTotal * (1 - discountRatio));
-
-  // special discounts logic
-  // let vatableSales = 0;
-  // let vatExemptSales = 0;
-  // let zeroRatedSales = 0;
-  // let noVatTypeSales = 0;
-  // let vatAmount = 0;
-
   if (args.specialDiscountType === "SC" || args.specialDiscountType === "PWD" || args.specialDiscountType === "NAAC" || args.specialDiscountType === "MOV") {
     // ang pag compute ng special discount ay depende sa item if inclusive or exclusive. Separate ang pag discount ng 20%
     // SC/PWD/NAAC/MoV: Apply 20% discount ONLY to eligible items
     // VAT is REMOVED from discounted portion (becomes VAT-exempt)
 
-    let discountableVatable = 0;
-    let discountableExempt = 0;
-    let nonEligibleVatable = 0;
-    let nonEligibleExempt = 0;
+    let vatableNet = 0;
+    let vatAmount = 0;
+    let specialDiscountAmount = 0;
+    let vatExemptSales = 0;
 
     for (const item of args.items) {
-      const itemTotal = item.unitPrice * item.quantity;
+      const gross = item.unitPrice * item.quantity;
+      const isEligible = isItemEligibleForSpecialDiscount(
+        item,
+        args.specialDiscountType
+      );
 
-      if (isItemEligibleForSpecialDiscount(item, args.specialDiscountType)) {
-        if (item.vatType === "VATABLE") {
-          discountableVatable += itemTotal;
-        } else if (item.vatType === "VAT_EXEMPT") {
-          discountableExempt += itemTotal;
+      if (item.vatType === "ZERO_RATED") {
+        throw new Error("SC/PWD discount not allowed on zero-rated sales");
+      }
+
+      // vatable items
+      if (item.vatType === "VATABLE") {
+        const net = round(gross / 1.12)
+
+        if (isEligible) {
+          const discount = round(net * SPECIAL_DISCOUNT_RATE)
+          specialDiscountAmount += discount
+
+          vatExemptSales += round(net - discount);
+        } else {
+          vatableNet += net;
+          vatAmount += round(gross - net)
         }
-      } else {
-        if (item.vatType === "VATABLE") {
-          nonEligibleVatable += itemTotal;
-        } else if (item.vatType === "VAT_EXEMPT") {
-          nonEligibleExempt += itemTotal;
+      }
+
+      // vat-exempt items
+      if (item.vatType === "VAT_EXEMPT") {
+        if (isEligible) {
+          const discount = round(gross * SPECIAL_DISCOUNT_RATE)
+          specialDiscountAmount += discount;
+          vatExemptSales += round(gross - discount);
+        } else {
+          vatExemptSales += round(gross);
         }
       }
     }
 
-    // MGA PUMASA LANG SA DISCOUNTABLE ELIGIBLE ITEMS ANG MALALAGYAN NG 20% DISCOUNT
-    const scDiscountOnVatable = round(discountableVatable * SPECIAL_DISCOUNT_RATE);
-    const scDiscountOnExempt = round(discountableExempt * SPECIAL_DISCOUNT_RATE);
-
-    const specialDiscountAmount = round(scDiscountOnVatable + scDiscountOnExempt);
-
-    const remainingVatable = round(discountableVatable - scDiscountOnVatable + nonEligibleVatable);
-    const vatableSales = round(remainingVatable / 1.12);
-    const vatAmount = round(vatableSales * VAT_RATE);
-
-    const vatExemptSales = round(
-      (discountableExempt - scDiscountOnExempt) +
-      scDiscountOnVatable + // discounted vatable becomes exempt (item-based)
-      nonEligibleExempt
-    );
     const zeroRatedSales = zeroRatedTotal;
 
-    const netAmount = round(vatableSales + vatExemptSales + zeroRatedSales);
+    const netAmount = round(
+      vatableNet + vatExemptSales + zeroRatedSales
+    );
+
     const totalAmount = round(netAmount + vatAmount);
+
+    // MGA PUMASA LANG SA DISCOUNTABLE ELIGIBLE ITEMS ANG MALALAGYAN NG 20% DISCOUNT
+    // const discountableVatableNet = discountableVatable / 1.12;
+    // const scDiscountOnVatable = round(discountableVatableNet * 0.20);
+    // const scDiscountOnExempt = round(discountableExempt * SPECIAL_DISCOUNT_RATE);
+
+    // const specialDiscountAmount = round(scDiscountOnVatable + scDiscountOnExempt);
+
+    // const remainingVatable = round(discountableVatable - scDiscountOnVatable + nonEligibleVatable);
+    // const vatableSales = round(remainingVatable / 1.12);
+    // const vatAmount = round(vatableSales * VAT_RATE);
+
+    // const vatExemptSales = round(
+    //   (discountableExempt) +
+    //   (discountableVatableNet - scDiscountOnVatable)
+    // );
+    // const zeroRatedSales = zeroRatedTotal;
+
+    // const netAmount = round(vatableSales + vatExemptSales + zeroRatedSales);
+    // const totalAmount = round(netAmount + vatAmount);
 
     return {
       grossTotal: round(grossTotal),
       total: formatCurrency(totalAmount, "PHP"),
       regularDiscountAmount: 0,
-      specialDiscountAmount,
-      vatableSales,
-      vatAmount,
-      vatExemptSales,
+      specialDiscountAmount: round(specialDiscountAmount),
+      vatableSales: round(vatableNet),
+      vatAmount: round(vatAmount),
+      vatExemptSales: round(vatExemptSales),
       zeroRatedSales,
       netAmount,
       totalAmount,
@@ -259,61 +270,131 @@ export const calculateInvoiceAmounts = (args: {
 
   if (args.specialDiscountType === "SP") {
     // SOLO PARENT Discount logic (GOLDEN RULE NEED MASUNOD!!!)
+    // Apply 10% discount ONLY to eligible VATABLE items
     // Discount applies ONLY to eligible items (ITEM-BASED!!!!)
-    // In practice: usually VATABLE items only
-    // SOLO PARENT: Apply 10% discount ONLY to eligible VATABLE items
-    // VAT is REMOVED from discounted portion (becomes VAT-exempt) (PILI LANG THIS IS THE IMPORTANCE OF LEGAL FLAGS I.E MILK, MEDS AND ETC.)
+    // VAT stays (default rule)
+    // VAT-EXEMPT items remain VAT-EXEMPT
+    // ZERO-RATED not allowed with SP
+    // No VAT removal
+    // No conversion to VAT-EXEMPT
+    // No global discount
 
-    let spDiscountOnBase = 0;
-    let spExemptBaseTotal = 0;
-    let vatableBaseTotal = 0;
-    let grossVatExempt = 0;
-    let grossZeroRated = 0;
-    let vatableSales = 0;
+    let vatableNet = 0;
+    let vatAmount = 0;
+    let vatExemptSales = 0;
+    let specialDiscountAmount = 0;
+
+    if (
+      args.specialDiscountType === "SP" &&
+      args.items.every(i => !i.legalFlags?.soloParentEligible)
+    ) {
+      throw new Error("No Solo Parent–eligible items in this invoice");
+    }
 
     for (const item of args.items) {
-      const gross = round(item.unitPrice * item.quantity);
+      const gross = item.unitPrice * item.quantity
+      const isEligible = isItemEligibleForSpecialDiscount(item, "SP");
+
+      if (item.vatType === "ZERO_RATED") {
+        throw new Error("Solo parent discount not allowed on zero-rated sales")
+      }
+
+      // vatable items
       if (item.vatType === "VATABLE") {
-        const vatableSale = round(gross / 1.12); // VAT-exclusive
-        if (isItemEligibleForSpecialDiscount(item, "SP")) {
-          const discount = round(vatableSale * SOLO_PARENT_DISCOUNT_RATE); // 10% discount (SP)
-          spDiscountOnBase += discount;
-          const discountedBase = round(vatableSale - discount); // this becomes VAT-exempt as per BIR
-          spExemptBaseTotal += discountedBase;
+        if (isEligible) {
+          const discount = round(gross * SOLO_PARENT_DISCOUNT_RATE)
+          specialDiscountAmount += discount
+
+          const discountedGross = gross - discount
+          const net = round(discountedGross / 1.12)
+
+          vatableNet += net;
+          vatAmount += round(discountedGross - net)
         } else {
-          // else dont apply discount
-          vatableBaseTotal += vatableSale;
-          vatableSales += gross;
+          const net = round(gross / 1.12)
+          vatableNet += net;
+          vatAmount += round(gross - net)
         }
-      } else if (item.vatType === "VAT_EXEMPT") {
-        // VAT-EXEMPT items remain as-is (gross == net)
-        grossVatExempt += gross;
-      } else if (item.vatType === "ZERO_RATED") {
-        grossZeroRated += gross;
+      }
+
+      // vat-exempt items
+      if (item.vatType === "VAT_EXEMPT") {
+        vatExemptSales += round(gross)
       }
     }
 
-    vatableSales = round(vatableSales); // VAT-exclusive base subject to VAT
-    const vatableBase = round(vatableBaseTotal); // VAT-exclusive base subject to VAT
-    const vatAmount = round(vatableBase * VAT_RATE);
-    const vatExemptSales = round(grossVatExempt + spExemptBaseTotal); // existing exempt + discounted VAT-exempt portion
-    const zeroRatedSales = round(grossZeroRated);
+    const zeroRatedSales = zeroRatedTotal;
 
-    const netAmount = round(vatableBase + vatExemptSales + zeroRatedSales);
+    const netAmount = round(
+      vatableNet + vatExemptSales + zeroRatedSales
+    );
+
     const totalAmount = round(netAmount + vatAmount);
 
     return {
       grossTotal: round(grossTotal),
       total: formatCurrency(totalAmount, "PHP"),
       regularDiscountAmount: 0,
-      specialDiscountAmount: round(spDiscountOnBase), // e.g. 50 for milk
-      vatableSales,
-      vatAmount,
-      vatExemptSales,
+      specialDiscountAmount: round(specialDiscountAmount),
+      vatableSales: round(vatableNet),
+      vatAmount: round(vatAmount),
+      vatExemptSales: round(vatExemptSales),
       zeroRatedSales,
       netAmount,
       totalAmount,
     };
+
+
+    // let spDiscountOnBase = 0;
+    // let spExemptBaseTotal = 0;
+    // let vatableBaseTotal = 0;
+    // let grossVatExempt = 0;
+    // let grossZeroRated = 0;
+    // let vatableSales = 0;
+
+    // for (const item of args.items) {
+    //   const gross = round(item.unitPrice * item.quantity);
+    //   if (item.vatType === "VATABLE") {
+    //     const vatableSale = round(gross / 1.12); // VAT-exclusive
+    //     if (isItemEligibleForSpecialDiscount(item, "SP")) {
+    //       const discount = round(vatableSale * SOLO_PARENT_DISCOUNT_RATE); // 10% discount (SP)
+    //       spDiscountOnBase += discount;
+    //       const discountedBase = round(vatableSale - discount); // this becomes VAT-exempt as per BIR
+    //       spExemptBaseTotal += discountedBase;
+    //     } else {
+    //       // else dont apply discount
+    //       vatableBaseTotal += vatableSale;
+    //       vatableSales += gross;
+    //     }
+    //   } else if (item.vatType === "VAT_EXEMPT") {
+    //     // VAT-EXEMPT items remain as-is (gross == net)
+    //     grossVatExempt += gross;
+    //   } else if (item.vatType === "ZERO_RATED") {
+    //     grossZeroRated += gross;
+    //   }
+    // }
+
+    // vatableSales = round(vatableSales); // VAT-exclusive base subject to VAT
+    // const vatableBase = round(vatableBaseTotal); // VAT-exclusive base subject to VAT
+    // const vatAmount = round(vatableBase * VAT_RATE);
+    // const vatExemptSales = round(grossVatExempt + spExemptBaseTotal); // existing exempt + discounted VAT-exempt portion
+    // const zeroRatedSales = round(grossZeroRated);
+
+    // const netAmount = round(vatableBase + vatExemptSales + zeroRatedSales);
+    // const totalAmount = round(netAmount + vatAmount);
+
+    // return {
+    //   grossTotal: round(grossTotal),
+    //   total: formatCurrency(totalAmount, "PHP"),
+    //   regularDiscountAmount: 0,
+    //   specialDiscountAmount: round(spDiscountOnBase), // e.g. 50 for milk
+    //   vatableSales,
+    //   vatAmount,
+    //   vatExemptSales,
+    //   zeroRatedSales,
+    //   netAmount,
+    //   totalAmount,
+    // };
 
   }
 
