@@ -123,14 +123,16 @@ export const createInvoice = mutation({
       })
     ),
     currency: v.string(),
+    dueDate: v.optional(v.number()),
+
     // status
     status: v.optional(
       v.union(
         v.literal("DRAFT"),
-        v.literal("SENT"),
         v.literal("PAID"),
-        v.literal("UNPAID")
-      )
+        v.literal("OPEN"),
+        v.literal("OVERDUE"),
+      ),
     ),
   },
   handler: async (ctx, args) => {
@@ -268,6 +270,9 @@ export const createInvoice = mutation({
     // const invoiceNumber = `${prefix}-${currentYear}-${serialNumber.toString().padStart(5, "0")}`;
     const invoiceNumber = `${prefix}-${serialNumber.toString().padStart(8, "0")}`;
 
+    // invoice date created
+    const invoiceDate = Math.floor(Date.now() / 1000) // unix timestamp today
+
     const invoiceId = await ctx.db.insert("invoices", {
       // relationships
       userId: user._id,
@@ -319,6 +324,8 @@ export const createInvoice = mutation({
 
       // miscs.
       status: args.status ?? "DRAFT",
+      invoiceDate,
+      dueDate: args.dueDate,
       updatedAt: Math.floor(Date.now() / 1000),
     });
 
@@ -390,9 +397,9 @@ export const handleInvoiceStatus = mutation({
     invoiceId: v.id("invoices"),
     status: v.union(
       v.literal("DRAFT"),
-      v.literal("SENT"),
       v.literal("PAID"),
-      v.literal("UNPAID")
+      v.literal("OPEN"),
+      v.literal("OVERDUE"),
     ),
   },
   handler: async (ctx, { invoiceId, status }) => {

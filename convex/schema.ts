@@ -161,11 +161,13 @@ export default defineSchema({
     // draft = wag ibilang sa mga successful invoices
     status: v.union(
       v.literal("DRAFT"),
-      v.literal("SENT"),
       v.literal("PAID"),
-      v.literal("UNPAID")
+      v.literal("OPEN"),
+      v.literal("OVERDUE"),
     ),
     pdfUrl: v.optional(v.string()),
+    invoiceDate: v.number(),
+    dueDate: v.optional(v.number()),
     updatedAt: v.number(),
   })
     .index("by_user", ["userId"])
