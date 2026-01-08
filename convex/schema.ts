@@ -161,11 +161,13 @@ export default defineSchema({
     // draft = wag ibilang sa mga successful invoices
     status: v.union(
       v.literal("DRAFT"),
-      v.literal("SENT"),
       v.literal("PAID"),
-      v.literal("UNPAID")
+      v.literal("OPEN"),
+      v.literal("OVERDUE"),
     ),
     pdfUrl: v.optional(v.string()),
+    invoiceDate: v.number(),
+    dueDate: v.optional(v.number()),
     updatedAt: v.number(),
   })
     .index("by_user", ["userId"])
@@ -198,6 +200,9 @@ export default defineSchema({
       })
     ),
 
+    normalizedName: v.optional(v.string()),
+
+
     // TODO: Need to assess how to handle category properly and check if it is needed to be put in invoice
     // category: v.optional(
     //     v.union(
@@ -214,7 +219,8 @@ export default defineSchema({
     // isSpecialDiscountEligible: v.boolean(),
   })
     // .index("by_invoice", ["invoiceId"])
-    .index("by_user", ["userId"]),
+    .index("by_user", ["userId"])
+    .index("by_normalizedName", ["normalizedName"]),
   // branding
   branding: defineTable({
     userId: v.id("users"), //subscriber

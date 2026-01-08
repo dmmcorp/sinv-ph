@@ -241,7 +241,14 @@ function TestCasesPage() {
 
     // TEST CASE 25: Solo Parent discount (10%)
     const testCase25 = calculateInvoiceAmounts({
-      items: [{ unitPrice: 560, quantity: 2, vatType: "VATABLE" }],
+      items: [
+        {
+          unitPrice: 560,
+          quantity: 2,
+          vatType: "VATABLE",
+          legalFlags: { soloParentEligible: true },
+        },
+      ],
       taxType: "VAT",
       specialDiscountType: "SP",
     });
@@ -250,7 +257,12 @@ function TestCasesPage() {
     // TEST CASE 26: Solo Parent - Mixed VAT types
     const testCase26 = calculateInvoiceAmounts({
       items: [
-        { unitPrice: 1120, quantity: 1, vatType: "VATABLE" },
+        {
+          unitPrice: 1120,
+          quantity: 1,
+          vatType: "VATABLE",
+          legalFlags: { soloParentEligible: true },
+        },
         { unitPrice: 500, quantity: 1, vatType: "VAT_EXEMPT" },
       ],
       taxType: "MIXED",
@@ -261,7 +273,12 @@ function TestCasesPage() {
     // TEST CASE 27: Solo Parent - Multiple items with different quantities
     const testCase27 = calculateInvoiceAmounts({
       items: [
-        { unitPrice: 500, quantity: 3, vatType: "VATABLE" },
+        {
+          unitPrice: 500,
+          quantity: 3,
+          vatType: "VATABLE",
+          legalFlags: { soloParentEligible: true },
+        },
         { unitPrice: 750, quantity: 2, vatType: "VATABLE" },
       ],
       taxType: "VAT",
@@ -344,6 +361,40 @@ function TestCasesPage() {
       "TEST CASE 30: SP - Mixed (VAT-EXEMPT milk + VATABLE rice + VATABLE candy)",
       testCase30
     );
+    const testCase31 = calculateInvoiceAmounts({
+      items: [
+        {
+          unitPrice: 300,
+          quantity: 1,
+          vatType: "VAT_EXEMPT",
+          legalFlags: { soloParentEligible: true },
+        },
+      ],
+      taxType: "VAT_EXEMPT",
+      specialDiscountType: "SP",
+    });
+    console.log("TEST CASE 31", testCase31);
+
+    const testCase32 = calculateInvoiceAmounts({
+      items: [
+        {
+          unitPrice: 560,
+          quantity: 1,
+          vatType: "VATABLE",
+          legalFlags: { soloParentEligible: true }, // Milk
+        },
+        {
+          unitPrice: 1000,
+          quantity: 1,
+          vatType: "VATABLE",
+          legalFlags: { soloParentEligible: false }, // Electric Fan
+        },
+      ],
+      taxType: "VAT",
+      specialDiscountType: "SP",
+    });
+
+    console.log("TEST CASE 32", testCase32);
   }, []);
 
   return (
