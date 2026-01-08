@@ -164,3 +164,13 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+.headline {
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: 700;
+}
+
+.subhead {
+  font-size: clamp(1rem, 4vw, 1.5rem);
+  font-weight: 300;
+}

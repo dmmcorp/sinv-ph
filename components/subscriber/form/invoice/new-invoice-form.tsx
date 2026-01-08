@@ -65,6 +65,8 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
     }
     return;
   };
+
+  const rowCount = Math.max(5, selectedItems.length);
   return (
     <div className="relative border-t-primary border-t-5 flex flex-col min-h-185 bg-primary  lg:min-h-312 mx-auto border-2 shadow-lg p-4 lg:p-10 rounded-2xl space-y-5 lg:space-y-10 bg-white">
       <div className="flex justify-between ">
@@ -108,7 +110,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                     {/* <FormLabel>Client Name</FormLabel> */}
                     <FormControl>
                       <Input
-                        className="border-none font-semibold text-[0.6rem] sm:text-xs lg:text-lg shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
+                        className="capitalized border-none font-semibold text-[0.6rem] sm:text-xs lg:text-lg shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
                         placeholder="Enter client name"
                         disabled
                         {...field}
@@ -178,46 +180,46 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
             <div className="col-span-2 text-center">Amount</div>
           </div>
 
-          {selectedItems.length > 0
-            ? selectedItems.map((selectedItem, index) => (
-                <div
-                  key={selectedItem.description}
-                  className="grid grid-cols-12 text-center   gap-x-1 text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-xs  items-center border-t border-t-black/70 py-1 lg:py-2 border-b border-b-black"
-                >
-                  <div className="col-span-[0.5]">{index + 1}</div>
-                  <div className="col-span-6">{selectedItem.description}</div>
-                  <div className="col-span-2">
-                    {formatCurrency(selectedItem.price, selectedCurrency)}
-                  </div>
-                  <div className="col-span-[1.5] flex items-center justify-center gap-2">
-                    {selectedItem.quantity}
-                  </div>
-                  <div className="col-span-2">
-                    {}
-                    {formatCurrency(
-                      selectedItem.quantity * selectedItem.price,
+         {Array.from({ length: rowCount }).map((_, index) => {
+          const item = selectedItems[index];
+
+          return (
+            <div
+              key={index}
+              className="grid grid-cols-12 text-center gap-x-1  h-5 md:h-7 lg:h-7
+                        text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-xs
+                        items-center border-t border-t-black/70 
+                        border-b border-b-black py-1 lg:py-2"
+            >
+              <div className="col-span-[0.5]">
+                {item ? index + 1 : ""}
+              </div>
+
+              <div className="col-span-6">
+                {item?.description || ""}
+              </div>
+
+              <div className="col-span-2">
+                {item
+                  ? formatCurrency(item.price, selectedCurrency)
+                  : ""}
+              </div>
+
+              <div className="col-span-[1.5] flex items-center justify-center gap-2">
+                {item?.quantity || ""}
+              </div>
+
+              <div className="col-span-2">
+                {item
+                  ? formatCurrency(
+                      item.quantity * item.price,
                       selectedCurrency
-                    )}
-                  </div>
-                </div>
-              ))
-            : [1, 2, 3, 5].map((_, index) => (
-                <div
-                  key={index}
-                  className="grid grid-cols-12 text-center min-h-5 py-3  gap-x-1 text-xs items-center border-t border-t-black/70  border-b border-b-black"
-                >
-                  <div className="col-span-[0.5]">{}</div>
-                  <div className="col-span-6">{}</div>
-                  <div className="col-span-2">{}</div>
-                  <div className="col-span-[1.5] flex items-center justify-center gap-2">
-                    {}
-                  </div>
-                  <div className="col-span-2">
-                    {}
-                    {}
-                  </div>
-                </div>
-              ))}
+                    )
+                  : ""}
+              </div>
+            </div>
+          );
+        })}
           <div className="mt-2 lg:mt-4">
             <div className="grid grid-cols-12 gap-x-1  font-semibold text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-sm">
               <div className="col-span-8 "></div>

@@ -4,6 +4,7 @@ import "./globals.css";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { OnboardingGuard } from "@/components/guards/OnboardingGuard";
+import NavBar from "@/components/landing-page/navigation/nav-bar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,7 +13,7 @@ const geistSans = Geist({
 
 const poppinsFont = Poppins({
   subsets: ["latin"],
-  weight: ["400"],
+  weight: ["100", "200", "300", "400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -32,7 +33,9 @@ export default function RootLayout({
           className={`${geistSans.variable} ${poppinsFont.className} antialiased`}
         >
           <ConvexClientProvider>
-            <OnboardingGuard>{children}</OnboardingGuard>
+            <OnboardingGuard>
+              <NavBar/>
+              {children}</OnboardingGuard>
           </ConvexClientProvider>
         </body>
       </html>

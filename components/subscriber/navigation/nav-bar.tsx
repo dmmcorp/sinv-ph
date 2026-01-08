@@ -1,10 +1,9 @@
 "use client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import React from "react";
-import MobileNavigation from "./mobile-navigation";
+import MobileNavigation from "../../mobile-navigation";
 import { FileBox, LayoutDashboardIcon, Receipt, Users } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import UserAvatar from "./user-avatar";
+import UserAvatar from "../../user-avatar";
 import Link from "next/link";
 
 function NavBar() {
