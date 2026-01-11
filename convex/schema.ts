@@ -49,6 +49,7 @@ export default defineSchema({
     tin: v.optional(v.string()),
     address: v.string(),
     logoUrl: v.string(),
+    defaultTemplate: v.optional(v.id("userTemplates")), // existing
 
     updatedAt: v.number(),
   }).index("by_user", ["userId"]),
@@ -68,6 +69,8 @@ export default defineSchema({
   invoices: defineTable({
     userId: v.id("users"), // subscribers id
     clientId: v.id("clients"), // subscribers client id
+    userTemplateId: v.optional(v.id("userTemplates")), // template invoice
+    // templateId
 
     // sellers (store pa rin, because as per BIR old invoices should remain the same business name even if that specific business changed its name, address or tin already.)
     sellerBusinessName: v.optional(v.string()), //nadadag 12/17/2025
@@ -161,8 +164,8 @@ export default defineSchema({
     // draft = wag ibilang sa mga successful invoices
     status: v.union(
       v.literal("DRAFT"),
-      v.literal("PAID"),
-      v.literal("OPEN"),
+      v.literal("PAID"), // HAS OR = PAID
+      v.literal("OPEN"), // NO OR = NOT PAID
       v.literal("OVERDUE"),
     ),
     pdfUrl: v.optional(v.string()),
@@ -171,6 +174,7 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_user", ["userId"])
+    .index("by_userTempllates", ["userTemplateId"])
     .index("by_client", ["clientId"]),
 
   // items catalog table
@@ -222,14 +226,31 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_normalizedName", ["normalizedName"]),
   // branding
-  branding: defineTable({
-    userId: v.id("users"), //subscriber
 
-    // visuals
-    accentColor: v.string(),
-    headerLayout: v.string(),
-    logoUrl: v.optional(v.string()),
-    digitalSignatureUrl: v.optional(v.string()),
+  // 1st - 5 value (forest, sky)
+  // // 6th value
+  templates: defineTable({
+    // TEMPLATES = POSITIONING OF ITEMS / FONTS
+
+    // userId: v.id("users"),     // subscriber
+    templateId: v.string(),       // TEMPLATE NAME
+
+    // visuals color customization
+    primaryColor: v.string(),     // hex values // usually bold 10% of sales invoice template
+    secondaryColor: v.string(),   // hex values // usually normal text
+    headerColor: v.string(),      // hex values (header color for template)
+    backgroundColor: v.string(),  // hex values (background color)
+    // logoUrl: v.optional(v.string()),
+    // digitalSignatureUrl: v.optional(v.string()),
+  }),
+  userTemplates: defineTable({
+    userId: v.id("users"),
+    templateId: v.id("templates"),
+
+    primaryColor: v.string(),     // hex values // usually bold 10% of sales invoice template
+    secondaryColor: v.string(),   // hex values // usually normal text
+    headerColor: v.string(),      // hex values (header color for template)
+    backgroundColor: v.string(),  // hex values (background color)
   }),
   // invoice counter table for better scalability
   invoiceCounters: defineTable({
