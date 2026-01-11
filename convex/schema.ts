@@ -242,7 +242,8 @@ export default defineSchema({
     backgroundColor: v.string(),  // hex values (background color)
     // logoUrl: v.optional(v.string()),
     // digitalSignatureUrl: v.optional(v.string()),
-  }),
+  })
+    .index("by_template", ["templateId"]),
   userTemplates: defineTable({
     userId: v.id("users"),
     templateId: v.id("templates"),
@@ -251,7 +252,9 @@ export default defineSchema({
     secondaryColor: v.string(),   // hex values // usually normal text
     headerColor: v.string(),      // hex values (header color for template)
     backgroundColor: v.string(),  // hex values (background color)
-  }),
+  })
+    .index("by_user", ["userId"])
+    .index("by_template", ["templateId"]),
   // invoice counter table for better scalability
   invoiceCounters: defineTable({
     name: v.string(),

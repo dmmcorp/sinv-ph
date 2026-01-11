@@ -16,6 +16,7 @@ import type * as http from "../http.js";
 import type * as invoices from "../invoices.js";
 import type * as item_catalog from "../item_catalog.js";
 import type * as onboarding from "../onboarding.js";
+import type * as templates from "../templates.js";
 import type * as users from "../users.js";
 
 import type {
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   invoices: typeof invoices;
   item_catalog: typeof item_catalog;
   onboarding: typeof onboarding;
+  templates: typeof templates;
   users: typeof users;
 }>;
 
