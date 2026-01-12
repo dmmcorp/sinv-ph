@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
+import { Check, CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
@@ -48,10 +48,22 @@ export type Item = {
   unitPrice: number;
   description: string;
   vatType: "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED";
+  legalFlags?: {
+    scPwdEligible: boolean;
+    naacEligible: boolean;
+    movEligible: boolean;
+    spEligible: boolean;
+  };
 };
 
-const VAT = ["VAT_EXEMPT", "ZERO_RATED", "MIXED"];
+const VAT = ["VATABLE", "VAT_EXEMPT", "ZERO_RATED"];
 
+const LEGALFLAGSMAP = [
+  { label: "Senior Citizen/PWD Eligible", value: "scPwdEligible" },
+  { label: "NAAC Eligible", value: "naacEligible" },
+  { label: "MOV Eligible", value: "movEligible" },
+  { label: "SP Eligible", value: "spEligible" },
+];
 export function AddItemsDialog() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [step, setStep] = useState(0);
@@ -63,6 +75,17 @@ export function AddItemsDialog() {
   const { itemsCatalog, loading, addItemToDB } = useItemsCatalog();
   const [description, setDescription] = useState("");
   const { businessProfile } = useBusinessProfileStore();
+  const [legalFlags, setLegalFlags] = useState<{
+    scPwdEligible: boolean;
+    naacEligible: boolean;
+    movEligible: boolean;
+    soloParentEligible: boolean;
+  }>({
+    scPwdEligible: false,
+    naacEligible: false,
+    movEligible: false,
+    soloParentEligible: false
+  });
   const [price, setPrice] = useState(0);
   const { selectedItems, addItem, updateItemQuantity } = useInvoiceStore();
 
@@ -100,10 +123,10 @@ export function AddItemsDialog() {
       //step 3 - display it to the list in the ui
 
       //add item to the db
-      const result = await addItemToDB(description, price, vatType);
+      const result = await addItemToDB(description, price, vatType, legalFlags);
 
       if (!result) {
-        toast.error("Error: result not found");
+      
         return;
       }
       if (result && result.newItem === null) {
@@ -272,14 +295,16 @@ export function AddItemsDialog() {
                 />
               </div>
               {businessProfile?.businessType === "VAT-Registered Business" && (
+                <>
+       
                 <div className="space-y-2 mb-2">
                   <Label className="text-sm text-muted-foreground">Vat</Label>
                   <Select
                     defaultValue={vatType}
                     onValueChange={(value) => setVatType(value as VATTYPE)}
                   >
-                    <SelectTrigger className="w-full">
-                      <SelectValue>
+                    <SelectTrigger className="w-full bg-white">
+                      <SelectValue placeholder="Select Vat Type">
                         <span className="flex items-center gap-2">
                           <span>{vatType}</span>
                         </span>
@@ -296,33 +321,40 @@ export function AddItemsDialog() {
                     </SelectContent>
                   </Select>
                 </div>
+                <Label className="text-sm text-muted-foreground">Legal Eligibility Flags</Label>
+                <div className="space-y-2 mb-2 grid grid-cols-1">
+                  {LEGALFLAGSMAP.map((flag) => (
+                  <button
+                    key={flag.value}
+                    onClick={() => setLegalFlags({
+                      ...legalFlags,
+                      [flag.value]: !legalFlags[flag.value as keyof typeof legalFlags],
+                    })}
+                    className={`bg-white w-full text-left p-3 rounded-lg border transition-all flex flex-col ${
+                      legalFlags[flag.value as keyof typeof legalFlags]
+                        ? "border-primary bg-primary/5 ring-1 ring-primary"
+                        : "border-border hover:border-primary/50 hover:bg-muted/50"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2 ">
+                      <div className="space-y-1 min-w-0">
+                        <p className="font-normal text-sm truncate">
+                          {flag.label}
+                        </p>
+                      
+                      </div>
+                      {legalFlags[flag.value as keyof typeof legalFlags] && (
+                        <div className="shrink-0 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                          <Check className="h-3 w-3 text-primary-foreground" />
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                  ))}
+                </div>
+                </>
               )}
-              {/* <div className="space-y-2 mb-2">
-                <Label className="text-sm text-muted-foreground">
-                  Vat
-                </Label>
-                <Select
-                  defaultValue={vatType}
-                  onValueChange={(value) => setVatType(value as VATTYPE)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue>
-                      <span className="flex items-center gap-2">
-                        <span>{vatType}</span>
-                      </span>
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TAX_TYPES.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        <span className="flex items-center gap-2">
-                          <span>{type}</span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div> */}
+            
             </>
           )}
         </div>

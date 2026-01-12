@@ -9,6 +9,12 @@ export type SelectedItemType = {
   quantity: number;
   price: number;
   vatType: VATTYPE;
+  legalFlags?: {
+    scPwdEligible: boolean;
+    naacEligible: boolean;
+    movEligible: boolean;
+    spEligible: boolean;
+  };
 };
 
 //  id: number;
