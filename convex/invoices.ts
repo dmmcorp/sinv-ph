@@ -3,6 +3,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { TaxType } from "../lib/constants/TAX_TYPES";
+import { Id } from "./_generated/dataModel";
 
 // COUNTER SYNTAX:
 // INVOCE - TYPE OF INVOICE - BUSINESS ID - YEAR
@@ -337,23 +338,39 @@ export const createInvoice = mutation({
   },
 });
 
+// jh7553c3mahj1m82grmk02rj0d7z3es3
 export const getInvoiceById = query({
-  // 12/19/2025
-
   args: {
-    invoiceId: v.optional(v.id("invoices")),
+    invoiceId: v.id("invoices"),
   },
   handler: async (ctx, { invoiceId }) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
       throw new ConvexError("Not authenticated!");
     }
-    if (!invoiceId) {
-      return;
+
+    const invoice = await ctx.db.get(invoiceId);
+    if (!invoice) {
+      throw new ConvexError("Couldn't find invoice.")
     }
-    return await ctx.db.get(invoiceId);
+
+    if (invoice.userId !== userId) {
+      throw new ConvexError("Access denied.");
+    }
+
+    let userTemplate = null;
+    if (invoice.userTemplateId) {
+      userTemplate = await ctx.db
+        .get(invoice.userTemplateId)
+    }
+
+    return {
+      invoice,
+      userTemplate,
+    }
   },
 });
+
 export const getAllInvoices = query({
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);

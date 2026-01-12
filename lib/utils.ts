@@ -41,8 +41,14 @@ export const calculateInvoiceAmounts = (args: {
   specialDiscountType?: SpecialDiscountType;
 }) => {
 
-  if ((args.discountType || args.discountValue) && args.specialDiscountType) {
-    throw Error("You can't mix regular discount and special discount.");
+  const hasRegularDiscount =
+    args.discountValue !== undefined && args.discountValue > 0;
+  const hasSpecialDiscount =
+    args.specialDiscountType !== undefined &&
+    args.specialDiscountType !== null;
+
+  if (hasRegularDiscount && hasSpecialDiscount) {
+    throw new Error("You can't mix regular discount and special discount.");
   }
 console.log(args.items);
 console.log(args.specialDiscountType);

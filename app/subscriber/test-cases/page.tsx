@@ -1,464 +1,423 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { api } from "@/convex/_generated/api";
 import { calculateInvoiceAmounts } from "@/lib/utils";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useMutation, useQuery } from "convex/react";
 import { useEffect } from "react";
 
 function TestCasesPage() {
   const { signOut } = useAuthActions();
-  const data = useQuery(api.templates.getAllTemplates);
-  const template = useQuery(api.templates.getDefaultTemplate);
-  const makeDefault = useMutation(api.templates.makeDefaultTemplate);
 
-  if (!data || template === undefined) {
-    return <div>Loading…</div>;
-  }
+  useEffect(() => {
+    // VAT example (VATABLE item) (PASSED)
+    const vatExample = calculateInvoiceAmounts({
+      items: [{ unitPrice: 1120.37, quantity: 1, vatType: "VATABLE" }],
+      taxType: "VAT",
+    });
+    console.log("TEST CASE 1: Single VATABLE item — No discount", vatExample);
 
-  if (!template) return <div>No templates yet</div>;
+    // TEST CASE 2: Single VATABLE item — SC / PWD (PASSED)
+    const testCase2 = calculateInvoiceAmounts({
+      items: [{ unitPrice: 1120, quantity: 1, vatType: "VATABLE" }], // RAM
+      taxType: "VAT",
+      specialDiscountType: "SC",
+    });
+    console.log("TEST CASE 2: Single VATABLE item — SC / PWD", testCase2);
 
-  // useEffect(() => {
-  //   // VAT example (VATABLE item) (PASSED)
-  //   const vatExample = calculateInvoiceAmounts({
-  //     items: [{ unitPrice: 1120.37, quantity: 1, vatType: "VATABLE" }],
-  //     taxType: "VAT",
-  //   });
-  //   console.log("TEST CASE 1: Single VATABLE item — No discount", vatExample);
+    // TEST CASE 3: Single VAT-EXEMPT item — No discount (PASSED)
+    const testCase3 = calculateInvoiceAmounts({
+      items: [{ unitPrice: 500, quantity: 1, vatType: "VAT_EXEMPT" }],
+      taxType: "VAT_EXEMPT",
+    });
+    console.log("TEST CASE 3: Single VAT-EXEMPT item — No discount", testCase3);
 
-  //   // TEST CASE 2: Single VATABLE item — SC / PWD (PASSED)
-  //   const testCase2 = calculateInvoiceAmounts({
-  //     items: [{ unitPrice: 1120, quantity: 1, vatType: "VATABLE" }], // RAM
-  //     taxType: "VAT",
-  //     specialDiscountType: "SC",
-  //   });
-  //   console.log("TEST CASE 2: Single VATABLE item — SC / PWD", testCase2);
+    // TEST CASE 4: Single VAT-EXEMPT item — SC / PWD (PASSED)
+    const testCase4 = calculateInvoiceAmounts({
+      items: [{ unitPrice: 500, quantity: 1, vatType: "VAT_EXEMPT" }],
+      taxType: "VAT_EXEMPT",
+      specialDiscountType: "SC",
+    });
+    console.log("TEST CASE 4: Single VAT-EXEMPT item — SC / PWD", testCase4);
 
-  //   // TEST CASE 3: Single VAT-EXEMPT item — No discount (PASSED)
-  //   const testCase3 = calculateInvoiceAmounts({
-  //     items: [{ unitPrice: 500, quantity: 1, vatType: "VAT_EXEMPT" }],
-  //     taxType: "VAT_EXEMPT",
-  //   });
-  //   console.log("TEST CASE 3: Single VAT-EXEMPT item — No discount", testCase3);
+    // TEST CASE 5: Mixed: VATABLE + NON-VAT — No discount (PASSED)
+    const testCase5 = calculateInvoiceAmounts({
+      items: [
+        { unitPrice: 1120, quantity: 1, vatType: "VATABLE" },
+        { unitPrice: 500, quantity: 1, vatType: "VAT_EXEMPT" },
+      ],
+      taxType: "VAT",
+    });
+    console.log(
+      "TEST CASE 5: Mixed: VATABLE + NON-VAT — No discount",
+      testCase5
+    );
 
-  //   // TEST CASE 4: Single VAT-EXEMPT item — SC / PWD (PASSED)
-  //   const testCase4 = calculateInvoiceAmounts({
-  //     items: [{ unitPrice: 500, quantity: 1, vatType: "VAT_EXEMPT" }],
-  //     taxType: "VAT_EXEMPT",
-  //     specialDiscountType: "SC",
-  //   });
-  //   console.log("TEST CASE 4: Single VAT-EXEMPT item — SC / PWD", testCase4);
+    // TEST CASE 6: Mixed: VATABLE + NON-VAT — SC / PWD (PASSED)
+    const testCase6 = calculateInvoiceAmounts({
+      items: [
+        { unitPrice: 1120, quantity: 1, vatType: "VATABLE" },
+        { unitPrice: 500, quantity: 1, vatType: "VAT_EXEMPT" },
+      ],
+      taxType: "MIXED",
+      specialDiscountType: "PWD",
+    });
+    console.log("TEST CASE 6: Mixed: VATABLE + NON-VAT — SC / PWD", testCase6);
 
-  //   // TEST CASE 5: Mixed: VATABLE + NON-VAT — No discount (PASSED)
-  //   const testCase5 = calculateInvoiceAmounts({
-  //     items: [
-  //       { unitPrice: 1120, quantity: 1, vatType: "VATABLE" },
-  //       { unitPrice: 500, quantity: 1, vatType: "VAT_EXEMPT" },
-  //     ],
-  //     taxType: "VAT",
-  //   });
-  //   console.log(
-  //     "TEST CASE 5: Mixed: VATABLE + NON-VAT — No discount",
-  //     testCase5
-  //   );
+    // TEST CASE 7: Multiple VATABLE items — No discount (PASSED)
+    const testCase7 = calculateInvoiceAmounts({
+      items: [
+        { unitPrice: 560, quantity: 1, vatType: "VATABLE" },
+        { unitPrice: 560, quantity: 1, vatType: "VATABLE" },
+      ],
+      taxType: "VAT",
+    });
+    console.log("TEST CASE 7: Multiple VATABLE items — No discount", testCase7);
 
-  //   // TEST CASE 6: Mixed: VATABLE + NON-VAT — SC / PWD (PASSED)
-  //   const testCase6 = calculateInvoiceAmounts({
-  //     items: [
-  //       { unitPrice: 1120, quantity: 1, vatType: "VATABLE" },
-  //       { unitPrice: 500, quantity: 1, vatType: "VAT_EXEMPT" },
-  //     ],
-  //     taxType: "MIXED",
-  //     specialDiscountType: "PWD",
-  //   });
-  //   console.log("TEST CASE 6: Mixed: VATABLE + NON-VAT — SC / PWD", testCase6);
+    // TEST CASE 8: Multiple VATABLE items — SC / PWD (PASSED)
+    const testCase8 = calculateInvoiceAmounts({
+      items: [
+        { unitPrice: 560, quantity: 1, vatType: "VATABLE" },
+        { unitPrice: 560, quantity: 1, vatType: "VATABLE" },
+      ],
+      taxType: "VAT",
+      specialDiscountType: "SC", // senior citizen
+    });
+    console.log("TEST CASE 8: Multiple VATABLE items — SC / PWD", testCase8);
 
-  //   // TEST CASE 7: Multiple VATABLE items — No discount (PASSED)
-  //   const testCase7 = calculateInvoiceAmounts({
-  //     items: [
-  //       { unitPrice: 560, quantity: 1, vatType: "VATABLE" },
-  //       { unitPrice: 560, quantity: 1, vatType: "VATABLE" },
-  //     ],
-  //     taxType: "VAT",
-  //   });
-  //   console.log("TEST CASE 7: Multiple VATABLE items — No discount", testCase7);
+    // TEST CASE 9: Multiple NON-VAT items — No discount (PASSED)
+    const testCase9 = calculateInvoiceAmounts({
+      items: [
+        { unitPrice: 300, quantity: 1, vatType: "VAT_EXEMPT" },
+        { unitPrice: 200, quantity: 1, vatType: "VAT_EXEMPT" },
+      ],
+      taxType: "NON_VAT",
+    });
+    console.log("TEST CASE 9: Multiple NON-VAT items — No discount", testCase9);
 
-  //   // TEST CASE 8: Multiple VATABLE items — SC / PWD (PASSED)
-  //   const testCase8 = calculateInvoiceAmounts({
-  //     items: [
-  //       { unitPrice: 560, quantity: 1, vatType: "VATABLE" },
-  //       { unitPrice: 560, quantity: 1, vatType: "VATABLE" },
-  //     ],
-  //     taxType: "VAT",
-  //     specialDiscountType: "SC", // senior citizen
-  //   });
-  //   console.log("TEST CASE 8: Multiple VATABLE items — SC / PWD", testCase8);
+    // TEST CASE 10: Multiple NON-VAT items — SC / PWD (PASSED)
+    const testCase10 = calculateInvoiceAmounts({
+      items: [
+        { unitPrice: 300, quantity: 1, vatType: "VAT_EXEMPT" },
+        { unitPrice: 200, quantity: 1, vatType: "VAT_EXEMPT" },
+      ],
+      taxType: "VAT_EXEMPT",
+      specialDiscountType: "PWD",
+    });
 
-  //   // TEST CASE 9: Multiple NON-VAT items — No discount (PASSED)
-  //   const testCase9 = calculateInvoiceAmounts({
-  //     items: [
-  //       { unitPrice: 300, quantity: 1, vatType: "VAT_EXEMPT" },
-  //       { unitPrice: 200, quantity: 1, vatType: "VAT_EXEMPT" },
-  //     ],
-  //     taxType: "NON_VAT",
-  //   });
-  //   console.log("TEST CASE 9: Multiple NON-VAT items — No discount", testCase9);
+    console.log("TEST CASE 10: Multiple NON-VAT items — SC / PWD", testCase10);
 
-  //   // TEST CASE 10: Multiple NON-VAT items — SC / PWD (PASSED)
-  //   const testCase10 = calculateInvoiceAmounts({
-  //     items: [
-  //       { unitPrice: 300, quantity: 1, vatType: "VAT_EXEMPT" },
-  //       { unitPrice: 200, quantity: 1, vatType: "VAT_EXEMPT" },
-  //     ],
-  //     taxType: "VAT_EXEMPT",
-  //     specialDiscountType: "PWD",
-  //   });
+    // TEST CASE 11: Regular Discount (PASSED)
+    const testCase11 = calculateInvoiceAmounts({
+      items: [{ unitPrice: 300, quantity: 1, vatType: "VATABLE" }],
+      taxType: "VAT",
+      discountType: "PERCENT",
+      discountValue: 20,
+    });
+    console.log("TEST CASE 11: Regular Discount", testCase11);
 
-  //   console.log("TEST CASE 10: Multiple NON-VAT items — SC / PWD", testCase10);
+    // TEST CASE 12 — VATABLE, FIXED discount
+    const testCase12 = calculateInvoiceAmounts({
+      items: [{ unitPrice: 500, quantity: 1, vatType: "VATABLE" }],
+      taxType: "VAT",
+      discountType: "FIXED",
+      discountValue: 50,
+    });
+    console.log("TEST CASE 12: VATABLE, FIXED discount", testCase12);
 
-  //   // TEST CASE 11: Regular Discount (PASSED)
-  //   const testCase11 = calculateInvoiceAmounts({
-  //     items: [{ unitPrice: 300, quantity: 1, vatType: "VATABLE" }],
-  //     taxType: "VAT",
-  //     discountType: "PERCENT",
-  //     discountValue: 20,
-  //   });
-  //   console.log("TEST CASE 11: Regular Discount", testCase11);
+    // TEST CASE 13 — VATABLE, 10% discount
+    const testCase13 = calculateInvoiceAmounts({
+      items: [{ unitPrice: 1120, quantity: 1, vatType: "VATABLE" }],
+      taxType: "VAT",
+      discountType: "PERCENT",
+      discountValue: 10,
+    });
+    console.log("TEST CASE 13 — VATABLE, 10% discount", testCase13);
 
-  //   // TEST CASE 12 — VATABLE, FIXED discount
-  //   const testCase12 = calculateInvoiceAmounts({
-  //     items: [{ unitPrice: 500, quantity: 1, vatType: "VATABLE" }],
-  //     taxType: "VAT",
-  //     discountType: "FIXED",
-  //     discountValue: 50,
-  //   });
-  //   console.log("TEST CASE 12: VATABLE, FIXED discount", testCase12);
+    // TEST CASE 14 — NON_VAT, 20% discount
+    const testCase14 = calculateInvoiceAmounts({
+      items: [{ unitPrice: 400, quantity: 1, vatType: "VAT_EXEMPT" }],
+      taxType: "NON_VAT",
+      discountType: "PERCENT",
+      discountValue: 20,
+    });
+    console.log("TEST CASE 14 — NON_VAT, 20% discount", testCase14);
 
-  //   // TEST CASE 13 — VATABLE, 10% discount
-  //   const testCase13 = calculateInvoiceAmounts({
-  //     items: [{ unitPrice: 1120, quantity: 1, vatType: "VATABLE" }],
-  //     taxType: "VAT",
-  //     discountType: "PERCENT",
-  //     discountValue: 10,
-  //   });
-  //   console.log("TEST CASE 13 — VATABLE, 10% discount", testCase13);
+    // TEST CASE 15 — NON_VAT, FIXED discount
+    const testCase15 = calculateInvoiceAmounts({
+      items: [{ unitPrice: 250, quantity: 2, vatType: "VAT_EXEMPT" }],
+      taxType: "NON_VAT",
+      discountType: "FIXED",
+      discountValue: 50,
+    });
+    console.log("TEST CASE 15 — NON_VAT, FIXED discount", testCase15);
 
-  //   // TEST CASE 14 — NON_VAT, 20% discount
-  //   const testCase14 = calculateInvoiceAmounts({
-  //     items: [{ unitPrice: 400, quantity: 1, vatType: "VAT_EXEMPT" }],
-  //     taxType: "NON_VAT",
-  //     discountType: "PERCENT",
-  //     discountValue: 20,
-  //   });
-  //   console.log("TEST CASE 14 — NON_VAT, 20% discount", testCase14);
+    // TEST CASE 16 — Mixed, 10% discount
+    const testCase16 = calculateInvoiceAmounts({
+      items: [
+        { unitPrice: 300, quantity: 1, vatType: "VATABLE" },
+        { unitPrice: 200, quantity: 1, vatType: "VAT_EXEMPT" },
+      ],
+      taxType: "MIXED",
+      discountType: "PERCENT",
+      discountValue: 10,
+    });
+    console.log("TEST CASE 16 — Mixed, 10% discount", testCase16);
 
-  //   // TEST CASE 15 — NON_VAT, FIXED discount
-  //   const testCase15 = calculateInvoiceAmounts({
-  //     items: [{ unitPrice: 250, quantity: 2, vatType: "VAT_EXEMPT" }],
-  //     taxType: "NON_VAT",
-  //     discountType: "FIXED",
-  //     discountValue: 50,
-  //   });
-  //   console.log("TEST CASE 15 — NON_VAT, FIXED discount", testCase15);
+    // TEST CASE 17 - Mixed, FIXED discount (flat)
+    const testCase17 = calculateInvoiceAmounts({
+      items: [
+        { unitPrice: 560, quantity: 1, vatType: "VATABLE" },
+        { unitPrice: 240, quantity: 1, vatType: "VAT_EXEMPT" },
+      ],
+      taxType: "MIXED",
+      discountType: "FIXED",
+      discountValue: 100,
+    });
+    console.log("TEST CASE 17 - Mixed, FIXED discount (flat)", testCase17);
 
-  //   // TEST CASE 16 — Mixed, 10% discount
-  //   const testCase16 = calculateInvoiceAmounts({
-  //     items: [
-  //       { unitPrice: 300, quantity: 1, vatType: "VATABLE" },
-  //       { unitPrice: 200, quantity: 1, vatType: "VAT_EXEMPT" },
-  //     ],
-  //     taxType: "MIXED",
-  //     discountType: "PERCENT",
-  //     discountValue: 10,
-  //   });
-  //   console.log("TEST CASE 16 — Mixed, 10% discount", testCase16);
+    // TEST CASE 18 — VATABLE, small price + percent
+    const testCase18 = calculateInvoiceAmounts({
+      items: [{ unitPrice: 56, quantity: 1, vatType: "VATABLE" }],
+      taxType: "VAT",
+      discountType: "PERCENT",
+      discountValue: 10,
+    });
+    console.log("TEST CASE 18 — VATABLE, small price + percent", testCase18);
 
-  //   // TEST CASE 17 - Mixed, FIXED discount (flat)
-  //   const testCase17 = calculateInvoiceAmounts({
-  //     items: [
-  //       { unitPrice: 560, quantity: 1, vatType: "VATABLE" },
-  //       { unitPrice: 240, quantity: 1, vatType: "VAT_EXEMPT" },
-  //     ],
-  //     taxType: "MIXED",
-  //     discountType: "FIXED",
-  //     discountValue: 100,
-  //   });
-  //   console.log("TEST CASE 17 - Mixed, FIXED discount (flat)", testCase17);
+    // TEST CASE 19 - VATABLE, quantity + fixed
+    const testCase19 = calculateInvoiceAmounts({
+      items: [{ unitPrice: 120, quantity: 3, vatType: "VATABLE" }],
+      taxType: "VAT",
+      discountType: "FIXED",
+      discountValue: 60,
+    });
+    console.log("TEST CASE 19 - VATABLE, quantity + fixed", testCase19);
 
-  //   // TEST CASE 18 — VATABLE, small price + percent
-  //   const testCase18 = calculateInvoiceAmounts({
-  //     items: [{ unitPrice: 56, quantity: 1, vatType: "VATABLE" }],
-  //     taxType: "VAT",
-  //     discountType: "PERCENT",
-  //     discountValue: 10,
-  //   });
-  //   console.log("TEST CASE 18 — VATABLE, small price + percent", testCase18);
+    // TEST CASE 20 - NO DISCOUNT (CONTROL)
+    const testCase20 = calculateInvoiceAmounts({
+      items: [{ unitPrice: 180, quantity: 2, vatType: "VAT_EXEMPT" }],
+      taxType: "NON_VAT",
+    });
+    console.log("TEST CASE 20 - NO DISCOUNT (CONTOL)", testCase20);
 
-  //   // TEST CASE 19 - VATABLE, quantity + fixed
-  //   const testCase19 = calculateInvoiceAmounts({
-  //     items: [{ unitPrice: 120, quantity: 3, vatType: "VATABLE" }],
-  //     taxType: "VAT",
-  //     discountType: "FIXED",
-  //     discountValue: 60,
-  //   });
-  //   console.log("TEST CASE 19 - VATABLE, quantity + fixed", testCase19);
+    // TEST CASE 21 - ZERO RATED SALES
+    const testCase21 = calculateInvoiceAmounts({
+      items: [{ unitPrice: 100000, quantity: 1, vatType: "ZERO_RATED" }],
+      taxType: "ZERO_RATED",
+    });
+    console.log("TEST CASE 21: Zero-Rated Export Service", testCase21);
 
-  //   // TEST CASE 20 - NO DISCOUNT (CONTROL)
-  //   const testCase20 = calculateInvoiceAmounts({
-  //     items: [{ unitPrice: 180, quantity: 2, vatType: "VAT_EXEMPT" }],
-  //     taxType: "NON_VAT",
-  //   });
-  //   console.log("TEST CASE 20 - NO DISCOUNT (CONTOL)", testCase20);
+    // TEST CASE 22 - MIXED SALES NON VAT AND VATABLE
+    const testCase22 = calculateInvoiceAmounts({
+      items: [
+        { unitPrice: 20000, quantity: 1, vatType: "VATABLE" },
+        { unitPrice: 50000, quantity: 1, vatType: "ZERO_RATED" },
+      ],
+      taxType: "MIXED",
+    });
+    console.log("TEST CASE 22: Mixed VATABLE + Zero-Rated", testCase22);
 
-  //   // TEST CASE 21 - ZERO RATED SALES
-  //   const testCase21 = calculateInvoiceAmounts({
-  //     items: [{ unitPrice: 100000, quantity: 1, vatType: "ZERO_RATED" }],
-  //     taxType: "ZERO_RATED",
-  //   });
-  //   console.log("TEST CASE 21: Zero-Rated Export Service", testCase21);
+    // TEST CASE 23 - MIXED WITH ZERO RATED SPECIAL DISCOUNT
+    // const testCase23 = calculateInvoiceAmounts({
+    //   items: [
+    //     { unitPrice: 20000, quantity: 1, vatType: "VATABLE" },
+    //     { unitPrice: 50000, quantity: 1, vatType: "ZERO_RATED" },
+    //   ],
+    //   taxType: "MIXED",
+    //   specialDiscountType: "SC",
+    // });
+    // console.log("TEST CASE 23: Mixed VATABLE + Zero-Rated", testCase23);
 
-  //   // TEST CASE 22 - MIXED SALES NON VAT AND VATABLE
-  //   const testCase22 = calculateInvoiceAmounts({
-  //     items: [
-  //       { unitPrice: 20000, quantity: 1, vatType: "VATABLE" },
-  //       { unitPrice: 50000, quantity: 1, vatType: "ZERO_RATED" },
-  //     ],
-  //     taxType: "MIXED",
-  //   });
-  //   console.log("TEST CASE 22: Mixed VATABLE + Zero-Rated", testCase22);
+    // TEST CASE 24 - MIXED WITH ZERO RATED REGULAR DISCOUNT
+    const testCase24 = calculateInvoiceAmounts({
+      items: [
+        { unitPrice: 20000, quantity: 1, vatType: "VATABLE" },
+        { unitPrice: 50000, quantity: 1, vatType: "ZERO_RATED" },
+      ],
+      taxType: "MIXED",
+      discountType: "PERCENT",
+      discountValue: 20,
+    });
+    console.log("TEST CASE 24: Mixed VATABLE + Zero-Rated", testCase24);
 
-  //   // TEST CASE 23 - MIXED WITH ZERO RATED SPECIAL DISCOUNT
-  //   // const testCase23 = calculateInvoiceAmounts({
-  //   //   items: [
-  //   //     { unitPrice: 20000, quantity: 1, vatType: "VATABLE" },
-  //   //     { unitPrice: 50000, quantity: 1, vatType: "ZERO_RATED" },
-  //   //   ],
-  //   //   taxType: "MIXED",
-  //   //   specialDiscountType: "SC",
-  //   // });
-  //   // console.log("TEST CASE 23: Mixed VATABLE + Zero-Rated", testCase23);
+    // TEST CASE 25: Solo Parent discount (10%)
+    const testCase25 = calculateInvoiceAmounts({
+      items: [
+        {
+          unitPrice: 560,
+          quantity: 2,
+          vatType: "VATABLE",
+          legalFlags: { soloParentEligible: true },
+        },
+      ],
+      taxType: "VAT",
+      specialDiscountType: "SP",
+    });
+    console.log("TEST CASE 25: Solo Parent discount (10%)", testCase25);
 
-  //   // TEST CASE 24 - MIXED WITH ZERO RATED REGULAR DISCOUNT
-  //   const testCase24 = calculateInvoiceAmounts({
-  //     items: [
-  //       { unitPrice: 20000, quantity: 1, vatType: "VATABLE" },
-  //       { unitPrice: 50000, quantity: 1, vatType: "ZERO_RATED" },
-  //     ],
-  //     taxType: "MIXED",
-  //     discountType: "PERCENT",
-  //     discountValue: 20,
-  //   });
-  //   console.log("TEST CASE 24: Mixed VATABLE + Zero-Rated", testCase24);
+    // TEST CASE 26: Solo Parent - Mixed VAT types
+    const testCase26 = calculateInvoiceAmounts({
+      items: [
+        {
+          unitPrice: 1120,
+          quantity: 1,
+          vatType: "VATABLE",
+          legalFlags: { soloParentEligible: true },
+        },
+        { unitPrice: 500, quantity: 1, vatType: "VAT_EXEMPT" },
+      ],
+      taxType: "MIXED",
+      specialDiscountType: "SP",
+    });
+    console.log("TEST CASE 26: Solo Parent - Mixed VAT types", testCase26);
 
-  //   // TEST CASE 25: Solo Parent discount (10%)
-  //   const testCase25 = calculateInvoiceAmounts({
-  //     items: [
-  //       {
-  //         unitPrice: 560,
-  //         quantity: 2,
-  //         vatType: "VATABLE",
-  //         legalFlags: { soloParentEligible: true },
-  //       },
-  //     ],
-  //     taxType: "VAT",
-  //     specialDiscountType: "SP",
-  //   });
-  //   console.log("TEST CASE 25: Solo Parent discount (10%)", testCase25);
+    // TEST CASE 27: Solo Parent - Multiple items with different quantities
+    const testCase27 = calculateInvoiceAmounts({
+      items: [
+        {
+          unitPrice: 500,
+          quantity: 3,
+          vatType: "VATABLE",
+          legalFlags: { soloParentEligible: true },
+        },
+        { unitPrice: 750, quantity: 2, vatType: "VATABLE" },
+      ],
+      taxType: "VAT",
+      specialDiscountType: "SP",
+    });
+    console.log("TEST CASE 27: Solo Parent - Multiple items", testCase27);
 
-  //   // TEST CASE 26: Solo Parent - Mixed VAT types
-  //   const testCase26 = calculateInvoiceAmounts({
-  //     items: [
-  //       {
-  //         unitPrice: 1120,
-  //         quantity: 1,
-  //         vatType: "VATABLE",
-  //         legalFlags: { soloParentEligible: true },
-  //       },
-  //       { unitPrice: 500, quantity: 1, vatType: "VAT_EXEMPT" },
-  //     ],
-  //     taxType: "MIXED",
-  //     specialDiscountType: "SP",
-  //   });
-  //   console.log("TEST CASE 26: Solo Parent - Mixed VAT types", testCase26);
+    // TEST CASE 28: Solo Parent - Milk (eligible) + Electric Fan (not eligible)
+    const testCase28 = calculateInvoiceAmounts({
+      items: [
+        {
+          unitPrice: 560,
+          quantity: 1,
+          vatType: "VATABLE",
+          legalFlags: { soloParentEligible: true },
+        },
+        {
+          unitPrice: 1000,
+          quantity: 1,
+          vatType: "VATABLE",
+          legalFlags: { soloParentEligible: false },
+        },
+      ],
+      taxType: "VAT",
+      specialDiscountType: "SP",
+    });
+    console.log(
+      "TEST CASE 28: Solo Parent - Milk (eligible) + Fan (not eligible)",
+      testCase28
+    );
 
-  //   // TEST CASE 27: Solo Parent - Multiple items with different quantities
-  //   const testCase27 = calculateInvoiceAmounts({
-  //     items: [
-  //       {
-  //         unitPrice: 500,
-  //         quantity: 3,
-  //         vatType: "VATABLE",
-  //         legalFlags: { soloParentEligible: true },
-  //       },
-  //       { unitPrice: 750, quantity: 2, vatType: "VATABLE" },
-  //     ],
-  //     taxType: "VAT",
-  //     specialDiscountType: "SP",
-  //   });
-  //   console.log("TEST CASE 27: Solo Parent - Multiple items", testCase27);
+    const testCase29 = calculateInvoiceAmounts({
+      items: [
+        {
+          unitPrice: 1000,
+          quantity: 2,
+          vatType: "VATABLE",
+          legalFlags: { scPwdEligible: true },
+        },
+        {
+          unitPrice: 2000,
+          quantity: 1,
+          vatType: "VATABLE",
+          legalFlags: { scPwdEligible: false },
+        },
+      ],
+      taxType: "VAT",
+      specialDiscountType: "SC",
+    });
+    console.log(
+      "TEST CASE 29: SC/PWD - Medicine (eligible) + Gadget (not eligible)",
+      testCase29
+    );
 
-  //   // TEST CASE 28: Solo Parent - Milk (eligible) + Electric Fan (not eligible)
-  //   const testCase28 = calculateInvoiceAmounts({
-  //     items: [
-  //       {
-  //         unitPrice: 560,
-  //         quantity: 1,
-  //         vatType: "VATABLE",
-  //         legalFlags: { soloParentEligible: true },
-  //       },
-  //       {
-  //         unitPrice: 1000,
-  //         quantity: 1,
-  //         vatType: "VATABLE",
-  //         legalFlags: { soloParentEligible: false },
-  //       },
-  //     ],
-  //     taxType: "VAT",
-  //     specialDiscountType: "SP",
-  //   });
-  //   console.log(
-  //     "TEST CASE 28: Solo Parent - Milk (eligible) + Fan (not eligible)",
-  //     testCase28
-  //   );
+    const testCase30 = calculateInvoiceAmounts({
+      items: [
+        {
+          unitPrice: 300,
+          quantity: 1,
+          vatType: "VAT_EXEMPT",
+          legalFlags: { soloParentEligible: true },
+        },
+        {
+          unitPrice: 500,
+          quantity: 1,
+          vatType: "VATABLE",
+          legalFlags: { soloParentEligible: true },
+        },
+        {
+          unitPrice: 400,
+          quantity: 1,
+          vatType: "VATABLE",
+          legalFlags: { soloParentEligible: false },
+        },
+      ],
+      taxType: "MIXED",
+      specialDiscountType: "SP",
+    });
+    console.log(
+      "TEST CASE 30: SP - Mixed (VAT-EXEMPT milk + VATABLE rice + VATABLE candy)",
+      testCase30
+    );
+    const testCase31 = calculateInvoiceAmounts({
+      items: [
+        {
+          unitPrice: 300,
+          quantity: 1,
+          vatType: "VAT_EXEMPT",
+          legalFlags: { soloParentEligible: true },
+        },
+      ],
+      taxType: "VAT_EXEMPT",
+      specialDiscountType: "SP",
+    });
+    console.log("TEST CASE 31", testCase31);
 
-  //   const testCase29 = calculateInvoiceAmounts({
-  //     items: [
-  //       {
-  //         unitPrice: 1000,
-  //         quantity: 2,
-  //         vatType: "VATABLE",
-  //         legalFlags: { scPwdEligible: true },
-  //       },
-  //       {
-  //         unitPrice: 2000,
-  //         quantity: 1,
-  //         vatType: "VATABLE",
-  //         legalFlags: { scPwdEligible: false },
-  //       },
-  //     ],
-  //     taxType: "VAT",
-  //     specialDiscountType: "SC",
-  //   });
-  //   console.log(
-  //     "TEST CASE 29: SC/PWD - Medicine (eligible) + Gadget (not eligible)",
-  //     testCase29
-  //   );
+    const testCase32 = calculateInvoiceAmounts({
+      items: [
+        {
+          unitPrice: 560,
+          quantity: 1,
+          vatType: "VATABLE",
+          legalFlags: { soloParentEligible: true }, // Milk
+        },
+        {
+          unitPrice: 1000,
+          quantity: 1,
+          vatType: "VATABLE",
+          legalFlags: { soloParentEligible: false }, // Electric Fan
+        },
+      ],
+      taxType: "VAT",
+      specialDiscountType: "SP",
+    });
 
-  //   const testCase30 = calculateInvoiceAmounts({
-  //     items: [
-  //       {
-  //         unitPrice: 300,
-  //         quantity: 1,
-  //         vatType: "VAT_EXEMPT",
-  //         legalFlags: { soloParentEligible: true },
-  //       },
-  //       {
-  //         unitPrice: 500,
-  //         quantity: 1,
-  //         vatType: "VATABLE",
-  //         legalFlags: { soloParentEligible: true },
-  //       },
-  //       {
-  //         unitPrice: 400,
-  //         quantity: 1,
-  //         vatType: "VATABLE",
-  //         legalFlags: { soloParentEligible: false },
-  //       },
-  //     ],
-  //     taxType: "MIXED",
-  //     specialDiscountType: "SP",
-  //   });
-  //   console.log(
-  //     "TEST CASE 30: SP - Mixed (VAT-EXEMPT milk + VATABLE rice + VATABLE candy)",
-  //     testCase30
-  //   );
-  //   const testCase31 = calculateInvoiceAmounts({
-  //     items: [
-  //       {
-  //         unitPrice: 300,
-  //         quantity: 1,
-  //         vatType: "VAT_EXEMPT",
-  //         legalFlags: { soloParentEligible: true },
-  //       },
-  //     ],
-  //     taxType: "VAT_EXEMPT",
-  //     specialDiscountType: "SP",
-  //   });
-  //   console.log("TEST CASE 31", testCase31);
+    console.log("TEST CASE 32", testCase32);
 
-  //   const testCase32 = calculateInvoiceAmounts({
-  //     items: [
-  //       {
-  //         unitPrice: 560,
-  //         quantity: 1,
-  //         vatType: "VATABLE",
-  //         legalFlags: { soloParentEligible: true }, // Milk
-  //       },
-  //       {
-  //         unitPrice: 1000,
-  //         quantity: 1,
-  //         vatType: "VATABLE",
-  //         legalFlags: { soloParentEligible: false }, // Electric Fan
-  //       },
-  //     ],
-  //     taxType: "VAT",
-  //     specialDiscountType: "SP",
-  //   });
+    const testCase33 = calculateInvoiceAmounts({
+      items: [
+        {
+          unitPrice: 160,
+          quantity: 2,
+          vatType: "VATABLE",
+        },
+        {
+          unitPrice: 400,
+          quantity: 1,
+          vatType: "VATABLE",
+          legalFlags: { scPwdEligible: true }, // Medicine
+        },
+      ],
+      taxType: "VAT",
+      specialDiscountType: "SC",
+    });
 
-  //   console.log("TEST CASE 32", testCase32);
-  // }, []);
+    console.log("TEST CASE 33", testCase33);
+  }, []);
 
-  return (
-    <div>
-      <h1 style={{ color: template.primaryColor }}>primaryColor</h1>
-
-      <h2 style={{ color: template.secondaryColor }}>secondaryColor</h2>
-
-      <div
-        className="p-12 rounded-lg my-3"
-        style={{ backgroundColor: template.headerColor }}
-      >
-        {/* headerColor */}
-      </div>
-
-      <div
-        className="p-12 rounded-lg my-3"
-        style={{ backgroundColor: template.backgroundColor }}
-      >
-        {/* backgroundColor */}
-      </div>
-
-      <div className="space-y-3">
-        <p className="font-bold">DEFAULT:</p>
-        {data.templates.map((template) => (
-          <div key={template._id}>{template.primaryColor}</div>
-        ))}
-
-        <p className="font-bold">EXISTING:</p>
-        {data.existingUserTemplates.map((existingUserTemplate) => (
-          <div key={existingUserTemplate._id}>
-            {existingUserTemplate.primaryColor}
-            {template._id === existingUserTemplate._id ? (
-              <h2>Current Default Template</h2>
-            ) : (
-              <Button
-                onClick={async () => {
-                  await makeDefault({
-                    userTemplateId: existingUserTemplate._id,
-                  });
-                  alert("Template set as default!");
-                }}
-              >
-                Set as Default
-              </Button>
-            )}
-          </div>
-        ))}
-      </div>
-
-      <Button onClick={async () => await signOut()}>logout</Button>
-    </div>
-  );
+  return <Button onClick={async () => await signOut()}>logout</Button>;
 }
 
 export default TestCasesPage;

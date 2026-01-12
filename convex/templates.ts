@@ -101,7 +101,11 @@ export const editUserTemplate = mutation({
 
         return await ctx.db
             .patch(userTemplate._id, {
-                ...args,
+                _id: args.userTemplateId,
+                primaryColor: args.primaryColor,
+                secondaryColor: args.secondaryColor,
+                headerColor: args.headerColor,
+                backgroundColor: args.backgroundColor,
             })
     }
 })
@@ -128,7 +132,6 @@ export const getDefaultTemplate = query({
     }
 })
 
-// TODO: MAKE DEFAULT TEMPLATE MUTATION
 export const makeDefaultTemplate = mutation({
     args: {
         userTemplateId: v.id("userTemplates"),
@@ -158,4 +161,5 @@ export const makeDefaultTemplate = mutation({
         return true;
     }
 })
-// TODO: 
+
+// TODO: changeInvoiceUserTemplate
