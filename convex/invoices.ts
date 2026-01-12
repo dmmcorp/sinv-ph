@@ -125,6 +125,9 @@ export const createInvoice = mutation({
     currency: v.string(),
     dueDate: v.optional(v.number()),
 
+    // visuals x templates
+    userTemplateId: v.optional(v.id("userTemplates")),
+
     // status
     status: v.optional(
       v.union(
@@ -323,6 +326,7 @@ export const createInvoice = mutation({
       totalAmount: amounts.totalAmount,
 
       // miscs.
+      userTemplateId: args.userTemplateId,
       status: args.status ?? "DRAFT",
       invoiceDate,
       dueDate: args.dueDate,
@@ -433,3 +437,5 @@ export const handleInvoiceStatus = mutation({
     });
   },
 });
+
+// TODO: Edit user template invoice
