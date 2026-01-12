@@ -25,16 +25,6 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
   const { businessProfile } = useBusinessProfileSync();
   const total = useCalculateInvioceAmount();
 
-  // const {
-  //   // invoiceType,
-  //   // selectedCurrency,
-  //   // includeTax,
-  //   // includeDiscount,
-  //   // discountValue,
-  //   // isPercentage,
-  //   // selectedItems,
-    
-  // } = useInvoiceStore();
   const invoice = useInvoiceStore();
 
   // 2. Define a submit handler.
@@ -272,7 +262,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                     
                     { invoice.isSpecialDiscount ? (
                     formatCurrency(
-                        total.specialDiscountAmount,
+                        total.specialDiscountAmount, 
                         invoice.selectedCurrency
                       )
                     ) : (

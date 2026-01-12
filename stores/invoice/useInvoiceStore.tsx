@@ -10,10 +10,10 @@ export type SelectedItemType = {
   price: number;
   vatType: VATTYPE;
   legalFlags?: {
-    scPwdEligible: boolean;
-    naacEligible: boolean;
-    movEligible: boolean;
-    spEligible: boolean;
+    scPwdEligible?: boolean;
+    naacEligible?: boolean;
+    movEligible?: boolean;
+    soloParentEligible?: boolean; 
   };
 };
 

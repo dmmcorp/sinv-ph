@@ -14,18 +14,25 @@ export const useCalculateInvioceAmount = () => {
       quantity: item.quantity,
       unitPrice: item.price,
       vatType: item.vatType,
+      legalFlags: item.legalFlags,
     };
   });
-  const discountType = invoice.isPercentage ? "PERCENT" : "FIXED";
+  const discountType = invoice.isSpecialDiscount ? undefined : invoice.isPercentage ? "PERCENT" : "FIXED";
   const data = {
     items: removeIds,
-    discountType: discountType as DiscountType,
+    discountType: discountType as DiscountType | undefined,
     discountValue: Number(invoice.discountValue) ?? 0,
+    isSpecialDiscount: invoice.isSpecialDiscount,
+    specialDiscountType: invoice.selectedSpecialDiscounts as
+      | SpecialDiscountType
+      | undefined,
+    includeTax: invoice.includeTax,
   };
   const {
     grossTotal,
     // Discounts
     regularDiscountAmount,
+ 
     specialDiscountAmount,
     // BIR-required sales breakdown
     vatableSales,
