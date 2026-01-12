@@ -454,5 +454,3 @@ export const handleInvoiceStatus = mutation({
     });
   },
 });
-
-// TODO: Edit user template invoice

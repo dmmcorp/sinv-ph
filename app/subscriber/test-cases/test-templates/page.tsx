@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { randomHexColor } from "@/lib/utils";
 import { useMutation, useQuery } from "convex/react";
 
 const TestTemplates = () => {
@@ -12,6 +13,8 @@ const TestTemplates = () => {
   const invoiceData = useQuery(api.invoices.getInvoiceById, {
     invoiceId: "jh7553c3mahj1m82grmk02rj0d7z3es3" as Id<"invoices">,
   });
+  const changeTemplate = useMutation(api.templates.changeInvoiceUserTemplate);
+  const editTemplate = useMutation(api.templates.editUserTemplate);
 
   if (!data || template === undefined) {
     return <div>Loading…</div>;
@@ -22,6 +25,14 @@ const TestTemplates = () => {
   const { invoice, userTemplate } = invoiceData;
 
   if (!template) return <div>No templates yet</div>;
+
+  const toChangeUserTemplate =
+    userTemplate?._id === "m578acr0axkctd2cz9wp73bfyn7z3e6z"
+      ? "m577vhzev4c76hhx313qb7as6n7z2hr6"
+      : "m578acr0axkctd2cz9wp73bfyn7z3e6z";
+
+  const userTemplateId =
+    "m578acr0axkctd2cz9wp73bfyn7z3e6z" as Id<"userTemplates">;
 
   return (
     <div>
@@ -45,6 +56,17 @@ const TestTemplates = () => {
 
       <div>
         invoice with defined user template
+        <Button
+          onClick={async () => {
+            await changeTemplate({
+              invoiceId: invoice._id,
+              userTemplateId: toChangeUserTemplate as Id<"userTemplates">,
+            });
+            alert("Template changed!");
+          }}
+        >
+          Change Template
+        </Button>
         <h1 style={{ color: userTemplate?.primaryColor }}>
           Buyer Name: {invoice.buyerName}
         </h1>
@@ -64,6 +86,32 @@ const TestTemplates = () => {
           {/* backgroundColor with user template */}
         </div>
       </div>
+
+      <Button
+        onClick={async () => {
+          await editTemplate({
+            userTemplateId,
+            primaryColor: randomHexColor(),
+          });
+          alert("Primary color updated");
+        }}
+        className="mr-5"
+      >
+        Change Primary Color
+      </Button>
+
+      <Button
+        onClick={async () => {
+          await editTemplate({
+            userTemplateId,
+            headerColor: randomHexColor(),
+            backgroundColor: randomHexColor(),
+          });
+          alert("Header + Background updated");
+        }}
+      >
+        Change Header + Background
+      </Button>
 
       <div className="space-y-3">
         <p className="font-bold">DEFAULT:</p>

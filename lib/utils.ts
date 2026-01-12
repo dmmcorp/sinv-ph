@@ -598,3 +598,9 @@ export function formatTIN(value: string) {
     .slice(0, 12) // max 12 digits
     .replace(/(\d{3})(?=\d)/g, "$1-");
 }
+
+export const randomHexColor = () => {
+  return `#${Math.floor(Math.random() * 0xffffff)
+    .toString(16)
+    .padStart(6, "0")}`;
+};
