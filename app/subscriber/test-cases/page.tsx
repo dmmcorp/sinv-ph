@@ -3,17 +3,16 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import { calculateInvoiceAmounts } from "@/lib/utils";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { useEffect } from "react";
 
 function TestCasesPage() {
   const { signOut } = useAuthActions();
   const data = useQuery(api.templates.getAllTemplates);
   const template = useQuery(api.templates.getDefaultTemplate);
+  const makeDefault = useMutation(api.templates.makeDefaultTemplate);
 
-  if (!data) return <div>Loading…</div>;
-
-  if (template === undefined) {
+  if (!data || template === undefined) {
     return <div>Loading…</div>;
   }
 
@@ -429,14 +428,30 @@ function TestCasesPage() {
         {/* backgroundColor */}
       </div>
 
-      <div>
+      <div className="space-y-3">
+        <p className="font-bold">DEFAULT:</p>
         {data.templates.map((template) => (
           <div key={template._id}>{template.primaryColor}</div>
         ))}
 
+        <p className="font-bold">EXISTING:</p>
         {data.existingUserTemplates.map((existingUserTemplate) => (
           <div key={existingUserTemplate._id}>
             {existingUserTemplate.primaryColor}
+            {template._id === existingUserTemplate._id ? (
+              <h2>Current Default Template</h2>
+            ) : (
+              <Button
+                onClick={async () => {
+                  await makeDefault({
+                    userTemplateId: existingUserTemplate._id,
+                  });
+                  alert("Template set as default!");
+                }}
+              >
+                Set as Default
+              </Button>
+            )}
           </div>
         ))}
       </div>

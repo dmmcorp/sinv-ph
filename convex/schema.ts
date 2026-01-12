@@ -248,6 +248,8 @@ export default defineSchema({
     userId: v.id("users"),
     templateId: v.id("templates"),
 
+    // TODO: Template name just like in the templates table???
+
     primaryColor: v.string(),     // hex values // usually bold 10% of sales invoice template
     secondaryColor: v.string(),   // hex values // usually normal text
     headerColor: v.string(),      // hex values (header color for template)

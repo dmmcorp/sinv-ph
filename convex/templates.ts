@@ -129,4 +129,33 @@ export const getDefaultTemplate = query({
 })
 
 // TODO: MAKE DEFAULT TEMPLATE MUTATION
+export const makeDefaultTemplate = mutation({
+    args: {
+        userTemplateId: v.id("userTemplates"),
+    },
+    handler: async (ctx, { userTemplateId }) => {
+        const userId = await getAuthUserId(ctx);
+        if (!userId) {
+            throw new ConvexError("Not authenticated!");
+        }
+
+        const businessProfile = await ctx.db
+            .query("business_profile")
+            .withIndex("by_user", q => q.eq("userId", userId))
+            .first()
+
+        if (!businessProfile) {
+            throw new ConvexError(
+                "Couldn't find business profile, make sure onboarding is complete."
+            );
+        }
+
+        await ctx.db
+            .patch(businessProfile._id, {
+                defaultTemplate: userTemplateId
+            })
+
+        return true;
+    }
+})
 // TODO: 
