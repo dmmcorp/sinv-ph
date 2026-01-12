@@ -15,6 +15,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { api } from "@/convex/_generated/api";
 import { useCalculateInvioceAmount } from "@/hooks/use-calculate-invoice-amount";
+import { SPECIAL_DISCOUNT_TYPES, SPECIAL_DISCOUNT_TYPES_MAP } from "@/lib/constants/DISCOUNT_TYPES";
 import { INVOICE_TYPES } from "@/lib/constants/INVOICE_TYPES";
 import { INVOiCETYPE } from "@/lib/types";
 import useBusinessProfileStore from "@/stores/business-profile/useBusinessProfileStore";
@@ -239,7 +240,39 @@ function ActionsCard() {
           </div>
           {invoice.includeDiscount && (
             <div className="space-y-3 rounded-md border p-3 bg-muted/30">
-              <div className="space-y-2">
+              {invoice.isSpecialDiscount ? (
+                <div className="space-y-2">
+               
+                <div className="relative">
+                  <Select
+                    defaultValue={invoice.selectedSpecialDiscounts}
+                    onValueChange={(value) =>
+                      invoice.setSelectedSpecialDiscounts(value as any)
+                    }
+                    
+                  >
+                    <SelectTrigger className="w-full bg-white">
+                      <SelectValue placeholder="Select Special Discount Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SPECIAL_DISCOUNT_TYPES_MAP.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {errors.has("INVALID_DISCOUNT") && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {invoice.isPercentage
+                      ? "Discount cannot exceed 100%."
+                      : "Discount amount cannot be greater than the amount due."}
+                  </p>
+                )}
+              </div>
+              ): (
+                <div className="space-y-2">
                 <Label
                   htmlFor="discount-value"
                   className="text-sm text-muted-foreground"
@@ -275,19 +308,40 @@ function ActionsCard() {
                   </p>
                 )}
               </div>
+              )}
+              
+              {!invoice.isSpecialDiscount && (
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="is-percentage"
+                    checked={invoice.isPercentage}
+                    onCheckedChange={(checked) =>
+                      invoice.setIsPercentage(checked === true)
+                    }
+                  />
+                  <Label
+                    htmlFor="is-percentage"
+                    className="text-sm text-muted-foreground cursor-pointer"
+                  >
+                    Discount by percentage
+                  </Label>
+                </div>
+              )}
               <div className="flex items-center gap-2">
                 <Checkbox
-                  id="is-percentage"
-                  checked={invoice.isPercentage}
-                  onCheckedChange={(checked) =>
-                    invoice.setIsPercentage(checked === true)
-                  }
+                  id="is-special-discount"
+                  checked={invoice.isSpecialDiscount}
+                  onCheckedChange={(checked) => {
+                    invoice.setIsSpecialDiscount(checked === true);
+                    invoice.scIdNumber = "";
+                    invoice.setSelectedSpecialDiscounts(undefined);
+                  }}
                 />
                 <Label
-                  htmlFor="is-percentage"
+                  htmlFor="is-special-discount"
                   className="text-sm text-muted-foreground cursor-pointer"
                 >
-                  Discount by percentage
+                  Special Discount
                 </Label>
               </div>
             </div>

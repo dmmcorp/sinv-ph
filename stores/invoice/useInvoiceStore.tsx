@@ -2,7 +2,7 @@
 import { Id } from "@/convex/_generated/dataModel";
 import { INVOiCETYPE, VATTYPE } from "@/lib/types";
 import { create } from "zustand";
-
+import { SPECIAL_DISCOUNT_TYPES } from "@/lib/constants/DISCOUNT_TYPES";
 export type SelectedItemType = {
   _id: Id<"itemCatalog">;
   description: string;
@@ -27,6 +27,10 @@ interface InvoiceStoreType {
   step: number;
   discountValue: string;
   isPercentage: boolean;
+  isSpecialDiscount: boolean;
+  selectedSpecialDiscounts?: "SC" | "PWD" | "NAAC" | "MOV" | "SP";
+  scIdNumber: string; // for senior citizen id number or any government id number
+
 
   selectedItems: SelectedItemType[];
 
@@ -40,6 +44,9 @@ interface InvoiceStoreType {
   setStep: (value: number) => void;
   setInvoiceNo: (value: string) => void;
   setInvoiceType: (value: INVOiCETYPE) => void;
+  setIsSpecialDiscount: (value: boolean) => void;
+  setSelectedSpecialDiscounts: (value: "SC" | "PWD" | "NAAC" | "MOV" | "SP" | undefined) => void;
+  setScIdNumber: (value: string) => void;
   setDiscountValue: (value: string) => void;
   setIsPercentage: (value: boolean) => void;
 
@@ -60,6 +67,8 @@ const initialInvoiceState = {
   step: 0,
   discountValue: "",
   isPercentage: false,
+  isSpecialDiscount: false,
+  scIdNumber: "", // for senior citizen id number or any government id number
   selectedItems: [],
 };
 
@@ -73,7 +82,9 @@ export const useInvoiceStore = create<InvoiceStoreType>((set) => ({
   step: 0,
   discountValue: "",
   isPercentage: false,
-
+  isSpecialDiscount: false,
+  scIdNumber: "", // for senior citizen id number or any government id number
+  selectedSpecialDiscounts: undefined,
   selectedItems: [],
 
   // ACTIONS
@@ -88,6 +99,9 @@ export const useInvoiceStore = create<InvoiceStoreType>((set) => ({
   setStep: (value) => set({ step: value }),
   setDiscountValue: (value) => set({ discountValue: value }),
   setIsPercentage: (value) => set({ isPercentage: value }),
+  setIsSpecialDiscount: (value) => set({ isSpecialDiscount: value }),
+  setScIdNumber: (value) => set({ scIdNumber: value }),
+  setSelectedSpecialDiscounts: (value) => set({ selectedSpecialDiscounts: value }),
 
   addItem: (item) =>
     set((state) => ({
