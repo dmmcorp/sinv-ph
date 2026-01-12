@@ -25,15 +25,17 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
   const { businessProfile } = useBusinessProfileSync();
   const total = useCalculateInvioceAmount();
 
-  const {
-    invoiceType,
-    selectedCurrency,
-    includeTax,
-    includeDiscount,
-    discountValue,
-    isPercentage,
-    selectedItems,
-  } = useInvoiceStore();
+  // const {
+  //   // invoiceType,
+  //   // selectedCurrency,
+  //   // includeTax,
+  //   // includeDiscount,
+  //   // discountValue,
+  //   // isPercentage,
+  //   // selectedItems,
+    
+  // } = useInvoiceStore();
+  const invoice = useInvoiceStore();
 
   // 2. Define a submit handler.
   const formatedTin = () => {
@@ -66,7 +68,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
     return;
   };
 
-  const rowCount = Math.max(5, selectedItems.length);
+  const rowCount = Math.max(5, invoice.selectedItems.length);
   return (
     <div className="relative border-t-primary border-t-5 flex flex-col min-h-185 bg-primary  lg:min-h-312 mx-auto border-2 shadow-lg p-4 lg:p-10 rounded-2xl space-y-5 lg:space-y-10 bg-white">
       <div className="flex justify-between ">
@@ -93,7 +95,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
             {businessProfile?.address}
           </h5>
         </div>
-        <h1 className="text-lg lg:text-2xl"> {invoiceType} INVOICE</h1>
+        <h1 className="text-lg lg:text-2xl"> {invoice.invoiceType} INVOICE</h1>
       </div>
       <div className="flex-1 space-y-4 lg:space-y-8 ">
         <div className="flex justify-between">
@@ -101,7 +103,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
             <h3 className="text-[0.6rem] sm:text-xs lgtext-base font-normal">
               Bill To
             </h3>
-            <div className="">
+            <div className="">  
               <FormField
                 control={form.control}
                 name="clientName"
@@ -181,7 +183,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
           </div>
 
          {Array.from({ length: rowCount }).map((_, index) => {
-          const item = selectedItems[index];
+          const item = invoice.selectedItems[index];
 
           return (
             <div
@@ -201,7 +203,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
 
               <div className="col-span-2">
                 {item
-                  ? formatCurrency(item.price, selectedCurrency)
+                  ? formatCurrency(item.price, invoice.selectedCurrency)
                   : ""}
               </div>
 
@@ -213,7 +215,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                 {item
                   ? formatCurrency(
                       item.quantity * item.price,
-                      selectedCurrency
+                      invoice.selectedCurrency
                     )
                   : ""}
               </div>
@@ -225,10 +227,10 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
               <div className="col-span-8 "></div>
               <div className="col-span-2 text-right"> Subtotal:</div>
               <div className="col-span-2 text-center ">
-                {formatCurrency(total.grossTotal, selectedCurrency)}
+                {formatCurrency(total.grossTotal, invoice.selectedCurrency)}
               </div>
             </div>
-            {includeTax && (
+            {invoice.includeTax && (
               <>
                 <div className="grid grid-cols-12 gap-x-1  font-semibold text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-xs">
                   <div className="col-span-8 "></div>
@@ -241,14 +243,14 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                   <div className="col-span-8 "></div>
                   <div className="col-span-2 text-right font-light"> VAT:</div>
                   <div className="col-span-2 text-center font-light">
-                    {formatCurrency(total.vatAmount, selectedCurrency)}
+                    {formatCurrency(total.vatAmount, invoice.selectedCurrency)}
                   </div>
                 </div>
               </>
             )}
-            {includeDiscount && (
+            {invoice.includeDiscount && (
               <>
-                {isPercentage && (
+                {invoice.isPercentage && (
                   <div className="grid grid-cols-12 gap-x-1  font-semibold text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-xs">
                     <div className="col-span-6 "></div>
                     <div className="col-span-4 text-right font-light">
@@ -256,7 +258,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                       Discount %:
                     </div>
                     <div className="col-span-2 text-center font-light">
-                      {discountValue}%
+                      {invoice.discountValue}%
                     </div>
                   </div>
                 )}
@@ -267,10 +269,19 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                     Discount Amount:
                   </div>
                   <div className="col-span-2 text-center font-light">
-                    {formatCurrency(
-                      total.regularDiscountAmount,
-                      selectedCurrency
-                    )}
+                    
+                    { invoice.isSpecialDiscount ? (
+                    formatCurrency(
+                        total.specialDiscountAmount,
+                        invoice.selectedCurrency
+                      )
+                    ) : (
+                      formatCurrency(
+                        total.regularDiscountAmount,
+                        invoice.selectedCurrency
+                      )
+                    )}<br />
+
                   </div>
                 </div>
               </>
@@ -283,14 +294,14 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                 Total Amount:
               </div>
               <div className="col-span-2 text-center ">
-                {formatCurrency(total.totalAmount, selectedCurrency)}
+                {formatCurrency(total.totalAmount, invoice.selectedCurrency)}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {!includeTax && (
+      {!invoice.includeTax && (
         <div className="mt-auto  w-fit mx-auto">
           <h1 className="text-red-600 text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-xl uppercase text-center">
             &quot;This document is not valid for claim of input tax.&quot;

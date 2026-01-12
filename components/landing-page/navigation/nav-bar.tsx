@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import UserAvatar from "@/components/user-avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 function NavBar() {
   const isMobile = useIsMobile();
+  const pathname = usePathname();
   return (
-    <div className="fixed  w-full px-5 lg:px-10 mx-auto  flex items-center justify-between py-5 bg-white/80 backdrop-blur-md z-50">
+    <div className={`${pathname === '/' ? 'fixed' : 'hidden'}  w-full px-5 lg:px-10 mx-auto  flex items-center justify-between py-5 bg-white/80 backdrop-blur-md z-50`}>
       <div className="logo flex items-center gap-2">
     <SinvphLogo />
       </div>

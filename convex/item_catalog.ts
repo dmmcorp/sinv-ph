@@ -52,7 +52,15 @@ export const createItem = mutation({
         v.literal("ZERO_RATED") // 0% VAT (exports)
         // v.literal("NON_VAT") // Not subject to VAT
       ),
-    )
+    ),
+    legalFlags: v.optional(
+      v.object({
+        scPwdEligible: v.optional(v.boolean()),
+        soloParentEligible: v.optional(v.boolean()),
+        naacEligible: v.optional(v.boolean()),
+        movEligible: v.optional(v.boolean()),
+      })
+    ),
     // category: v.optional(
     //   v.union(
     //     v.literal("GOODS"),
@@ -68,6 +76,7 @@ export const createItem = mutation({
     description,
     unitPrice,
     vatType,
+    legalFlags,
   }) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
@@ -132,6 +141,7 @@ export const createItem = mutation({
       unitPrice,
       vatType: inferredVatType,
       isActive: true,
+      legalFlags,
       normalizedName,
     });
 
