@@ -32,7 +32,7 @@ export const calculateInvoiceAmounts = (args: {
       scPwdEligible?: boolean;
       soloParentEligible?: boolean;
       naacEligible?: boolean;
-      movEligible?: boolean;
+      movEligible?: boolean; 
     };
   }[];
   taxType?: TaxType;
@@ -44,7 +44,8 @@ export const calculateInvoiceAmounts = (args: {
   if ((args.discountType || args.discountValue) && args.specialDiscountType) {
     throw Error("You can't mix regular discount and special discount.");
   }
-
+console.log(args.items);
+console.log(args.specialDiscountType);
   const isItemEligibleForSpecialDiscount = (
     item: (typeof args.items)[0],
     discountType: SpecialDiscountType | undefined

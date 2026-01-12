@@ -23,7 +23,7 @@ export const SPECIAL_DISCOUNT_TYPES_MAP = [
     label: "Person With Disability",
 },{
     value: "NAAC",
-    label: "N/A Accredited Company",
+    label: "National Athletes And Coaches",
 },{
     value: "MOV",
     label: "Military Officer/Veteran",

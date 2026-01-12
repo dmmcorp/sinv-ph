@@ -17,7 +17,7 @@ export default function Home() {
           <h1 className="headline font-bold text-left leading-none">Create <span className="text-primary">Invoices</span> <br />In Minutes</h1>
           <p className="subhead my-6 text-left">Easily make simple invoices for <span className="font-semibold">freelancers</span> and <span className="font-semibold">Philippine businesses</span>, with support for <span className="font-semibold">BIR-registered setups</span>.</p>
           <div className="text-left">
-          <Link href="/invoice/new">
+          <Link href="/subscriber/invoices/new">
           
             <Button variant={'default'} >Start Invoicing <ArrowRightIcon className="ml-2 h-4 w-4" /></Button>
           </Link>

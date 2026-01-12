@@ -335,6 +335,9 @@ function ActionsCard() {
                     invoice.setIsSpecialDiscount(checked === true);
                     invoice.scIdNumber = "";
                     invoice.setSelectedSpecialDiscounts(undefined);
+                    invoice.setDiscountValue("");
+                    invoice.setIsPercentage(false);
+                    errors.delete("INVALID_DISCOUNT");
                   }}
                 />
                 <Label

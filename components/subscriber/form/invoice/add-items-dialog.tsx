@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Check, CheckIcon, ChevronsUpDownIcon } from "lucide-react";
+import { Check, CheckIcon, ChevronsUpDown, ChevronsUpDownIcon, Package, PencilLine, PhilippinePeso } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
@@ -41,7 +41,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { VATTYPE, VATTYPE_UNDEFINED } from "@/lib/types";
-import { TAX_TYPES } from "@/lib/constants/TAX_TYPES";
 
 export type Item = {
   _id: Id<"itemCatalog">;
@@ -49,20 +48,24 @@ export type Item = {
   description: string;
   vatType: "VATABLE" | "VAT_EXEMPT" | "ZERO_RATED";
   legalFlags?: {
-    scPwdEligible: boolean;
-    naacEligible: boolean;
-    movEligible: boolean;
-    spEligible: boolean;
+    scPwdEligible?: boolean | undefined ;
+    naacEligible?: boolean  | undefined;
+    movEligible?: boolean  | undefined;
+    soloParentEligible?: boolean | undefined;
   };
 };
 
-const VAT = ["VATABLE", "VAT_EXEMPT", "ZERO_RATED"];
+const VAT = [
+  { value: "VATABLE", label: "Vatable" },
+  { value: "VAT_EXEMPT", label: "Vat Exempt" },
+  { value: "ZERO_RATED", label: "Zero Rated" },
+];
 
 const LEGALFLAGSMAP = [
   { label: "Senior Citizen/PWD Eligible", value: "scPwdEligible" },
   { label: "NAAC Eligible", value: "naacEligible" },
   { label: "MOV Eligible", value: "movEligible" },
-  { label: "SP Eligible", value: "spEligible" },
+  { label: "SP Eligible", value: "soloParentEligible" },
 ];
 export function AddItemsDialog() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -71,7 +74,7 @@ export function AddItemsDialog() {
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [item, setItem] = useState<Item | undefined>();
-  const [vatType, setVatType] = useState<VATTYPE_UNDEFINED>(undefined);
+  const [vatType, setVatType] = useState<VATTYPE_UNDEFINED>("VATABLE");
   const { itemsCatalog, loading, addItemToDB } = useItemsCatalog();
   const [description, setDescription] = useState("");
   const { businessProfile } = useBusinessProfileStore();
@@ -99,6 +102,7 @@ export function AddItemsDialog() {
         price: item.unitPrice,
         quantity: 1,
         vatType: item.vatType,
+        legalFlags: item.legalFlags,
       };
       console.log("Current Item:", curItem);
 
@@ -163,6 +167,12 @@ export function AddItemsDialog() {
     setValue("");
     setError("");
     setStep(step);
+    setLegalFlags({
+      scPwdEligible: false,
+      naacEligible: false,
+      movEligible: false,
+      soloParentEligible: false
+    })
   };
 
   const dialogClose = () => {
@@ -179,106 +189,261 @@ export function AddItemsDialog() {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full">
-          <span className="hidden lg:block ">Select items/services</span>
+        <Button variant="outline" className="w-full bg-white">
+          <span className="hidden lg:block "> Add Items or Services</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="min-w-1/2  sm:max-w-2xl max-h-dvh overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add items/services</DialogTitle>
-          <DialogDescription>
-            Make changes to your profile here. Click save when you&apos;re done.
+           <DialogTitle className="text-base sm:text-lg lg:text-2xl font-semibold">
+    Add Items or Services
+  </DialogTitle>
+         <DialogDescription className="text-sm text-muted-foreground">
+            Choose an item or enter a custom service to add it as a line item on this invoice.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4">
           {step === 0 && (
-            <div className="grid grid-cols-2 gap-5">
-              <button onClick={() => onStepChange(1)} className="h-full">
-                <Card className="h-full p-6 hover:bg-accent cursor-pointer transition-colors">
-                  <div className="text-sm font-medium">
-                    Select Existing Items
-                  </div>
-                </Card>
-              </button>
-              <button onClick={() => onStepChange(2)} className="h-full">
-                <Card className="h-full p-6 hover:bg-accent cursor-pointer transition-colors">
-                  <div className="text-sm font-medium">
-                    Manually input new item or service
-                  </div>
-                </Card>
-              </button>
-            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  
+  {/* Existing Items */}
+  <button
+    onClick={() => onStepChange(1)}
+    className="group w-full focus:outline-none"
+  >
+    <Card className="relative h-full p-6 lg:p-8 rounded-2xl border border-border 
+      flex flex-col items-start justify-between
+      transition-all duration-200
+      hover:border-primary hover:shadow-lg hover:bg-primary/5">
+
+      <div className="flex items-start gap-4">
+        <div className="p-3 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition">
+          <Package className="w-6 h-6" />
+        </div>
+
+        <div className="text-left">
+          <h2 className="text-base lg:text-xl font-semibold">
+            Select Existing Items
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Choose from your saved products or services
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-6 text-sm text-primary font-medium group-hover:underline">
+        Browse your item list →
+      </div>
+
+    </Card>
+  </button>
+
+  {/* Manual Entry */}
+  <button
+    onClick={() => onStepChange(2)}
+    className="group w-full focus:outline-none"
+  >
+    <Card className="relative h-full p-6 lg:p-8 rounded-2xl border border-border 
+      flex flex-col items-start justify-between
+      transition-all duration-200
+      hover:border-primary hover:shadow-lg hover:bg-primary/5">
+
+      <div className="flex items-start gap-4">
+        <div className="p-3 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition">
+          <PencilLine className="w-6 h-6" />
+        </div>
+
+        <div className="text-left">
+          <h2 className="text-base lg:text-xl font-semibold">
+            Add a New Item
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manually enter a custom product or service
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-6 text-sm text-primary font-medium group-hover:underline">
+        Create a new line item →
+      </div>
+
+    </Card>
+  </button>
+
+</div>
           )}
 
           {step === 1 && itemsCatalog && !loading && (
-            <div className="grid gap-2">
-              <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="w-full justify-between"
-                  >
-                    {value
-                      ? itemsCatalog.find(
-                          (framework) => framework.description === value
-                        )?.description
-                      : "Select Item/service..."}
-                    <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command>
-                    <CommandInput placeholder="Search items..." />
-                    <CommandList>
-                      <CommandEmpty>No Items found.</CommandEmpty>
-                      <CommandGroup>
-                        {itemsCatalog.map((item) => (
-                          <CommandItem
-                            key={item._id}
-                            value={item.description}
-                            onSelect={(currentValue) => {
-                              setValue(
-                                currentValue === value ? "" : currentValue
-                              );
-                              setItem({
-                                _id: item._id,
-                                unitPrice: item.unitPrice,
-                                description: item.description,
-                                vatType: item.vatType,
-                              });
-                              setOpen(false);
-                            }}
-                          >
-                            <CheckIcon
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                value === item.description
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {item.description}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              {error && (
-                <>
-                  <p className="text-red-600">{error}</p>
-                </>
-              )}
-            </div>
+          <div className="w-full space-y-2">
+
+  {/* Label */}
+  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+    <Package className="w-4 h-4" />
+    Item or Service
+  </label>
+
+  <Popover open={open} onOpenChange={setOpen}>
+    <PopoverTrigger asChild>
+      <Button
+        variant="outline"
+        role="combobox"
+        aria-expanded={open}
+        className="
+          w-full h-11 sm:h-12
+          justify-between
+          px-3 sm:px-4
+          bg-white
+          text-left
+          rounded-xl
+        "
+      >
+        <span className="truncate">
+          {value
+            ? itemsCatalog.find((i) => i.description === value)?.description
+            : "Select an item or service"}
+        </span>
+        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+      </Button>
+    </PopoverTrigger>
+
+    <PopoverContent
+      align="start"
+      className="
+        w-[95vw] sm:w-[420px] lg:w-[520px]
+        p-0
+        max-h-[70vh]
+        overflow-hidden
+        rounded-xl
+      "
+    >
+      <Command>
+        <CommandInput
+          placeholder="Search items…"
+          className="h-11"
+        />
+
+        <CommandList className="max-h-[30vh] overflow-y-auto">
+          <CommandEmpty className="py-6 text-sm text-center text-muted-foreground">
+            No items found
+          </CommandEmpty>
+
+          <CommandGroup>
+            {itemsCatalog.map((item) => (
+              <CommandItem
+  key={item._id}
+  value={item.description}
+  onSelect={(currentValue) => {
+    setValue(currentValue === value ? "" : currentValue);
+    setItem({
+      _id: item._id,
+      unitPrice: item.unitPrice,
+      description: item.description,
+      vatType: item.vatType,
+      legalFlags: item.legalFlags,
+    });
+    setOpen(false);
+  }}
+  className="flex gap-3 py-3 px-3 cursor-pointer"
+>
+  <Check
+    className={cn(
+      "mt-1 h-4 w-4 shrink-0",
+      value === item.description ? "opacity-100" : "opacity-0"
+    )}
+  />
+
+  <div className="flex flex-col flex-1 gap-1">
+
+    {/* Top row */}
+    <div className="flex items-start justify-between gap-3">
+
+      {/* Left — Description + legal */}
+      <div className="flex flex-col gap-1">
+        <span className="text-sm font-medium leading-tight">
+          {item.description}
+        </span>
+
+        <div className="flex flex-wrap gap-1">
+          {item.legalFlags?.scPwdEligible && (
+            <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[10px] font-medium">
+              Senior Citizen / PWD
+            </span>
+          )}
+          {item.legalFlags?.naacEligible && (
+            <span className="px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 text-[10px] font-medium">
+              NAAC
+            </span>
+          )}
+          {item.legalFlags?.movEligible && (
+            <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-medium">
+              MOV
+            </span>
+          )}
+          {item.legalFlags?.soloParentEligible && (
+            <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-medium">
+              Solo Parent
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Right — Price */}
+      <div className="text-right shrink-0">
+        <div className="flex items-center justify-end gap-1 text-sm font-semibold">
+          {/* <PhilippinePeso className="w-3 h-3" /> */}
+          {item.unitPrice.toLocaleString()}
+        </div>
+        <div className="text-[10px] ">
+          per unit
+        </div>
+      </div>
+    </div>
+
+    {/* Bottom row */}
+    <div className="flex items-center justify-between text-[10px]">
+
+      {item.vatType && (
+        <span
+          className={cn(
+            "px-2 py-0.5 rounded font-medium",
+            item.vatType === "VATABLE"
+              ? "bg-blue-100 text-blue-700"
+              : "bg-amber-100 text-amber-700"
+          )}
+        >
+          {item.vatType}
+        </span>
+      )}
+
+      {item.vatType === "VATABLE" && (
+        <span className="">
+          12% VAT applied
+        </span>
+      )}
+    </div>
+
+  </div>
+</CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </PopoverContent>
+  </Popover>
+
+  {error && (
+    <p className="text-xs text-red-600 mt-1">
+      {error}
+    </p>
+  )}
+
+</div>
           )}
 
           {step === 2 && (
             <>
               <div className="grid gap-2">
-                <Label htmlFor="description">Description (Optional)</Label>
+                <Label htmlFor="description" className="text-muted-foreground">Description</Label>
                 <Input
                   id="description"
                   placeholder="Enter custom description"
@@ -286,7 +451,7 @@ export function AddItemsDialog() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="price">Price (Optional)</Label>
+                <Label htmlFor="price" className="text-muted-foreground">Price</Label>
                 <Input
                   id="price"
                   type="number"
@@ -298,13 +463,13 @@ export function AddItemsDialog() {
                 <>
        
                 <div className="space-y-2 mb-2">
-                  <Label className="text-sm text-muted-foreground">Vat</Label>
+                  <Label className="text-sm text-muted-foreground">Vat Classification</Label>
                   <Select
                     defaultValue={vatType}
                     onValueChange={(value) => setVatType(value as VATTYPE)}
                   >
-                    <SelectTrigger className="w-full bg-white">
-                      <SelectValue placeholder="Select Vat Type">
+                    <SelectTrigger className="w-full bg-white" >
+                      <SelectValue placeholder="Select Vat Type" defaultValue={VAT[0].value}>
                         <span className="flex items-center gap-2">
                           <span>{vatType}</span>
                         </span>
@@ -312,16 +477,16 @@ export function AddItemsDialog() {
                     </SelectTrigger>
                     <SelectContent>
                       {VAT.map((type) => (
-                        <SelectItem key={type} value={type}>
+                        <SelectItem key={type.value} value={type.value}>
                           <span className="flex items-center gap-2">
-                            <span>{type}</span>
+                            <span>{type.label}</span>
                           </span>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                <Label className="text-sm text-muted-foreground">Legal Eligibility Flags</Label>
+                <Label className="text-sm text-muted-foreground">Select Legal Eligibility Flags</Label>
                 <div className="space-y-2 mb-2 grid grid-cols-1">
                   {LEGALFLAGSMAP.map((flag) => (
                   <button
@@ -366,11 +531,12 @@ export function AddItemsDialog() {
               }}
               variant={"outline"}
               type="button"
+               className=""
             >
               Back
             </Button>
 
-            <Button onClick={onAddNewItem} type="submit">
+            <Button onClick={onAddNewItem} disabled={step === 1 ? value === "" ? true : false : false } type="submit" className="lg:w-52 ">
               Add
             </Button>
           </DialogFooter>
