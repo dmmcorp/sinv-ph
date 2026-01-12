@@ -161,9 +161,3 @@ export const makeDefaultTemplate = mutation({
         return true;
     }
 })
-
-export const getInvoiceToTestColorTemplate = query({
-    handler: async (ctx) => {
-
-    }
-})
