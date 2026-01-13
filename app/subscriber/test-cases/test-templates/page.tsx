@@ -40,13 +40,12 @@ const TestTemplates = () => {
   if (!draftInvoice) return <div>Can't find invoice</div>;
   if (!issuedInvoice) return <div>Can't find issued invoice</div>;
 
-  const { invoice, userTemplate } = draftInvoice;
-  const { invoice: issued } = issuedInvoice;
+  const { invoice, template: userTemplate } = draftInvoice;
 
   if (!template) return <div>No templates yet</div>;
 
   const toChangeUserTemplate =
-    userTemplate?._id === "m578acr0axkctd2cz9wp73bfyn7z3e6z"
+    invoice.userTemplateId === "m578acr0axkctd2cz9wp73bfyn7z3e6z"
       ? "m577vhzev4c76hhx313qb7as6n7z2hr6"
       : "m578acr0axkctd2cz9wp73bfyn7z3e6z";
 
@@ -55,6 +54,7 @@ const TestTemplates = () => {
 
   return (
     <div>
+      <h2>Default Template - Fetched In Business Profile</h2>
       <h1 style={{ color: template.primaryColor }}>primaryColor</h1>
 
       <h2 style={{ color: template.secondaryColor }}>secondaryColor</h2>
@@ -74,7 +74,7 @@ const TestTemplates = () => {
       </div>
 
       <div>
-        <h2>Invoice (DRAFT – live template)</h2>
+        <h2>Invoice (DRAFT live template)</h2>
         {(() => {
           const t = resolveTemplate(draftInvoice);
 
@@ -145,7 +145,7 @@ const TestTemplates = () => {
 
       {issuedInvoice && (
         <div>
-          <h2>Invoice (PAID – snapshot) yung dating brand</h2>
+          <h2>Invoice (PAID snapshot) yung dating brand</h2>
           {(() => {
             const t = resolveTemplate(issuedInvoice);
             return (

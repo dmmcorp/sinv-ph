@@ -194,6 +194,11 @@ export const changeInvoiceUserTemplate = mutation({
             throw new ConvexError("Couldn't find invoice.")
         }
 
+        // TODO: DRAFT LANG DAPAT
+        if (invoice.status !== "DRAFT") {
+            throw new ConvexError("Issued invoices cannot be modified.");
+        }
+
         if (invoice.userId !== userId) {
             throw new ConvexError("Access denied.");
         }

@@ -245,17 +245,17 @@ export default defineSchema({
     // userId: v.id("users"),     // subscriber
     templateId: v.string(),       // TEMPLATE NAME
     layoutConfig: v.object({      // new field
-      headerPosition: v.union(v.literal("top"), v.literal("left")), 
+      headerPosition: v.union(v.literal("top"), v.literal("left")),
       logoPosition: v.union(v.literal("top-left"), v.literal("center")),
       showFooterTotals: v.boolean(),
       itemTableStyle: v.union(v.literal("grid"), v.literal("list"), v.literal("compact")),
       font: v.string(),
     }),
     // visuals color customization
-    primaryColor: v.string(),     // hex values // usually bold 10% of sales invoice template
-    secondaryColor: v.string(),   // hex values // usually normal text
-    headerColor: v.string(),      // hex values (header color for template)
-    backgroundColor: v.string(),  // hex values (background color)
+    primaryColor: v.string(),         // hex values // usually bold 10% of sales invoice template
+    secondaryColor: v.string(),       // hex values // usually normal text
+    headerColor: v.string(),          // hex values (header color for template)
+    backgroundColor: v.string(),      // hex values (background color)
     // logoUrl: v.optional(v.string()),
     // digitalSignatureUrl: v.optional(v.string()),
   })

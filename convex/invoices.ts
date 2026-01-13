@@ -366,15 +366,25 @@ export const getInvoiceById = query({
       throw new ConvexError("Access denied.");
     }
 
-    let userTemplate = null;
-    if (invoice.userTemplateId) {
-      userTemplate = await ctx.db
+    let template = null;
+    if (invoice.templateSnapshot) {
+      template = invoice.templateSnapshot
+    } else if (invoice.userTemplateId) {
+      const userTemplate = await ctx.db
         .get(invoice.userTemplateId)
+      if (userTemplate) {
+        template = {
+          primaryColor: userTemplate.primaryColor,
+          secondaryColor: userTemplate.secondaryColor,
+          headerColor: userTemplate.headerColor,
+          backgroundColor: userTemplate.backgroundColor,
+        }
+      }
     }
 
     return {
       invoice,
-      userTemplate,
+      template,
     }
   },
 });
