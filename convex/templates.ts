@@ -98,6 +98,18 @@ export const editUserTemplate = mutation({
             throw new ConvexError("Invalid action. You are editing a user template that does not belong to you.")
         }
 
+        // const invoice = await ctx.db
+        //     .query("invoices")
+        //     .withIndex("by_userTemplates", q => q.eq("userTemplateId", userTemplate._id))
+        //     .first()
+        // if (!invoice) {
+        //     throw new ConvexError("Couldn't find invoice.")
+        // }
+
+        // if (invoice.status === "PAID") {
+        //     throw new ConvexError("Invalid aciton. You can't redesign template")
+        // }
+
         // patching only those values provided
         const update: Partial<typeof userTemplate> = {}
 

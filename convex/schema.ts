@@ -69,8 +69,17 @@ export default defineSchema({
   invoices: defineTable({
     userId: v.id("users"), // subscribers id
     clientId: v.id("clients"), // subscribers client id
+
+    // template related fields
     userTemplateId: v.optional(v.id("userTemplates")), // template invoice
-    // templateId
+    templateSnapshot: v.optional(
+      v.object({
+        primaryColor: v.string(),
+        secondaryColor: v.string(),
+        headerColor: v.string(),
+        backgroundColor: v.string(),
+      })
+    ),
 
     // sellers (store pa rin, because as per BIR old invoices should remain the same business name even if that specific business changed its name, address or tin already.)
     sellerBusinessName: v.optional(v.string()), //nadadag 12/17/2025
@@ -174,7 +183,7 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_user", ["userId"])
-    .index("by_userTempllates", ["userTemplateId"])
+    .index("by_userTemplates", ["userTemplateId"])
     .index("by_client", ["clientId"]),
 
   // items catalog table

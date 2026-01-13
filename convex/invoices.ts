@@ -128,6 +128,14 @@ export const createInvoice = mutation({
 
     // visuals x templates
     userTemplateId: v.optional(v.id("userTemplates")),
+    templateSnapshot: v.optional(
+      v.object({
+        primaryColor: v.string(),
+        secondaryColor: v.string(),
+        headerColor: v.string(),
+        backgroundColor: v.string(),
+      })
+    ),
 
     // status
     status: v.optional(
@@ -418,39 +426,47 @@ export const handleInvoiceStatus = mutation({
     invoiceId: v.id("invoices"),
     status: v.union(
       v.literal("DRAFT"),
-      v.literal("PAID"),
-      v.literal("OPEN"),
+      v.literal("PAID"), // HAS OR = PAID
+      v.literal("OPEN"), // NO OR = NOT PAID
       v.literal("OVERDUE"),
     ),
   },
   handler: async (ctx, { invoiceId, status }) => {
     const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new ConvexError("Not authenticated!");
-    }
+    if (!userId) throw new ConvexError("Not authenticated");
 
     const invoice = await ctx.db.get(invoiceId);
-    if (!invoice) {
-      throw new ConvexError("Invoice not found");
-    }
+    if (!invoice) throw new ConvexError("Invoice not found");
 
     if (invoice.userId !== userId) {
-      throw new ConvexError("You are unauthorized to modify this invoice.");
+      throw new ConvexError("Access denied");
     }
 
-    // const client = await ctx.db.get(clientId);
-    // if (!client) {
-    //   throw new ConvexError("Client not found!");
-    // }
+    if (invoice.status !== "DRAFT") {
+      throw new ConvexError("Issued invoices cannot be modified.");
+    }
 
-    // // if this loggedin user is not authorized to modify this client then throw an error
-    // if (client.userId !== userId) {
-    //   throw new ConvexError("You are unauthorized to modify this invoice.")
-    // }
+    let templateSnapshot = undefined;
 
-    return await ctx.db.patch(invoiceId, {
-      status,
-      updatedAt: Math.floor(Date.now() / 1000), // unix timestamp today
-    });
-  },
-});
+    if (invoice.userTemplateId) {
+      const userTemplate = await ctx.db.get(invoice.userTemplateId);
+      if (userTemplate) {
+        templateSnapshot = {
+          primaryColor: userTemplate.primaryColor,
+          secondaryColor: userTemplate.secondaryColor,
+          headerColor: userTemplate.headerColor,
+          backgroundColor: userTemplate.backgroundColor,
+        };
+      }
+    }
+
+    await ctx.db
+      .patch(invoice._id, {
+        templateSnapshot,
+        status,
+        updatedAt: Date.now(),
+      });
+
+    return true
+  }
+})

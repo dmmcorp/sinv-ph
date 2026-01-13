@@ -9,20 +9,39 @@ import { useMutation, useQuery } from "convex/react";
 const TestTemplates = () => {
   const data = useQuery(api.templates.getAllTemplates);
   const template = useQuery(api.templates.getDefaultTemplate);
-  const makeDefault = useMutation(api.templates.makeDefaultTemplate);
-  const invoiceData = useQuery(api.invoices.getInvoiceById, {
+  const draftInvoice = useQuery(api.invoices.getInvoiceById, {
     invoiceId: "jh7553c3mahj1m82grmk02rj0d7z3es3" as Id<"invoices">,
   });
+  const issuedInvoice = useQuery(api.invoices.getInvoiceById, {
+    invoiceId: "jh71s488pb1k3bk7spm491q9hh7z2hg6" as Id<"invoices">,
+  });
+  const makeDefault = useMutation(api.templates.makeDefaultTemplate);
   const changeTemplate = useMutation(api.templates.changeInvoiceUserTemplate);
   const editTemplate = useMutation(api.templates.editUserTemplate);
+
+  const resolveTemplate = (invoiceData: any) => {
+    const { invoice, userTemplate } = invoiceData;
+
+    return (
+      invoice.templateSnapshot ??
+      userTemplate ?? {
+        primaryColor: "#000000",
+        secondaryColor: "#333333",
+        headerColor: "#e5e7eb",
+        backgroundColor: "#f9fafb",
+      }
+    );
+  };
 
   if (!data || template === undefined) {
     return <div>Loading…</div>;
   }
 
-  if (!invoiceData) return <div>Cant find invoice</div>;
+  if (!draftInvoice) return <div>Can't find invoice</div>;
+  if (!issuedInvoice) return <div>Can't find issued invoice</div>;
 
-  const { invoice, userTemplate } = invoiceData;
+  const { invoice, userTemplate } = draftInvoice;
+  const { invoice: issued } = issuedInvoice;
 
   if (!template) return <div>No templates yet</div>;
 
@@ -55,36 +74,47 @@ const TestTemplates = () => {
       </div>
 
       <div>
-        invoice with defined user template
-        <Button
-          onClick={async () => {
-            await changeTemplate({
-              invoiceId: invoice._id,
-              userTemplateId: toChangeUserTemplate as Id<"userTemplates">,
-            });
-            alert("Template changed!");
-          }}
-        >
-          Change Template
-        </Button>
-        <h1 style={{ color: userTemplate?.primaryColor }}>
-          Buyer Name: {invoice.buyerName}
-        </h1>
-        <h2 style={{ color: userTemplate?.secondaryColor }}>
-          Amount: {invoice.totalAmount}
-        </h2>
-        <div
-          className="p-12 rounded-lg my-3"
-          style={{ backgroundColor: userTemplate?.headerColor ?? "blue" }}
-        >
-          {/* headerColor with user template */}
-        </div>
-        <div
-          className="p-12 rounded-lg my-3"
-          style={{ backgroundColor: userTemplate?.backgroundColor ?? "gray" }}
-        >
-          {/* backgroundColor with user template */}
-        </div>
+        <h2>Invoice (DRAFT – live template)</h2>
+        {(() => {
+          const t = resolveTemplate(draftInvoice);
+
+          return (
+            <>
+              <Button
+                onClick={async () => {
+                  await changeTemplate({
+                    invoiceId: invoice._id,
+                    userTemplateId: toChangeUserTemplate as Id<"userTemplates">,
+                  });
+                  alert("Template changed!");
+                }}
+              >
+                Change Template
+              </Button>
+
+              <h1 style={{ color: t?.primaryColor }}>
+                Buyer Name: {invoice.buyerName}
+              </h1>
+              <h2 style={{ color: t?.secondaryColor }}>
+                Amount: {invoice.totalAmount}
+              </h2>
+              <div
+                className="p-12 rounded-lg my-3"
+                style={{ backgroundColor: t?.headerColor ?? "blue" }}
+              >
+                {/* headerColor with user template */}
+              </div>
+              <div
+                className="p-12 rounded-lg my-3"
+                style={{
+                  backgroundColor: t?.backgroundColor ?? "gray",
+                }}
+              >
+                {/* backgroundColor with user template */}
+              </div>
+            </>
+          );
+        })()}
       </div>
 
       <Button
@@ -112,6 +142,39 @@ const TestTemplates = () => {
       >
         Change Header + Background
       </Button>
+
+      {issuedInvoice && (
+        <div>
+          <h2>Invoice (PAID – snapshot) yung dating brand</h2>
+          {(() => {
+            const t = resolveTemplate(issuedInvoice);
+            return (
+              <>
+                <h1 style={{ color: t?.primaryColor }}>
+                  Buyer Name: {invoice.buyerName}
+                </h1>
+                <h2 style={{ color: t?.secondaryColor }}>
+                  Amount: {invoice.totalAmount}
+                </h2>
+                <div
+                  className="p-12 rounded-lg my-3"
+                  style={{ backgroundColor: t?.headerColor ?? "blue" }}
+                >
+                  {/* headerColor with user template */}
+                </div>
+                <div
+                  className="p-12 rounded-lg my-3"
+                  style={{
+                    backgroundColor: t?.backgroundColor ?? "gray",
+                  }}
+                >
+                  {/* backgroundColor with user template */}
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      )}
 
       <div className="space-y-3">
         <p className="font-bold">DEFAULT:</p>
