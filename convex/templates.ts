@@ -90,7 +90,6 @@ export const editUserTemplate = mutation({
 
         const userTemplate = await ctx.db
             .get(args.userTemplateId)
-
         if (!userTemplate) {
             throw new ConvexError("No user template found.")
         }
@@ -99,14 +98,19 @@ export const editUserTemplate = mutation({
             throw new ConvexError("Invalid action. You are editing a user template that does not belong to you.")
         }
 
+        // patching only those values provided
+        const update: Partial<typeof userTemplate> = {}
+
+        if (args.primaryColor !== undefined) update.primaryColor = args.primaryColor
+
+        if (args.secondaryColor !== undefined) update.secondaryColor = args.secondaryColor
+
+        if (args.headerColor !== undefined) update.headerColor = args.headerColor
+
+        if (args.backgroundColor !== undefined) update.backgroundColor = args.backgroundColor
+
         return await ctx.db
-            .patch(userTemplate._id, {
-                _id: args.userTemplateId,
-                primaryColor: args.primaryColor,
-                secondaryColor: args.secondaryColor,
-                headerColor: args.headerColor,
-                backgroundColor: args.backgroundColor,
-            })
+            .patch(userTemplate._id, update)
     }
 })
 
@@ -162,4 +166,33 @@ export const makeDefaultTemplate = mutation({
     }
 })
 
-// TODO: changeInvoiceUserTemplate
+export const changeInvoiceUserTemplate = mutation({
+    args: {
+        invoiceId: v.id("invoices"),
+        userTemplateId: v.id("userTemplates") // the user template id na magiging
+    },
+    handler: async (ctx, { invoiceId, userTemplateId }) => {
+        const userId = await getAuthUserId(ctx);
+        if (!userId) {
+            throw new ConvexError("Not authenticated!");
+        }
+
+        const invoice = await ctx.db.get(invoiceId);
+        if (!invoice) {
+            throw new ConvexError("Couldn't find invoice.")
+        }
+
+        if (invoice.userId !== userId) {
+            throw new ConvexError("Access denied.");
+        }
+
+        if (invoice.userTemplateId === userTemplateId) {
+            throw new ConvexError("Invoice already uses this template.");
+
+        }
+
+        await ctx.db.patch(invoice._id, { userTemplateId });
+        return true;
+
+    }
+})
