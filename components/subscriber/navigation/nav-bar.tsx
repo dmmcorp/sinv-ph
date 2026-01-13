@@ -5,15 +5,13 @@ import MobileNavigation from "../../mobile-navigation";
 import { FileBox, LayoutDashboardIcon, Receipt, Users } from "lucide-react";
 import UserAvatar from "../../user-avatar";
 import Link from "next/link";
+import SinvphLogo from "@/components/sinvph-logo";
 
 function NavBar() {
   const isMobile = useIsMobile();
   return (
-    <div className="w-full flex items-center justify-between py-3">
-      <div className="logo flex items-center gap-2">
-        <div className="size-10 rounded-full bg-black "></div>
-        <h2>SINV PH</h2>
-      </div>
+    <div className="w-full flex items-center justify-between py-3 px-5 lg:px-10 bg-white">
+      <SinvphLogo/>
       <div className="navtab hidden lg:block  w-fit px-10 rounded-full ">
         <ul className="flex items-start justify-evenly gap-y-2 ">
           <Link href={"/subscriber"}>

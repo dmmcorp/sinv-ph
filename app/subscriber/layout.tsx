@@ -9,8 +9,12 @@ export default function SubcriberLayout({
 }) {
   return (
     <SubscriberGuard>
-      <main className=" px-2 sm:px-4  lg:px-8 xl:px-16 2xl:px-32  min-h-dvh flex flex-col justify-between">
-        <NavBar />
+       <div className=" w-full  inset-0 z-[-1]">
+            <NavBar />
+        </div>
+      <main className="mt-2 relative px-2 sm:px-4  lg:px-8 xl:px-16 2xl:px-32  min-h-dvh flex flex-col justify-between">
+       
+      
         <div className="  flex-1 flex flex-col">{children}</div>
         <footer className="w-full border-t bg-background">
           <div className="mx-auto max-w-7xl px-4 py-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs text-muted-foreground">

@@ -18,14 +18,14 @@ function Page() {
         </div>
       )}
       {step === 1 && (
-        <div className="space-y-10 ">
+        <div className="space-y-4  ">
           <div className="">
             <Button
-              variant={"secondary"}
+              variant={"ghost"}
               onClick={() => setStep(0)}
-              className=""
+              className="font-semibold"
             >
-              <ChevronLeft />
+              <ChevronLeft className="size-8"/>
               Select a Client
             </Button>
           </div>
