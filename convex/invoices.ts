@@ -128,14 +128,6 @@ export const createInvoice = mutation({
 
     // visuals x templates
     userTemplateId: v.optional(v.id("userTemplates")),
-    templateSnapshot: v.optional(
-      v.object({
-        primaryColor: v.string(),
-        secondaryColor: v.string(),
-        headerColor: v.string(),
-        backgroundColor: v.string(),
-      })
-    ),
 
     // status
     status: v.optional(
@@ -366,25 +358,48 @@ export const getInvoiceById = query({
       throw new ConvexError("Access denied.");
     }
 
-    let template = null;
+    // SNAPSHOT
     if (invoice.templateSnapshot) {
-      template = invoice.templateSnapshot
-    } else if (invoice.userTemplateId) {
+      return {
+        invoice,
+        renderTemplate: invoice.templateSnapshot,
+        templateSource: "SNAPSHOT" as const,
+      };
+    }
+
+    // DRAFT
+    if (invoice.userTemplateId) {
       const userTemplate = await ctx.db
         .get(invoice.userTemplateId)
+
       if (userTemplate) {
-        template = {
-          primaryColor: userTemplate.primaryColor,
-          secondaryColor: userTemplate.secondaryColor,
-          headerColor: userTemplate.headerColor,
-          backgroundColor: userTemplate.backgroundColor,
+        const baseTemplate = await ctx.db
+          .get(userTemplate.templateId)
+        if (!baseTemplate) {
+          throw new ConvexError("Base template not found")
+        }
+
+        return {
+          invoice,
+          renderTemplate: {
+            primaryColor: userTemplate.primaryColor,
+            secondaryColor: userTemplate.secondaryColor,
+            headerColor: userTemplate.headerColor,
+            backgroundColor: userTemplate.backgroundColor,
+            layoutConfig: {
+              ...baseTemplate.layoutConfig,
+              ...(userTemplate.layoutConfig ?? {}),
+            },
+          },
+          templateSource: "DRAFT" as const,
         }
       }
     }
 
+    /// NO TEMPLATE CHOSEN
     return {
       invoice,
-      template,
+      templateSource: "NONE" as const,
     }
   },
 });
@@ -461,11 +476,23 @@ export const handleInvoiceStatus = mutation({
     if (invoice.userTemplateId) {
       const userTemplate = await ctx.db.get(invoice.userTemplateId);
       if (userTemplate) {
+        const baseTemplate = await ctx.db.get(userTemplate.templateId);
+        if (!baseTemplate) {
+          throw new ConvexError("Base template not found");
+        }
+
         templateSnapshot = {
+          // colors
           primaryColor: userTemplate.primaryColor,
           secondaryColor: userTemplate.secondaryColor,
           headerColor: userTemplate.headerColor,
           backgroundColor: userTemplate.backgroundColor,
+
+          // layout
+          layoutConfig: {
+            ...baseTemplate.layoutConfig,
+            ...(userTemplate.layoutConfig ?? {}),
+          },
         };
       }
     }

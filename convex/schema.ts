@@ -74,10 +74,23 @@ export default defineSchema({
     userTemplateId: v.optional(v.id("userTemplates")), // template invoice
     templateSnapshot: v.optional(
       v.object({
+        // colors
         primaryColor: v.string(),
         secondaryColor: v.string(),
         headerColor: v.string(),
         backgroundColor: v.string(),
+
+        // layout
+        layoutConfig: v.optional(v.object({
+          headerPosition: v.union(v.literal("top"), v.literal("left")),
+          logoPosition: v.union(v.literal("top-left"), v.literal("center")),
+          showFooterTotals: v.boolean(),
+          itemTableStyle: v.union(v.literal("grid"), v.literal("list"), v.literal("compact")),
+          font: v.string(),
+
+          // sourceUserTemplateId: v.optional(v.id("userTemplates")),
+          // sourceTemplateId: v.optional(v.id("templates")),
+        })),
       })
     ),
 
@@ -270,6 +283,18 @@ export default defineSchema({
     secondaryColor: v.string(),   // hex values // usually normal text
     headerColor: v.string(),      // hex values (header color for template)
     backgroundColor: v.string(),  // hex values (background color)
+
+    layoutConfig: v.optional(
+      v.object({
+        headerPosition: v.optional(v.union(v.literal("top"), v.literal("left"))),
+        logoPosition: v.optional(v.union(v.literal("top-left"), v.literal("center"))),
+        showFooterTotals: v.optional(v.boolean()),
+        itemTableStyle: v.optional(
+          v.union(v.literal("grid"), v.literal("list"), v.literal("compact"))
+        ),
+        font: v.optional(v.string()),
+      })
+    ),
   })
     .index("by_user", ["userId"])
     .index("by_template", ["templateId"]),

@@ -35,6 +35,20 @@ export const createUserTemplate = mutation({
         headerColor: v.string(),      // hex values (header color for template)
         backgroundColor: v.string(),  // hex values (background color)
 
+        layoutConfig: v.optional(
+            v.object({
+                headerPosition: v.optional(v.union(v.literal("top"), v.literal("left"))),
+                logoPosition: v.optional(
+                    v.union(v.literal("top-left"), v.literal("center"))
+                ),
+                showFooterTotals: v.optional(v.boolean()),
+                itemTableStyle: v.optional(
+                    v.union(v.literal("grid"), v.literal("list"), v.literal("compact"))
+                ),
+                font: v.optional(v.string()),
+            })
+        ),
+
         isSaved: v.optional(v.boolean())
     },
     handler: async (ctx, args) => {
@@ -50,6 +64,7 @@ export const createUserTemplate = mutation({
             secondaryColor: args.secondaryColor,
             headerColor: args.headerColor,
             backgroundColor: args.backgroundColor,
+            layoutConfig: args.layoutConfig,
         });
 
         if (args.isSaved) {
@@ -66,7 +81,7 @@ export const createUserTemplate = mutation({
 
             await ctx.db.patch(businessProfile._id, {
                 defaultTemplate: userTemplateId,
-                updatedAt: Math.floor(Date.now() / 1000),
+                updatedAt: Math.floor(Date.now() / 1000) // unix timestamp,
             });
         }
 
@@ -81,6 +96,20 @@ export const editUserTemplate = mutation({
         secondaryColor: v.optional(v.string()),                 // hex values // usually normal text
         headerColor: v.optional(v.string()),                    // hex values (header color for template)
         backgroundColor: v.optional(v.string()),                // hex values (background color)
+
+        layoutConfig: v.optional(
+            v.object({
+                headerPosition: v.optional(v.union(v.literal("top"), v.literal("left"))),
+                logoPosition: v.optional(
+                    v.union(v.literal("top-left"), v.literal("center"))
+                ),
+                showFooterTotals: v.optional(v.boolean()),
+                itemTableStyle: v.optional(
+                    v.union(v.literal("grid"), v.literal("list"), v.literal("compact"))
+                ),
+                font: v.optional(v.string()),
+            })
+        ),
     },
     handler: async (ctx, args) => {
         const userId = await getAuthUserId(ctx);
@@ -120,6 +149,13 @@ export const editUserTemplate = mutation({
         if (args.headerColor !== undefined) update.headerColor = args.headerColor
 
         if (args.backgroundColor !== undefined) update.backgroundColor = args.backgroundColor
+
+        if (args.layoutConfig !== undefined) {
+            update.layoutConfig = {
+                ...(userTemplate.layoutConfig ?? {}),
+                ...args.layoutConfig,
+            };
+        }
 
         return await ctx.db
             .patch(userTemplate._id, update)
@@ -194,7 +230,6 @@ export const changeInvoiceUserTemplate = mutation({
             throw new ConvexError("Couldn't find invoice.")
         }
 
-        // TODO: DRAFT LANG DAPAT
         if (invoice.status !== "DRAFT") {
             throw new ConvexError("Issued invoices cannot be modified.");
         }
