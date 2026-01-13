@@ -151,7 +151,7 @@ export function ClientSelector({ onSetStep }: ClientSelector) {
                     >
                       <div className="flex items-start justify-between gap-2 ">
                         <div className="space-y-1 min-w-0">
-                          <p className="font-semibold truncate">
+                          <p className="font-semibold truncate capitalize">
                             {client.name}
                           </p>
                           <p className="text-sm text-muted-foreground truncate">

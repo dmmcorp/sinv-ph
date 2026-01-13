@@ -61,8 +61,8 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
   const rowCount = Math.max(5, invoice.selectedItems.length);
   return (
     <div className="relative border-t-primary border-t-5 flex flex-col min-h-185 bg-primary  lg:min-h-312 mx-auto border-2 shadow-lg p-4 lg:p-10 rounded-2xl space-y-5 lg:space-y-10 bg-white">
-      <div className="flex justify-between ">
-        <div className="">
+      <div className="flex justify-between gap-x-5">
+        <div className="w-[70%]">
           {businessProfile && businessProfile.logoUrl !== "" && (
             <Image
               width={70}
@@ -72,10 +72,10 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
               className="object-contain size-10 sm:size-12.5 md:size-15 lg:size-17.5"
             />
           )}
-          <h3 className="text-xs lg:text-lg font-bold mt-1 sm:mt-3">
+          <h3 className="text-xs lg:text-xl font-bold mt-1 sm:mt-3">
             {businessProfile?.businessName}
           </h3>
-          <p className="text-[0.6rem] sm:text-xs lg:text-lg">
+          <p className="text-[0.6rem] sm:text-xs lg:text-xl ">
             {businessProfile?.sellerName}
           </p>
           <h5 className="text-[0.6rem] sm:text-xs lg:text-lg">
@@ -85,7 +85,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
             {businessProfile?.address}
           </h5>
         </div>
-        <h1 className="text-lg lg:text-2xl"> {invoice.invoiceType} INVOICE</h1>
+        <h1 className="text-3xl sm:text-4xl xl:text-7xl font-light">INVOICE</h1>
       </div>
       <div className="flex-1 space-y-4 lg:space-y-8 ">
         <div className="flex justify-between">
@@ -102,7 +102,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
                     {/* <FormLabel>Client Name</FormLabel> */}
                     <FormControl>
                       <Input
-                        className="capitalized border-none font-semibold text-[0.6rem] sm:text-xs lg:text-lg shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
+                        className="capitalize border-none font-semibold text-[0.6rem] sm:text-xs lg:text-lg shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
                         placeholder="Enter client name"
                         disabled
                         {...field}

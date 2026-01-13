@@ -23,7 +23,7 @@ import useClientSelection from "@/stores/client/useClientSelection";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
 import useItemCatalogStore from "@/stores/items/useItemsCatalogStore";
 import { useMutation } from "convex/react";
-import { FileText, Save } from "lucide-react";
+import { DollarSign, FileText, PhilippinePeso, Save, Tag } from "lucide-react";
 import { ChangeEvent, useState } from "react";
 import { toast } from "sonner";
 type ErrorType = "INVALID_DISCOUNT" | "TIN_REQUIRED" | "NEGATIVE_TOTAL";
@@ -135,11 +135,14 @@ function ActionsCard() {
   const handlePreviewPDF = () => {};
   return (
     <Card className="col-span-1 lg:col-span-3 max-h-fit">
-      <CardHeader>
-        <CardTitle>Actions</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {businessProfile?.businessType !== undefined ||
+       
+        {/* Header */}
+      <div className="px-6 pt-6 pb-4 border-b border-slate-700/30">
+        <h2 className="text-2xl font-semibold  tracking-tight">Invoice Settings</h2>
+        <p className="text-sm text-slate-400 mt-1">Customize your invoice details</p>
+      </div>
+      <div className="px-6 py-6 space-y-6">
+        {/* {businessProfile?.businessType !== undefined ||
           (businessProfile?.businessType !== "Freelancer/Individual" && (
             <div className="space-y-2 mb-2">
               <Label className="text-sm text-muted-foreground">
@@ -167,16 +170,32 @@ function ActionsCard() {
                 </SelectContent>
               </Select>
             </div>
-          ))}
+          ))} */}
 
         <div className="space-y-2">
-          <Label className="text-sm text-muted-foreground">
-            Item/Service Selection
-          </Label>
+          <label className="text-xs font-semibold  uppercase tracking-wider">Template</label>
+          <button className="w-full px-4 py-2.5 text-sm font-medium  hover:text-slate-500 border   rounded-lg transition-all duration-200  text-left flex items-center justify-between group">
+            <span>Choose template</span>
+            <svg
+              className="w-4 h-4 opacity-50 group-hover:opacity-75 transition-opacity"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="space-y-2">
+           <label className="text-xs font-semibold  uppercase tracking-wider"> Item or Service</label>
           <AddItemsDialog />
         </div>
         <div className="space-y-2 mb-2">
-          <Label className="text-sm text-muted-foreground">Currency</Label>
+          <label className="text-xs font-semibold  uppercase tracking-wider flex items-center gap-2">
+            {invoice.selectedCurrency ? <DollarSign className="w-3.5 h-3.5" /> : <PhilippinePeso className="w-3.5 h-3.5" />}
+            Currency
+          </label>
           <Select
             defaultValue={invoice.selectedCurrency}
             onValueChange={(value) => invoice.setCurrency(value)}
@@ -207,13 +226,13 @@ function ActionsCard() {
           </Select>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3 pt-2">
           {/* Tax Switch */}
           {businessProfile?.businessType === "VAT-Registered Business" && (
             <div className="flex items-center justify-between">
               <Label
                 htmlFor="tax-switch"
-                className="text-sm text-muted-foreground"
+                className="text-sm font-medium "
               >
                 Include Tax
               </Label>
@@ -228,7 +247,8 @@ function ActionsCard() {
           <div className="flex items-center justify-between">
             <Label
               htmlFor="discount-switch"
-              className="text-sm text-muted-foreground"
+        
+              className="text-sm font-medium "
             >
               Include Discount
             </Label>
@@ -275,8 +295,9 @@ function ActionsCard() {
                 <div className="space-y-2">
                 <Label
                   htmlFor="discount-value"
-                  className="text-sm text-muted-foreground"
+                 className="text-xs font-semibold uppercase tracking-wider flex items-center gap-2 mb-2"
                 >
+                  <Tag className="w-3.5 h-3.5" />
                   Discount Amount
                 </Label>
                 <div className="relative">
@@ -350,8 +371,11 @@ function ActionsCard() {
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="space-y-3 pt-2">
+        
+        </div>
+      </div>
+        {/* Action Buttons */}
+         <div className="px-6 py-4 border-t border-slate-700/30 space-y-3">
             <Button
               variant="outline"
               className="w-full bg-transparent"
@@ -365,8 +389,6 @@ function ActionsCard() {
               Save Invoice
             </Button>
           </div>
-        </div>
-      </CardContent>
     </Card>
   );
 }
