@@ -256,7 +256,7 @@ export default defineSchema({
     // DEFAULT TEMPLATES
 
     // userId: v.id("users"),     // subscriber
-    templateId: v.string(),       // TEMPLATE NAME
+    templateName: v.string(),       // TEMPLATE NAME
     layoutConfig: v.object({      // new field
       headerPosition: v.union(v.literal("top"), v.literal("left")),
       logoPosition: v.union(v.literal("top-left"), v.literal("center")),
@@ -272,12 +272,12 @@ export default defineSchema({
     // logoUrl: v.optional(v.string()),
     // digitalSignatureUrl: v.optional(v.string()),
   })
-    .index("by_template", ["templateId"]),
+    .index("by_template", ["templateName"]),
   userTemplates: defineTable({
     userId: v.id("users"),
     templateId: v.id("templates"),
 
-    // TODO: Template name just like in the templates table???
+    templateName: v.string(),
 
     primaryColor: v.string(),     // hex values // usually bold 10% of sales invoice template
     secondaryColor: v.string(),   // hex values // usually normal text

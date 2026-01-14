@@ -35,6 +35,8 @@ export const createUserTemplate = mutation({
         headerColor: v.string(),      // hex values (header color for template)
         backgroundColor: v.string(),  // hex values (background color)
 
+        templateName: v.string(),
+
         layoutConfig: v.optional(
             v.object({
                 headerPosition: v.optional(v.union(v.literal("top"), v.literal("left"))),
@@ -65,6 +67,7 @@ export const createUserTemplate = mutation({
             headerColor: args.headerColor,
             backgroundColor: args.backgroundColor,
             layoutConfig: args.layoutConfig,
+            templateName: args.templateName,
         });
 
         if (args.isSaved) {
@@ -96,6 +99,7 @@ export const editUserTemplate = mutation({
         secondaryColor: v.optional(v.string()),                 // hex values // usually normal text
         headerColor: v.optional(v.string()),                    // hex values (header color for template)
         backgroundColor: v.optional(v.string()),                // hex values (background color)
+        templateName: v.optional(v.string()),
 
         layoutConfig: v.optional(
             v.object({
@@ -149,6 +153,8 @@ export const editUserTemplate = mutation({
         if (args.headerColor !== undefined) update.headerColor = args.headerColor
 
         if (args.backgroundColor !== undefined) update.backgroundColor = args.backgroundColor
+
+        if (args.templateName !== undefined) update.templateName = args.templateName
 
         if (args.layoutConfig !== undefined) {
             update.layoutConfig = {
