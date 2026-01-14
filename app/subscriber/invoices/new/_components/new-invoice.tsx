@@ -113,7 +113,7 @@ function NewInvoice() {
               ease: "backInOut",
             },
           }}
-          className="grid grid-cols-1 lg:grid-cols-12 min-h-screen w-full gap-10"
+          className="grid grid-cols-1 lg:grid-cols-12 min-h-screen w-full gap-2 sm:gap-4 md:gap-6 lg:gap-8 xl:gap-10"
         >
           <motion.div className="col-span-1 lg:col-span-9">
             <NewInvoiceForm form={form} />

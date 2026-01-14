@@ -1,19 +1,21 @@
 import type { Metadata } from "next";
-import { Geist, Poppins } from "next/font/google";
+import { Geist, Inter, Poppins, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { OnboardingGuard } from "@/components/guards/OnboardingGuard";
 import NavBar from "@/components/landing-page/navigation/nav-bar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const sourceSerif4 = Source_Serif_4({
+  subsets: ["latin"],  
+  weight: ["200", "300", "400", "700", "800", "900"],
+   variable: "--font-serif",
 });
 
-const poppinsFont = Poppins({
+const interFont = Inter({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "700"],
+   variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
@@ -30,7 +32,7 @@ export default function RootLayout({
     <ConvexAuthNextjsServerProvider>
       <html lang="en">
         <body
-          className={`${geistSans.variable} ${poppinsFont.className} antialiased`}
+          className={`${sourceSerif4.variable} ${interFont.variable} antialiased`}
         >
           <ConvexClientProvider>
             <OnboardingGuard>

@@ -18,24 +18,7 @@ function InvoiceNumber({ form }: { form: UseFormReturn<InvoiceFormValues> }) {
   }, [invoiceNo, form]);
 
   return (
-    <FormField
-      control={form.control}
-      name="invoiceNo"
-      render={({ field }) => (
-        <FormItem>
-          {/* <FormLabel>Invoice Number</FormLabel> */}
-          <FormControl>
-            <Input
-              className="border-none max-w-14 sm:max-w-fit  text-[0.5rem] sm:text-xs lg:text-lg shadow-none focus-visible:border-ring focus-visible:ring-ring/0 px-0 py-0 h-fit"
-              placeholder="0001"
-              disabled
-              {...field}
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
+   <h3 className="text-[0.6rem] sm:text-xs md:text-sm lg:text-base xl:text-lg">{invoiceNo}</h3>
   );
 }
 

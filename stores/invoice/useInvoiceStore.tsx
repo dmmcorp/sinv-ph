@@ -55,9 +55,10 @@ interface InvoiceStoreType {
   setScIdNumber: (value: string) => void;
   setDiscountValue: (value: string) => void;
   setIsPercentage: (value: boolean) => void;
+  setSelectedItems: (items: SelectedItemType[]) => void;
 
   addItem: (item: SelectedItemType) => void;
-  updateItemQuantity: (id: Id<"itemCatalog">, quantity: number) => void;
+  updateItemQuantity: (id: Id<"itemCatalog">, quantity: number, type: "increment" | "replace") => void;
   removeItem: (id: Id<"itemCatalog">) => void;
 
   clearInvoice: () => void;
@@ -114,10 +115,15 @@ export const useInvoiceStore = create<InvoiceStoreType>((set) => ({
       selectedItems: [...state.selectedItems, item],
     })),
 
-  updateItemQuantity: (id, quantity) =>
+    setSelectedItems: (items) =>
+    set(() => ({
+      selectedItems: items,
+    })),
+
+  updateItemQuantity: (id, quantity, type) =>
     set((state) => ({
       selectedItems: state.selectedItems.map((item) =>
-        item._id === id ? { ...item, quantity: item.quantity + quantity } : item
+        item._id === id ? { ...item, quantity: type === "increment" ? item.quantity + quantity : quantity } : item
       ),
     })),
 

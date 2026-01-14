@@ -15,12 +15,13 @@ import useClientSelection from "@/stores/client/useClientSelection";
 
 interface AddNewClientDialogTypes {
   newClient: NewClientTypes;
+  clientCount: number
   onSetNewClient: React.Dispatch<React.SetStateAction<NewClientTypes>>;
   onHandleAddClient: () => void;
 }
 function AddNewClientDialog({
   newClient,
-
+  clientCount,
   onSetNewClient,
   onHandleAddClient,
 }: AddNewClientDialogTypes) {
@@ -33,7 +34,7 @@ function AddNewClientDialog({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-xl">Add New Client</DialogTitle>
+          <DialogTitle className="text-xl">Add {clientCount < 1 ? "Your First" : "More"} Client</DialogTitle>
           <DialogDescription>
             Enter the client&apos;s details below to add them to your list.
           </DialogDescription>

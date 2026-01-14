@@ -1,5 +1,6 @@
 "use client";
-import { AddItemsDialog } from "@/components/subscriber/form/invoice/add-items-dialog";
+import { AddItemsDialog, Item } from "@/components/subscriber/form/invoice/add-items-dialog";
+import { TemplateDialog } from "@/components/subscriber/form/invoice/template-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,9 +16,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { api } from "@/convex/_generated/api";
 import { useCalculateInvioceAmount } from "@/hooks/use-calculate-invoice-amount";
-import { SPECIAL_DISCOUNT_TYPES, SPECIAL_DISCOUNT_TYPES_MAP } from "@/lib/constants/DISCOUNT_TYPES";
-import { INVOICE_TYPES } from "@/lib/constants/INVOICE_TYPES";
-import { INVOiCETYPE } from "@/lib/types";
+import {  SPECIAL_DISCOUNT_TYPES_MAP } from "@/lib/constants/DISCOUNT_TYPES";
 import useBusinessProfileStore from "@/stores/business-profile/useBusinessProfileStore";
 import useClientSelection from "@/stores/client/useClientSelection";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
@@ -39,7 +38,12 @@ function ActionsCard() {
   const { selectedClient } = useClientSelection();
   const saveInvoice = useMutation(api.invoices.createInvoice);
   const [errors, setErrors] = useState<Set<ErrorType>>(new Set());
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
 
+  const handleSelectTemplate = (template: string) => {
+    setSelectedTemplate(template)
+  }
   const handleSaveInvoice = () => {
     let vatStatus: "NON_VAT" | "VAT" = "NON_VAT";
 
@@ -103,6 +107,7 @@ function ActionsCard() {
     }
   };
 
+
   //handle the discount input to limit to 100 if % and totalAMount if fixed
   const handleDIscountInput = (value: string) => {
     const discount = Number(value);
@@ -132,8 +137,10 @@ function ActionsCard() {
     });
     invoice.setDiscountValue(discount.toString());
   };
+
   const handlePreviewPDF = () => {};
   return (
+    <>
     <Card className="col-span-1 lg:col-span-3 max-h-fit">
        
         {/* Header */}
@@ -172,20 +179,23 @@ function ActionsCard() {
             </div>
           ))} */}
 
-        <div className="space-y-2">
-          <label className="text-xs font-semibold  uppercase tracking-wider">Template</label>
-          <button className="w-full px-4 py-2.5 text-sm font-medium  hover:text-slate-500 border   rounded-lg transition-all duration-200  text-left flex items-center justify-between group">
-            <span>Choose template</span>
-            <svg
-              className="w-4 h-4 opacity-50 group-hover:opacity-75 transition-opacity"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-wider">Template</label>
+            <button
+              onClick={() => setTemplateDialogOpen(true)}
+              className="w-full px-4 py-2.5 text-sm font-medium border  hover:border-slate-500 rounded-lg transition-all duration-200 text-left flex items-center justify-between group"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
+              <span className="capitalize">{selectedTemplate ? `${selectedTemplate} (Selected)` : "Choose template"}</span>
+              <svg
+                className="w-4 h-4 opacity-50 group-hover:opacity-75 transition-opacity"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
 
         <div className="space-y-2">
            <label className="text-xs font-semibold  uppercase tracking-wider"> Item or Service</label>
@@ -255,7 +265,19 @@ function ActionsCard() {
             <Switch
               id="discount-switch"
               checked={invoice.includeDiscount}
-              onCheckedChange={invoice.toggleDiscount}
+              onCheckedChange={(checked) => {
+                if(!checked){
+                  invoice.setIsSpecialDiscount(false);
+                  invoice.scIdNumber = "";
+                  invoice.setSelectedSpecialDiscounts(undefined);
+                  invoice.setDiscountValue("");
+                  invoice.setIsPercentage(false);
+                  setErrors(new Set());
+                   invoice.toggleDiscount()
+                } else {
+                  invoice.toggleDiscount()
+                }
+               }}
             />
           </div>
           {invoice.includeDiscount && (
@@ -276,7 +298,11 @@ function ActionsCard() {
                     </SelectTrigger>
                     <SelectContent>
                       {SPECIAL_DISCOUNT_TYPES_MAP.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
+                        <SelectItem 
+                        key={type.value} 
+                        value={type.value} 
+                        // disabled={handleSDiscountDisabled(type.value)}
+                        >
                           {type.label}
                         </SelectItem>
                       ))}
@@ -336,9 +362,13 @@ function ActionsCard() {
                   <Checkbox
                     id="is-percentage"
                     checked={invoice.isPercentage}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={(checked) =>{
                       invoice.setIsPercentage(checked === true)
-                    }
+                      invoice.setDiscountValue("")
+                      invoice.setSelectedSpecialDiscounts(undefined)
+                      errors.delete("INVALID_DISCOUNT");
+                    }}
+                    className="bg-white"
                   />
                   <Label
                     htmlFor="is-percentage"
@@ -390,6 +420,12 @@ function ActionsCard() {
             </Button>
           </div>
     </Card>
+     <TemplateDialog
+        open={templateDialogOpen}
+        onOpenChange={setTemplateDialogOpen}
+        onSelectTemplate={handleSelectTemplate}
+      />
+     </>
   );
 }
 

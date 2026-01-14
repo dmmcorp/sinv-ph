@@ -237,6 +237,7 @@ export function ClientSelector({ onSetStep }: ClientSelector) {
       </CardContent>
       <AddNewClientDialog
         newClient={newClient}
+        clientCount={filteredClients?.length ?? 0}
         onSetNewClient={setNewClient}
         onHandleAddClient={handleAddClient}
       />

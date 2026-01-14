@@ -7,7 +7,8 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
   --font-mono: var(--font-geist-mono);
 
   --color-primary: var(--primary);
@@ -131,18 +132,18 @@
   body {
     @apply bg-background text-foreground;
     box-sizing: border-box;
+    font-family: var(--font-sans);
   }
   h1 {
     font-size: clamp(2rem, 6vw, 2.5rem);
     font-weight: 600;
     font-family:
-      "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+      var(--font-serif);
   }
   h2 {
     font-size: clamp(1.3rem, 6vw, 1.8rem);
     font-weight: 500;
-    font-family:
-      "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+    font-family: var(--font-serif);
   }
 
   button:hover {
@@ -173,4 +174,19 @@ input[type="number"] {
 .subhead {
   font-size: clamp(1rem, 4vw, 1.5rem);
   font-weight: 300;
+}
+
+.invoice-text {
+  font-size: clamp(0.5rem, 2vw, 1rem);
+  @apply text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-base xl:text-lg;
+}
+
+.a4-size {
+  width: 100%;
+  max-width: 794px;
+  min-height: 1123px;
+  background: white;
+  margin: auto;
+  box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.5);
+  @apply p-10
 }

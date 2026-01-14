@@ -15,7 +15,7 @@ export const SPECIAL_DISCOUNT_TYPES = [
 ] as const
 
 export const SPECIAL_DISCOUNT_TYPES_MAP = [
-    {
+{
     value: "SC",
     label: "Senior Citizen",
 },{

@@ -25,7 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Check, CheckIcon, ChevronsUpDown, ChevronsUpDownIcon, Package, PencilLine, PhilippinePeso } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
@@ -90,7 +90,7 @@ export function AddItemsDialog() {
     soloParentEligible: false
   });
   const [price, setPrice] = useState(0);
-  const { selectedItems, addItem, updateItemQuantity } = useInvoiceStore();
+  const { selectedItems, addItem, updateItemQuantity, setSelectedItems } = useInvoiceStore();
 
   const onAddNewItem = async () => {
     // get the item
@@ -114,7 +114,7 @@ export function AddItemsDialog() {
       console.log("Existing Item:", existingItem);
       // just add quantity if yes
       if (existingItem) {
-        updateItemQuantity(existingItem._id, 1);
+        updateItemQuantity(existingItem._id, 1, 'increment');
       } else {
         //add the whole item to the array if no
         addItem(curItem);
@@ -152,7 +152,7 @@ export function AddItemsDialog() {
       );
       // just add quantity if yes
       if (existingItem) {
-        updateItemQuantity(existingItem._id, 1);
+        updateItemQuantity(existingItem._id, 1, 'increment');
       } else {
         addItem(curItem);
       }
@@ -186,11 +186,39 @@ export function AddItemsDialog() {
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPrice(parseFloat(e.target.value || "0"));
   };
+
+  const handleDisabledFlag = (flag: string): boolean => {
+    if(vatType === "ZERO_RATED" && (flag === "scPwdEligible" || flag === "soloParentEligible")){
+       return true; // disable when vat type is zero rated for SC/PWD and Solo Parent
+      }
+    return false;
+  };
+
+  useEffect(() => {
+    if (!dialogOpen) {
+      onStepChange(0);
+      setLegalFlags({
+        scPwdEligible: false,
+        naacEligible: false,
+        movEligible: false,
+        soloParentEligible: false
+      });
+    }
+  }, [dialogOpen]);
+
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full bg-white">
+        <Button variant="outline" className="w-full px-4 py-2.5 text-sm font-medium border bg-white hover:bg-white hover:text-black hover:border-black rounded-lg transition-all duration-200 text-left flex items-center justify-between group ">
           <span className="hidden lg:block "> Add Items or Services</span>
+          <svg
+              className="w-4 h-4 opacity-50 group-hover:opacity-75 transition-opacity"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
         </Button>
       </DialogTrigger>
       <DialogContent className="min-w-1/2  sm:max-w-2xl max-h-dvh overflow-y-auto">
@@ -495,11 +523,14 @@ export function AddItemsDialog() {
                       ...legalFlags,
                       [flag.value]: !legalFlags[flag.value as keyof typeof legalFlags],
                     })}
-                    className={`bg-white w-full text-left p-3 rounded-lg border transition-all flex flex-col ${
-                      legalFlags[flag.value as keyof typeof legalFlags]
+                    disabled={handleDisabledFlag(flag.value)}
+                    className={`bg-white w-full text-left p-3 rounded-lg border transition-all flex flex-col 
+                      ${ legalFlags[flag.value as keyof typeof legalFlags]
                         ? "border-primary bg-primary/5 ring-1 ring-primary"
                         : "border-border hover:border-primary/50 hover:bg-muted/50"
-                    }`}
+                      }
+                      ${ handleDisabledFlag(flag.value) && "opacity-50 cursor-not-allowed"}
+                      `}
                   >
                     <div className="flex items-start justify-between gap-2 ">
                       <div className="space-y-1 min-w-0">

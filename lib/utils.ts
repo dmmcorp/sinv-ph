@@ -18,6 +18,7 @@ export const formatCurrency = (value: number, currency: string): string => {
     currency: currency.toUpperCase(),
     minimumFractionDigits: 2, // Always show 2 decimals for centavos
     maximumFractionDigits: 2, // Cap at 2 decimals
+
   }).format(value);
 };
 

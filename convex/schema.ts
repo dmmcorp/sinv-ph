@@ -239,6 +239,7 @@ export default defineSchema({
   // 1st - 5 value (forest, sky)
   // // 6th value
   // TEMPLATES = POSITIONING OF ITEMS / FONTS
+  
   templates: defineTable({
     // DEFAULT TEMPLATES
 
