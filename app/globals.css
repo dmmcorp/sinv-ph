@@ -178,7 +178,7 @@ input[type="number"] {
 
 .invoice-text {
   font-size: clamp(0.5rem, 2vw, 1rem);
-  @apply text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-base xl:text-lg;
+  @apply text-[0.4rem] sm:text-[0.6rem] md:text-sm;
 }
 
 .a4-size {
@@ -187,6 +187,6 @@ input[type="number"] {
   min-height: 1123px;
   background: white;
   margin: auto;
-  box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0.3cm rgba(0, 0, 0, 0.22);
   @apply p-10
 }

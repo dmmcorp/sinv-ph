@@ -18,7 +18,7 @@ function InvoiceNumber({ form }: { form: UseFormReturn<InvoiceFormValues> }) {
   }, [invoiceNo, form]);
 
   return (
-   <h3 className="text-[0.6rem] sm:text-xs md:text-sm lg:text-base xl:text-lg">{invoiceNo}</h3>
+   <h3 className="invoice-text">{invoiceNo}</h3>
   );
 }
 
