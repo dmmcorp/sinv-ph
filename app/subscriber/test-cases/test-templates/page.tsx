@@ -18,35 +18,24 @@ const TestTemplates = () => {
   const makeDefault = useMutation(api.templates.makeDefaultTemplate);
   const changeTemplate = useMutation(api.templates.changeInvoiceUserTemplate);
   const editTemplate = useMutation(api.templates.editUserTemplate);
-
-  const resolveTemplate = (invoiceData: any) => {
-    const { invoice, userTemplate } = invoiceData;
-
-    return (
-      invoice.templateSnapshot ??
-      userTemplate ?? {
-        primaryColor: "#000000",
-        secondaryColor: "#333333",
-        headerColor: "#e5e7eb",
-        backgroundColor: "#f9fafb",
-      }
-    );
-  };
+  const editStatus = useMutation(api.invoices.handleInvoiceStatus);
 
   if (!data || template === undefined) {
     return <div>Loading…</div>;
   }
 
-  if (!draftInvoice) return <div>Can't find invoice</div>;
-  if (!issuedInvoice) return <div>Can't find issued invoice</div>;
+  if (!draftInvoice || !issuedInvoice) return <div>Loading…</div>;
 
-  const { invoice, userTemplate } = draftInvoice;
-  const { invoice: issued } = issuedInvoice;
+  const draftTemplate = draftInvoice.renderTemplate;
+  const issuedTemplate = issuedInvoice.renderTemplate;
+
+  console.log(draftTemplate);
+  console.log(issuedTemplate);
 
   if (!template) return <div>No templates yet</div>;
 
   const toChangeUserTemplate =
-    userTemplate?._id === "m578acr0axkctd2cz9wp73bfyn7z3e6z"
+    draftInvoice.invoice.userTemplateId === "m578acr0axkctd2cz9wp73bfyn7z3e6z"
       ? "m577vhzev4c76hhx313qb7as6n7z2hr6"
       : "m578acr0axkctd2cz9wp73bfyn7z3e6z";
 
@@ -55,6 +44,7 @@ const TestTemplates = () => {
 
   return (
     <div>
+      <h2>Default Template - Fetched In Business Profile</h2>
       <h1 style={{ color: template.primaryColor }}>primaryColor</h1>
 
       <h2 style={{ color: template.secondaryColor }}>secondaryColor</h2>
@@ -74,40 +64,91 @@ const TestTemplates = () => {
       </div>
 
       <div>
-        <h2>Invoice (DRAFT – live template)</h2>
+        <h2>Invoice (DRAFT live template)</h2>
         {(() => {
-          const t = resolveTemplate(draftInvoice);
-
           return (
             <>
-              <Button
-                onClick={async () => {
-                  await changeTemplate({
-                    invoiceId: invoice._id,
-                    userTemplateId: toChangeUserTemplate as Id<"userTemplates">,
-                  });
-                  alert("Template changed!");
-                }}
-              >
-                Change Template
-              </Button>
+              <div className="flex gap-3">
+                <Button
+                  onClick={async () => {
+                    await changeTemplate({
+                      invoiceId: draftInvoice.invoice._id,
+                      userTemplateId:
+                        toChangeUserTemplate as Id<"userTemplates">,
+                    });
+                    alert("Template changed!");
+                  }}
+                >
+                  Change Template
+                </Button>
 
-              <h1 style={{ color: t?.primaryColor }}>
-                Buyer Name: {invoice.buyerName}
+                <Button
+                  onClick={async () => {
+                    await editStatus({
+                      invoiceId: draftInvoice.invoice._id,
+                      status: "OPEN",
+                    });
+                    alert("Status changed to open");
+                  }}
+                >
+                  Open
+                </Button>
+
+                <Button
+                  onClick={async () => {
+                    await editStatus({
+                      invoiceId: draftInvoice.invoice._id,
+                      status: "PAID",
+                    });
+                    alert("Status changed to PAID");
+                  }}
+                >
+                  PAID
+                </Button>
+
+                <Button
+                  onClick={async () => {
+                    await editStatus({
+                      invoiceId: draftInvoice.invoice._id,
+                      status: "OVERDUE",
+                    });
+                    alert("Status changed to OVERDUE");
+                  }}
+                >
+                  OVERDUE
+                </Button>
+
+                <Button
+                  onClick={async () => {
+                    await editStatus({
+                      invoiceId: draftInvoice.invoice._id,
+                      status: "DRAFT",
+                    });
+                    alert("Status changed to DRAFT");
+                  }}
+                >
+                  DRAFT
+                </Button>
+              </div>
+
+              <h1 style={{ color: draftTemplate?.primaryColor }}>
+                Buyer Name: {draftInvoice.invoice.buyerName}
               </h1>
-              <h2 style={{ color: t?.secondaryColor }}>
-                Amount: {invoice.totalAmount}
+              <h2 style={{ color: draftTemplate?.secondaryColor }}>
+                Amount: {draftInvoice.invoice.totalAmount}
               </h2>
               <div
                 className="p-12 rounded-lg my-3"
-                style={{ backgroundColor: t?.headerColor ?? "blue" }}
+                style={{
+                  backgroundColor: draftTemplate?.headerColor ?? "blue",
+                }}
               >
                 {/* headerColor with user template */}
               </div>
               <div
                 className="p-12 rounded-lg my-3"
                 style={{
-                  backgroundColor: t?.backgroundColor ?? "gray",
+                  backgroundColor: draftTemplate?.backgroundColor ?? "gray",
                 }}
               >
                 {/* backgroundColor with user template */}
@@ -145,27 +186,28 @@ const TestTemplates = () => {
 
       {issuedInvoice && (
         <div>
-          <h2>Invoice (PAID – snapshot) yung dating brand</h2>
+          <h2>Invoice (PAID snapshot) yung dating brand</h2>
           {(() => {
-            const t = resolveTemplate(issuedInvoice);
             return (
               <>
-                <h1 style={{ color: t?.primaryColor }}>
-                  Buyer Name: {invoice.buyerName}
+                <h1 style={{ color: issuedTemplate?.primaryColor }}>
+                  Buyer Name: {draftInvoice.invoice.buyerName}
                 </h1>
-                <h2 style={{ color: t?.secondaryColor }}>
-                  Amount: {invoice.totalAmount}
+                <h2 style={{ color: issuedTemplate?.secondaryColor }}>
+                  Amount: {draftInvoice.invoice.totalAmount}
                 </h2>
                 <div
                   className="p-12 rounded-lg my-3"
-                  style={{ backgroundColor: t?.headerColor ?? "blue" }}
+                  style={{
+                    backgroundColor: issuedTemplate?.headerColor ?? "blue",
+                  }}
                 >
                   {/* headerColor with user template */}
                 </div>
                 <div
                   className="p-12 rounded-lg my-3"
                   style={{
-                    backgroundColor: t?.backgroundColor ?? "gray",
+                    backgroundColor: issuedTemplate?.backgroundColor ?? "gray",
                   }}
                 >
                   {/* backgroundColor with user template */}

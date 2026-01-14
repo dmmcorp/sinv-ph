@@ -33,7 +33,7 @@ export const calculateInvoiceAmounts = (args: {
       scPwdEligible?: boolean;
       soloParentEligible?: boolean;
       naacEligible?: boolean;
-      movEligible?: boolean; 
+      movEligible?: boolean;
     };
   }[];
   taxType?: TaxType;
@@ -51,8 +51,8 @@ export const calculateInvoiceAmounts = (args: {
   if (hasRegularDiscount && hasSpecialDiscount) {
     throw new Error("You can't mix regular discount and special discount.");
   }
-console.log(args.items);
-console.log(args.specialDiscountType);
+  console.log(args.items);
+  console.log(args.specialDiscountType);
   const isItemEligibleForSpecialDiscount = (
     item: (typeof args.items)[0],
     discountType: SpecialDiscountType | undefined
@@ -84,9 +84,10 @@ console.log(args.specialDiscountType);
 
 
   for (const item of args.items) {
-    if (item.vatType === "ZERO_RATED" && args.specialDiscountType) {
-      throw new Error("SC/PWD discount not allowed on zero-rated sales");
-    }
+    // TODO: If all items are zero rated throw an error
+    // if (item.vatType === "ZERO_RATED" && args.specialDiscountType) {
+    //   throw new Error("SC/PWD discount not allowed on zero-rated sales");
+    // }
 
     const itemTotal = item.unitPrice * item.quantity;
 
@@ -171,9 +172,10 @@ console.log(args.specialDiscountType);
         args.specialDiscountType
       );
 
-      if (item.vatType === "ZERO_RATED") {
-        throw new Error("SC/PWD discount not allowed on zero-rated sales");
-      }
+      // TODO: If all items are zero rated throw an error
+      // if (item.vatType === "ZERO_RATED" && args.specialDiscountType) {
+      //   throw new Error("SC/PWD discount not allowed on zero-rated sales");
+      // }
 
       // vatable items
       if (item.vatType === "VATABLE") {
@@ -303,9 +305,10 @@ console.log(args.specialDiscountType);
       const gross = item.unitPrice * item.quantity
       const isEligible = isItemEligibleForSpecialDiscount(item, "SP");
 
-      if (item.vatType === "ZERO_RATED") {
-        throw new Error("Solo parent discount not allowed on zero-rated sales")
-      }
+      // TODO: If all items are zero rated throw an error
+      // if (item.vatType === "ZERO_RATED" && args.specialDiscountType) {
+      //   throw new Error("Solo parent discount not allowed on zero-rated sales");
+      // }
 
       // vatable items
       if (item.vatType === "VATABLE") {
