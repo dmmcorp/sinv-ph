@@ -27,7 +27,7 @@ export const SubscriberGuard = ({
   }, [user, pathname, isLoading, router]);
 
   if (isLoading) {
-    return <div>Loading...</div>; // Or your loading component
+    return <div>subscriber loading...</div>; // Or your loading component
   }
 
   return <>{children}</>;

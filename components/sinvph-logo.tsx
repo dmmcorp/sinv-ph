@@ -1,14 +1,19 @@
+import Image from "next/image";
+import LOGO from "@/public/assets/Logo.webp";
+import Link from "next/link";
 
-import Image from 'next/image'
-import LOGO from '@/public/assets/Logo.webp'
-import Link from 'next/link'
-
-function SinvphLogo() {
+function SinvphLogo({ width, height }: { width?: number; height?: number }) {
   return (
-    <Link href={'/'}>
-        <Image src={LOGO} alt='SINVPH' className='b bg-blend-lighten  pointer-events-none' width={100} height={100}/>
+    <Link href={"/"}>
+      <Image
+        src={LOGO}
+        alt="SINVPH"
+        className="b bg-blend-lighten  pointer-events-none"
+        width={width || 100}
+        height={height || 100}
+      />
     </Link>
-  )
+  );
 }
 
-export default SinvphLogo
+export default SinvphLogo;

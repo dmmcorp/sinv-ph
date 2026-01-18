@@ -40,7 +40,7 @@ export default function OnboardingSuccessPage() {
           <div className="text-5xl">🎉</div>
 
           <h1 className=" font-semibold text-3xl">You’re all set!</h1>
-
+s
           <p className="text-muted-foreground text-sm lg:text-2xl">
             Let&apos;s take the next step — what would you like to do first?
           </p>

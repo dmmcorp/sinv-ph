@@ -59,7 +59,7 @@ const invoiceFormSchema = z.object({
         total: z
           .number({ error: "Total is required" })
           .min(0, "Total cannot be negative"),
-      })
+      }),
     )
     .min(1, "At least one item is required"),
 
@@ -78,7 +78,7 @@ const invoiceFormSchema = z.object({
 
 function NewInvoice() {
   const { selectedClient } = useClientSelection();
-  const { selectedItems, invoiceNo } = useInvoiceStore();
+  const { selectedItems } = useInvoiceStore();
 
   const form = useForm<z.infer<typeof invoiceFormSchema>>({
     resolver: zodResolver(invoiceFormSchema),

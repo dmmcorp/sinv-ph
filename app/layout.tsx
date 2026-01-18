@@ -1,21 +1,21 @@
 import type { Metadata } from "next";
 import { Geist, Inter, Poppins, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
-import { ConvexClientProvider } from "@/components/ConvexClientProvider";
+import { ConvexClientProvider } from "@/components/convex-client-provider";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
-import { OnboardingGuard } from "@/components/guards/OnboardingGuard";
+import { AppGuard } from "@/components/guards/AppGuard";
 import NavBar from "@/components/landing-page/navigation/nav-bar";
 
 const sourceSerif4 = Source_Serif_4({
-  subsets: ["latin"],  
+  subsets: ["latin"],
   weight: ["200", "300", "400", "700", "800", "900"],
-   variable: "--font-serif",
+  variable: "--font-serif",
 });
 
 const interFont = Inter({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "700"],
-   variable: "--font-sans",
+  variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
@@ -35,9 +35,10 @@ export default function RootLayout({
           className={`${sourceSerif4.variable} ${interFont.variable} antialiased`}
         >
           <ConvexClientProvider>
-            <OnboardingGuard>
-              <NavBar/>
-              {children}</OnboardingGuard>
+            <AppGuard>
+              <NavBar />
+              {children}
+            </AppGuard>
           </ConvexClientProvider>
         </body>
       </html>
