@@ -61,7 +61,7 @@ function SignInForm() {
       if (error instanceof Error) {
         if (error.message.includes("Failed to fetch")) {
           setError(
-            "Connection error. Please check your internet connection and try again."
+            "Connection error. Please check your internet connection and try again.",
           );
         } else {
           setError("Invalid email or password");
@@ -84,8 +84,8 @@ function SignInForm() {
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input
-                  className="px-5 py-5 pr-10"
-                  placeholder="Email address"
+                  className="px-5 py-5 pr-10 "
+                  placeholder="juandelacruz@gmail.com"
                   {...field}
                 />
               </FormControl>
@@ -104,7 +104,7 @@ function SignInForm() {
                   <Input
                     className="px-5 py-5 pr-10"
                     type={hidden ? "password" : "text"}
-                    placeholder="Password"
+                    placeholder="Enter your password"
                     {...field}
                   />
                   <button
@@ -123,15 +123,9 @@ function SignInForm() {
         />
         {error !== "" && <div className="text-red-600 text-sm">{error}</div>}
 
-        <div className=" flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Checkbox id="rememberMe" />
-            <Label htmlFor="rememberMe" className="font-normal">
-              Remember me
-            </Label>
-          </div>
+        <div className=" flex items-center justify-end">
           <Link href={"/auth/forgot-password"} className="">
-            <h5 className="text-blue-500">Forgot Password?</h5>
+            <p className="text-primary text-sm">Forgot Password?</p>
           </Link>
         </div>
         <div className="w-full flex items-center justify-center">
@@ -139,7 +133,7 @@ function SignInForm() {
             type="submit"
             variant={"default"}
             disabled={isLoading}
-            className="mx-auto rounded-full px-10 py-3 font-normal"
+            className="mx-auto rounded-full w-full px-10 py-3 font-normal"
           >
             {isLoading ? (
               <Loader className="animate-spin size-6" />

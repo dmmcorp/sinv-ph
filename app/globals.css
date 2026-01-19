@@ -42,8 +42,8 @@
   --radius: 0.625rem;
 
   /* Base */
-  --background: oklch(0.97 0.01 240); /* #F4F8FA */
-  --foreground: oklch(0.18 0.03 260); /* #0F1A2F */
+  --background: oklch(0.97 0.01 240);
+  --foreground: oklch(0.18 0.03 260);
 
   /* Card / Popover */
   --card: oklch(1 0 0);
@@ -51,11 +51,11 @@
   --popover: oklch(1 0 0);
   --popover-foreground: var(--foreground);
 
-  /* Brand */
-  --primary: oklch(0.56 0.2 255); /* #276EF1 */
+  /* Brand (adjusted) */
+  --primary: oklch(52.059% 0.14079 252.982);
   --primary-foreground: oklch(0.98 0 0);
 
-  --accent: oklch(72.086% 0.14293 242.112); /* #1AA977 */
+  --accent: oklch(72.564% 0.11701 236.533);
   --accent-foreground: oklch(0.98 0 0);
 
   /* Secondary / UI */
@@ -99,10 +99,10 @@
   --popover: oklch(0.2 0.02 260);
   --popover-foreground: var(--foreground);
 
-  --primary: oklch(0.72 0.18 255);
+  --primary: oklch(52.059% 0.14079 252.982);
   --primary-foreground: oklch(0.18 0.02 260);
 
-  --accent: oklch(0.7 0.16 165);
+  --accent: oklch(72.564% 0.11701 236.533);
   --accent-foreground: oklch(0.18 0.02 260);
 
   --secondary: oklch(0.28 0.02 260);
@@ -138,12 +138,15 @@
     font-size: clamp(2rem, 6vw, 2.5rem);
     font-weight: 600;
     font-family:
-      var(--font-serif);
+      var(--font-serif), "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS",
+      sans-serif;
   }
   h2 {
     font-size: clamp(1.3rem, 6vw, 1.8rem);
     font-weight: 500;
-    font-family: var(--font-serif);
+    font-family:
+      var(--font-serif), "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS",
+      sans-serif;
   }
 
   button:hover {
@@ -188,5 +191,5 @@ input[type="number"] {
   background: white;
   margin: auto;
   box-shadow: 0 0 0.3cm rgba(0, 0, 0, 0.22);
-  @apply p-10
+  @apply p-10;
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import SinvphLogo from "../sinvph-logo";
 import { AuthFlow } from "./auth-flow";
 import SignInForm from "./form/sign-in-form";
 
@@ -10,21 +11,29 @@ function SignIn({
 }) {
   return (
     <main className="signin min-h-screen flex justify-center items-center">
-      <section className="container mx-auto w-[400px] space-y-8">
-        <h1 className="text-center">LOGO</h1>
+      <section className="container mx-auto w-100 space-y-8 px-2">
         <div className="space-y-2">
-          <h1 className="text-center leading-none">Welcome Back!</h1>
-          <div className="flex items-center gap-1 w-full justify-center">
-            <p>Don&apos;t have an account yet?</p>
-            <button
-              onClick={() => setAuthFlowState("signUp")}
-              className="text-blue-500"
-            >
-              Sign up now
-            </button>
-          </div>
+          <p className="text-left text-accent leading-none text-2xl font-semibold">
+            Sign in to SINVPH
+          </p>
+          <p className="text-muted-foreground text-sm">
+            Create and send invoices, then track everything in one dashboard.
+          </p>
         </div>
-        <SignInForm />
+        <div className="border-accent/20 rounded-lg border p-8 shadow-lg bg-white">
+          <SignInForm />
+        </div>
+        <div className="flex items-center gap-1 w-full justify-center">
+          <p className="text-muted-foreground">
+            Don&apos;t have an account yet?
+          </p>
+          <button
+            onClick={() => setAuthFlowState("signUp")}
+            className="text-primary"
+          >
+            Sign up now
+          </button>
+        </div>
       </section>
     </main>
   );

@@ -12,12 +12,22 @@ import { useBusinessProfileSync } from "@/hooks/use-business-profile";
 import { UseFormReturn } from "react-hook-form";
 import { InvoiceFormValues } from "@/lib/types";
 import Image from "next/image";
-import { SelectedItemType, useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
+import {
+  SelectedItemType,
+  useInvoiceStore,
+} from "@/stores/invoice/useInvoiceStore";
 import { VAT_RATE_PERCENTAGE } from "@/lib/constants/VAT_RATE";
 import { useCalculateInvioceAmount } from "@/hooks/use-calculate-invoice-amount";
 import InvoiceNumber from "./invoice-no";
 import { toast } from "sonner";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import ItemDetailsDialog from "./item-details-dialog";
 import useClientSelection from "@/stores/client/useClientSelection";
 import { useState } from "react";
@@ -27,26 +37,29 @@ interface NewInvoiceFormProps {
 }
 
 function NewInvoiceForm({ form }: NewInvoiceFormProps) {
-  
- const { selectedClient } = useClientSelection();
-  const [selectedItem, setSelectedItem] = useState<SelectedItemType | null>(null);
+  const { selectedClient } = useClientSelection();
+  const [selectedItem, setSelectedItem] = useState<SelectedItemType | null>(
+    null,
+  );
   const [dialogOpen, setDialogOpen] = useState(false);
   const [quantity, setQuantity] = useState<number>(selectedItem?.quantity || 1);
   const { businessProfile } = useBusinessProfileSync();
   const total = useCalculateInvioceAmount();
   const invoice = useInvoiceStore();
 
-  // 2. Define a submit handler.
-
-       const formatedTin = () => {
+  const formatedTin = () => {
     const businessType = businessProfile?.businessType;
     switch (businessType) {
       case "Freelancer/Individual":
         return businessProfile?.tin;
       case "Small Business":
-        return businessProfile?.tin ? "NON-VAT REG TIN " + businessProfile?.tin : "";
+        return businessProfile?.tin
+          ? "NON-VAT REG TIN " + businessProfile?.tin
+          : "";
       case "VAT-Registered Business":
-        return businessProfile?.tin ? "VAT REG TIN " + businessProfile?.tin : "";
+        return businessProfile?.tin
+          ? "VAT REG TIN " + businessProfile?.tin
+          : "";
       default:
         return businessProfile?.tin;
     }
@@ -65,7 +78,9 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
         handleRemoveItem();
         return;
       }
-      toast.success(`${selectedItem.description} quantity updated successfully`);
+      toast.success(
+        `${selectedItem.description} quantity updated successfully`,
+      );
       setDialogOpen(false);
       setSelectedItem(null);
     }
@@ -82,7 +97,6 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
 
   return (
     <div className="relative a4-size flex flex-col min-h-185  lg:min-h-312 mx-auto border-2  p-4 lg:p-10 rounded-2xl space-y-5 lg:space-y-10 bg-white">
-    
       {/* HEADER */}
       <div className="flex justify-between gap-x-5">
         <div className="w-[70%]">
@@ -96,7 +110,9 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
               />
             </div>
           )}
-          <h3 className="invoice-text font-bold mt-1 sm:mt-3">{businessProfile?.businessName}</h3>
+          <h3 className="invoice-text font-bold mt-1 sm:mt-3">
+            {businessProfile?.businessName}
+          </h3>
           <p className="invoice-text ">{businessProfile?.sellerName}</p>
           <h5 className="invoice-text">{formatedTin()}</h5>
           <h5 className="invoice-text">{businessProfile?.address}</h5>
@@ -108,12 +124,18 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
       <div className="flex justify-between">
         <div>
           <h3 className="invoice-text font-semibold"> Customer Information</h3>
-          <h3 className="font-medium invoice-text capitalize">{selectedClient?.name}</h3>
-          <p className="invoice-text whitespace-pre-line">{selectedClient?.address}</p>
+          <h3 className="font-medium invoice-text capitalize">
+            {selectedClient?.name}
+          </h3>
+          <p className="invoice-text whitespace-pre-line">
+            {selectedClient?.address}
+          </p>
         </div>
         <div>
           <div className="grid grid-cols-2 items-center gap-x-2 text-[0.6rem] sm:text-xs lg:text-lg text-nowrap">
-            <h3 className="text-nowrap invoice-text font-normal">Invoice No.</h3>
+            <h3 className="text-nowrap invoice-text font-normal">
+              Invoice No.
+            </h3>
             <InvoiceNumber form={form} />
           </div>
           <div className="grid grid-cols-2 items-center gap-x-2 invoice-text font-normal">
@@ -128,39 +150,59 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
         <Table>
           <TableHeader className="bg-blue-600 min-h-1 py-0 h-1">
             <TableRow className="hover:bg-blue-600 border-blue-600 invoice-text py-0 h-2">
-              <TableHead className="text-white font-semibold w-12 ">#</TableHead>
-              <TableHead className="text-white font-semibold">Description</TableHead>
-              <TableHead className="text-white font-semibold text-right">Unit Price</TableHead>
-              <TableHead className="text-white font-semibold text-right">QTY</TableHead>
-              <TableHead className="text-white font-semibold text-right">Amount</TableHead>
+              <TableHead className="text-white font-semibold w-12 ">
+                #
+              </TableHead>
+              <TableHead className="text-white font-semibold">
+                Description
+              </TableHead>
+              <TableHead className="text-white font-semibold text-right">
+                Unit Price
+              </TableHead>
+              <TableHead className="text-white font-semibold text-right">
+                QTY
+              </TableHead>
+              <TableHead className="text-white font-semibold text-right">
+                Amount
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {invoice.selectedItems.length > 0
-              ? invoice.selectedItems.map((item, index) => (
-                  <TableRow
-                    key={item._id}
-                    onClick={() => handleItemClick(item)}
-                    className="cursor-pointer hover:bg-blue-50 transition-colors"
-                  >
-                    <TableCell className="font-medium text-slate-900">{index + 1}</TableCell>
-                    <TableCell className="text-slate-700">{item.description}</TableCell>
-                    <TableCell className="text-right text-slate-700">₱{item.price.toLocaleString("en-PH")}</TableCell>
-                    <TableCell className="text-right text-slate-700">{item.quantity}</TableCell>
-                    <TableCell className="text-right font-semibold text-slate-900">
-                      ₱{(item.price * item.quantity).toLocaleString("en-PH")}
-                    </TableCell>
-                  </TableRow>
-                ))
-              : (
-                <TableRow className="h-10">
-                  <TableCell colSpan={5} className="p-10 border-0 invoice-text">
-                    <p className="text-center text-muted-foreground leading-loose text-wrap invoice-text">
-                      Add items or services here by clicking the <span className="font-bold">Add items or Services</span> button in the Invoice settings.
-                    </p>
+            {invoice.selectedItems.length > 0 ? (
+              invoice.selectedItems.map((item, index) => (
+                <TableRow
+                  key={item._id}
+                  onClick={() => handleItemClick(item)}
+                  className="cursor-pointer hover:bg-blue-50 transition-colors"
+                >
+                  <TableCell className="font-medium text-slate-900">
+                    {index + 1}
+                  </TableCell>
+                  <TableCell className="text-slate-700">
+                    {item.description}
+                  </TableCell>
+                  <TableCell className="text-right text-slate-700">
+                    ₱{item.price.toLocaleString("en-PH")}
+                  </TableCell>
+                  <TableCell className="text-right text-slate-700">
+                    {item.quantity}
+                  </TableCell>
+                  <TableCell className="text-right font-semibold text-slate-900">
+                    ₱{(item.price * item.quantity).toLocaleString("en-PH")}
                   </TableCell>
                 </TableRow>
-              )}
+              ))
+            ) : (
+              <TableRow className="h-10">
+                <TableCell colSpan={5} className="p-10 border-0 invoice-text">
+                  <p className="text-center text-muted-foreground leading-loose text-wrap invoice-text">
+                    Add items or services here by clicking the{" "}
+                    <span className="font-bold">Add items or Services</span>{" "}
+                    button in the Invoice settings.
+                  </p>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
@@ -172,35 +214,57 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
         <div className="grid grid-cols-12 gap-x-1 font-semibold text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-base">
           <div className="col-span-8"></div>
           <div className="col-span-2 text-right invoice-text">Subtotal:</div>
-          <div className="col-span-2 text-right pr-2 invoice-text">{formatCurrency(total.grossTotal, invoice.selectedCurrency)}</div>
+          <div className="col-span-2 text-right pr-2 invoice-text">
+            {formatCurrency(total.grossTotal, invoice.selectedCurrency)}
+          </div>
         </div>
         {/* Original VAT, discounts, and total sections preserved */}
         {invoice.includeTax && (
           <>
             <div className="grid grid-cols-12 gap-x-1 font-semibold text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-base">
               <div className="col-span-5 "></div>
-              <div className="col-span-5 text-right font-light invoice-text">Vatable Sales:</div>
-              <div className="col-span-2 font-light text-right pr-2 invoice-text">{formatCurrency(total.vatableSales, invoice.selectedCurrency)}</div>
+              <div className="col-span-5 text-right font-light invoice-text">
+                Vatable Sales:
+              </div>
+              <div className="col-span-2 font-light text-right pr-2 invoice-text">
+                {formatCurrency(total.vatableSales, invoice.selectedCurrency)}
+              </div>
             </div>
             <div className="grid grid-cols-12 gap-x-1 font-semibold text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-base">
               <div className="col-span-5 "></div>
-              <div className="col-span-5 text-right font-light invoice-text">VAT-Exempt Sales:</div>
-              <div className="col-span-2 font-light text-right pr-2 invoice-text">{formatCurrency(total.vatExemptSales, invoice.selectedCurrency)}</div>
+              <div className="col-span-5 text-right font-light invoice-text">
+                VAT-Exempt Sales:
+              </div>
+              <div className="col-span-2 font-light text-right pr-2 invoice-text">
+                {formatCurrency(total.vatExemptSales, invoice.selectedCurrency)}
+              </div>
             </div>
             <div className="grid grid-cols-12 gap-x-1 font-semibold text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-base">
               <div className="col-span-5"></div>
-              <div className="col-span-5 text-right font-light invoice-text">Zero-Rated Sales:</div>
-              <div className="col-span-2 font-light text-right pr-2 invoice-text">{formatCurrency(total.zeroRatedSales, invoice.selectedCurrency)}</div>
+              <div className="col-span-5 text-right font-light invoice-text">
+                Zero-Rated Sales:
+              </div>
+              <div className="col-span-2 font-light text-right pr-2 invoice-text">
+                {formatCurrency(total.zeroRatedSales, invoice.selectedCurrency)}
+              </div>
             </div>
             <div className="grid grid-cols-12 gap-x-1 font-semibold text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-base">
               <div className="col-span-5"></div>
-              <div className="col-span-5 text-right font-light invoice-text">Tax%:</div>
-              <div className="col-span-2 font-light text-right pr-2 invoice-text">{VAT_RATE_PERCENTAGE}%</div>
+              <div className="col-span-5 text-right font-light invoice-text">
+                Tax%:
+              </div>
+              <div className="col-span-2 font-light text-right pr-2 invoice-text">
+                {VAT_RATE_PERCENTAGE}%
+              </div>
             </div>
             <div className="grid grid-cols-12 gap-x-1 font-semibold text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-base">
               <div className="col-span-5"></div>
-              <div className="col-span-5 text-right font-light invoice-text">VAT:</div>
-              <div className="col-span-2 text-right pr-2 font-light invoice-text">{formatCurrency(total.vatAmount, invoice.selectedCurrency)}</div>
+              <div className="col-span-5 text-right font-light invoice-text">
+                VAT:
+              </div>
+              <div className="col-span-2 text-right pr-2 font-light invoice-text">
+                {formatCurrency(total.vatAmount, invoice.selectedCurrency)}
+              </div>
             </div>
           </>
         )}
@@ -209,32 +273,53 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
             {invoice.isPercentage && (
               <div className="grid grid-cols-12 gap-x-1 font-semibold text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-base">
                 <div className="col-span-6"></div>
-                <div className="col-span-4 text-right font-light invoice-text">Discount %:</div>
-                <div className="col-span-2 text-right pr-2 font-light invoice-text">{invoice.discountValue}%</div>
+                <div className="col-span-4 text-right font-light invoice-text">
+                  Discount %:
+                </div>
+                <div className="col-span-2 text-right pr-2 font-light invoice-text">
+                  {invoice.discountValue}%
+                </div>
               </div>
             )}
             <div className="grid grid-cols-12 gap-x-1 font-semibold text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-base">
               <div className="col-span-6"></div>
-              <div className="col-span-4 text-right font-light invoice-text">Discount Amount:</div>
+              <div className="col-span-4 text-right font-light invoice-text">
+                Discount Amount:
+              </div>
               <div className="col-span-2 text-right pr-2 font-light invoice-text">
-                {invoice.isSpecialDiscount
-                  ? <>
-                      {total.specialDiscountAmount > 1 && <span className="font-semibold mr-2">-</span>}
-                      {formatCurrency(total.specialDiscountAmount, invoice.selectedCurrency)}
-                    </>
-                  : <>
-                      {total.regularDiscountAmount > 1 && <span className="font-semibold mr-2">-</span>}
-                      {formatCurrency(total.regularDiscountAmount, invoice.selectedCurrency)}
-                    </>
-                }
+                {invoice.isSpecialDiscount ? (
+                  <>
+                    {total.specialDiscountAmount > 1 && (
+                      <span className="font-semibold mr-2">-</span>
+                    )}
+                    {formatCurrency(
+                      total.specialDiscountAmount,
+                      invoice.selectedCurrency,
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {total.regularDiscountAmount > 1 && (
+                      <span className="font-semibold mr-2">-</span>
+                    )}
+                    {formatCurrency(
+                      total.regularDiscountAmount,
+                      invoice.selectedCurrency,
+                    )}
+                  </>
+                )}
               </div>
             </div>
           </>
         )}
         <div className="grid grid-cols-12 gap-x-1 font-semibold  mt-2 lg:mt-5">
           <div className="col-span-5 "></div>
-          <h1 className="col-span-5 text-right text-nowrap  text-xl text-primary">Total Amount:</h1>
-          <h1 className="col-span-2 text-right pr-2  text-xl text-primary">{formatCurrency(total.totalAmount, invoice.selectedCurrency)}</h1>
+          <h1 className="col-span-5 text-right text-nowrap  text-xl text-primary">
+            Total Amount:
+          </h1>
+          <h1 className="col-span-2 text-right pr-2  text-xl text-primary">
+            {formatCurrency(total.totalAmount, invoice.selectedCurrency)}
+          </h1>
         </div>
       </div>
 
@@ -242,12 +327,12 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
       {!invoice.includeTax && (
         <div className="mt-auto w-fit mx-auto">
           <h1 className="text-red-600 text-[0.4rem] sm:text-[0.6rem] md:text-sm lg:text-xl uppercase text-center">
-            "This document is not valid for claim of input tax."
+            &quote;This document is not valid for claim of input tax.&quote;
           </h1>
         </div>
       )}
-   
-    <ItemDetailsDialog
+
+      <ItemDetailsDialog
         dialogOpen={dialogOpen}
         setDialogOpen={setDialogOpen}
         selectedItem={{
@@ -256,10 +341,12 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
           legalFlags: {
             naacEligible: selectedItem?.legalFlags?.naacEligible || false,
             movEligible: selectedItem?.legalFlags?.movEligible || false,
-            soloParentEligible: selectedItem?.legalFlags?.soloParentEligible || false,
+            soloParentEligible:
+              selectedItem?.legalFlags?.soloParentEligible || false,
             scPwdEligible: selectedItem?.legalFlags?.scPwdEligible || false,
           },
-          vatType: selectedItem?.vatType === "VATABLE" ? "VATABLE" : "NON-VATABLE",
+          vatType:
+            selectedItem?.vatType === "VATABLE" ? "VATABLE" : "NON-VATABLE",
           amount: (selectedItem?.price || 0) * quantity,
         }}
         quantity={quantity}
@@ -272,8 +359,3 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
 }
 
 export default NewInvoiceForm;
-
-    
-
-      
-

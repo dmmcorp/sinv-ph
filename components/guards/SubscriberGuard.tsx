@@ -3,6 +3,7 @@
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import LoadingWithLogo from "../loading-with-logo";
 
 export const SubscriberGuard = ({
   children,
@@ -27,7 +28,7 @@ export const SubscriberGuard = ({
   }, [user, pathname, isLoading, router]);
 
   if (isLoading) {
-    return <div>subscriber loading...</div>; // Or your loading component
+    return <LoadingWithLogo />; // Or your loading component
   }
 
   return <>{children}</>;

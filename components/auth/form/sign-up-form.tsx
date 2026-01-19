@@ -43,6 +43,7 @@ const signInFormSchema = z
 
 function SignUpForm() {
   const [hidden, setIsHidden] = useState<boolean>(true);
+
   const form = useForm<z.infer<typeof signInFormSchema>>({
     resolver: zodResolver(signInFormSchema),
     defaultValues: {
@@ -60,7 +61,6 @@ function SignUpForm() {
       email: values.email,
       password: values.password,
       onboarding: false,
-      updatedAt: Math.floor(Date.now() / 1000), // unix timestamp today
     });
   }
   return (
