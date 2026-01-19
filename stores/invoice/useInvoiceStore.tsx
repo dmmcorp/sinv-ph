@@ -2,7 +2,6 @@
 import { Id } from "@/convex/_generated/dataModel";
 import { INVOiCETYPE, VATTYPE } from "@/lib/types";
 import { create } from "zustand";
-import { SPECIAL_DISCOUNT_TYPES } from "@/lib/constants/DISCOUNT_TYPES";
 export type SelectedItemType = {
   _id: Id<"itemCatalog">;
   description: string;
