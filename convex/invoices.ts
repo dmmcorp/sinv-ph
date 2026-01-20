@@ -4,7 +4,7 @@ import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { TaxType } from "../lib/constants/TAX_TYPES";
 import { Id } from "./_generated/dataModel";
-import { aggregateInvoiceByUser } from "./aggregate";
+import { aggregateInvoiceByUser, aggregateRevenueByUser } from "./aggregate";
 
 // COUNTER SYNTAX:
 // INVOCE - TYPE OF INVOICE - BUSINESS ID - YEAR
@@ -335,7 +335,9 @@ export const createInvoice = mutation({
       updatedAt: Math.floor(Date.now() / 1000),
     });
     const doc = await ctx.db.get(invoiceId)
+
     await aggregateInvoiceByUser.insert(ctx, doc!);
+    await aggregateRevenueByUser.insert(ctx, doc!);
 
     return invoiceId;
   },
@@ -510,7 +512,8 @@ export const handleInvoiceStatus = mutation({
     const newDoc = await ctx.db.get(invoice._id)
     if (!newDoc) throw new Error("Updated invoice not found")
 
-    await aggregateInvoiceByUser.replace(ctx, invoice, newDoc)
+    await aggregateInvoiceByUser.replace(ctx, invoice, newDoc);
+    await aggregateRevenueByUser.replace(ctx, invoice, newDoc);
 
     return true
   }

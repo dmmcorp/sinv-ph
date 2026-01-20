@@ -609,3 +609,9 @@ export const randomHexColor = () => {
     .toString(16)
     .padStart(6, "0")}`;
 };
+
+export const yearMonthToShortMonth = (yearMonth: string) => {
+  // "2026-01" → Date("2026-01-01")
+  const date = new Date(`${yearMonth}-01`);
+  return date.toLocaleString("en-US", { month: "short" });
+};

@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { query } from "./_generated/server";
-import { aggregateInvoiceByUser } from "./aggregate";
+import { aggregateInvoiceByUser, aggregateRevenueByUser } from "./aggregate";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { STATUSTYPE } from "../lib/constants/STATUS_TYPES";
 
@@ -65,3 +65,33 @@ export const getInvoiceMetricsForUser = query({
         return result;
     },
 });
+
+export const getMonthlyRevenueForUser = query({
+    args: {
+        year: v.number() // 2026
+    },
+    handler: async (ctx, { year }) => {
+        const userId = await getAuthUserId(ctx);
+        if (!userId) throw new ConvexError("Not authenticated")
+
+        // 01, 02, .... 10 11 12
+        const months = Array.from({ length: 12 }, (_, i) =>
+            `${year}-${String(i + 1).padStart(2, "0")}`
+        )
+
+        const results = await Promise.all(
+            months.map((month) =>
+                aggregateRevenueByUser.sum(ctx, {
+                    bounds: {
+                        prefix: [userId, month]
+                    }
+                })
+            )
+        );
+
+        return months.map((month, i) => ({
+            month,
+            revenue: results[i] ?? 0,
+        }))
+    }
+})
