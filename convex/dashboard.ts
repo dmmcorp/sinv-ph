@@ -2,12 +2,13 @@ import { ConvexError, v } from "convex/values";
 import { query } from "./_generated/server";
 import { aggregateInvoiceByUser } from "./aggregate";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { STATUSTYPE } from "../lib/constants/STATUS_TYPES";
 
 export const getInvoiceCountsForUser = query({
     args: {
         status: v.union(
             v.literal("DRAFT"),
-            v.literal("PAID"), // HAS OR = PAIDasd
+            v.literal("PAID"), // HAS OR = PAID
             v.literal("OPEN"), // NO OR = NOT PAID
             v.literal("OVERDUE"),
         ),
@@ -24,3 +25,43 @@ export const getInvoiceCountsForUser = query({
         })
     }
 })
+
+export const getInvoiceMetricsForUser = query({
+    args: {},
+    handler: async (ctx) => {
+        const userId = await getAuthUserId(ctx);
+        if (!userId) throw new ConvexError("Not authenticated");
+
+        const statuses: STATUSTYPE[] = [
+            "DRAFT",
+            "OPEN",
+            "PAID",
+            "OVERDUE",
+        ];
+
+        const result = {
+            total: 0,
+            draft: 0,
+            open: 0,
+            paid: 0,
+            overdue: 0,
+        }
+
+        for (const status of statuses) {
+            const count = await aggregateInvoiceByUser.count(ctx, {
+                namespace: userId,
+                bounds: { eq: status },
+            })
+
+            result.total += count;
+
+
+            if (status === "DRAFT") result.draft = count;
+            if (status === "OPEN") result.open = count;
+            if (status === "PAID") result.paid = count;
+            if (status === "OVERDUE") result.overdue = count;
+        }
+
+        return result;
+    },
+});

@@ -284,6 +284,10 @@ export default defineSchema({
     secondaryColor: v.string(),   // hex values // usually normal text
     headerColor: v.string(),      // hex values (header color for template)
     backgroundColor: v.string(),  // hex values (background color)
+    // colors
+    // font weight
+    // font design (sans-serif, etc..)
+    // font size
 
     layoutConfig: v.optional(
       v.object({

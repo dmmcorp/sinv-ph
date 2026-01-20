@@ -507,6 +507,11 @@ export const handleInvoiceStatus = mutation({
         updatedAt: Date.now(),
       });
 
+    const newDoc = await ctx.db.get(invoice._id)
+    if (!newDoc) throw new Error("Updated invoice not found")
+
+    await aggregateInvoiceByUser.replace(ctx, invoice, newDoc)
+
     return true
   }
 })
