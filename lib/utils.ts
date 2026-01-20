@@ -294,12 +294,12 @@ export const calculateInvoiceAmounts = (args: {
     let vatExemptSales = 0;
     let specialDiscountAmount = 0;
 
-    if (
-      args.specialDiscountType === "SP" &&
-      args.items.every(i => !i.legalFlags?.soloParentEligible)
-    ) {
-      throw new Error("No Solo Parent–eligible items in this invoice");
-    }
+    // if (
+    //   args.specialDiscountType === "SP" &&
+    //   args.items.every(i => !i.legalFlags?.soloParentEligible)
+    // ) {
+    //   throw new Error("No Solo Parent–eligible items in this invoice");
+    // }
 
     for (const item of args.items) {
       const gross = item.unitPrice * item.quantity

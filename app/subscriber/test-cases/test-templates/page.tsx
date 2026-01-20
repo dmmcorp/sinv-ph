@@ -10,10 +10,10 @@ const TestTemplates = () => {
   const data = useQuery(api.templates.getAllTemplates);
   const template = useQuery(api.templates.getDefaultTemplate);
   const draftInvoice = useQuery(api.invoices.getInvoiceById, {
-    invoiceId: "jh7553c3mahj1m82grmk02rj0d7z3es3" as Id<"invoices">,
+    invoiceId: "jh7553c3mahj1m82grmk02rj0d7z3es3" as Id<"invoices">, // DRAFT STATUS
   });
   const issuedInvoice = useQuery(api.invoices.getInvoiceById, {
-    invoiceId: "jh71s488pb1k3bk7spm491q9hh7z2hg6" as Id<"invoices">,
+    invoiceId: "jh71s488pb1k3bk7spm491q9hh7z2hg6" as Id<"invoices">, // PAID STATUS
   });
   const makeDefault = useMutation(api.templates.makeDefaultTemplate);
   const changeTemplate = useMutation(api.templates.changeInvoiceUserTemplate);

@@ -1,0 +1,1 @@
+export type STATUSTYPE = "DRAFT" | "PAID" | "OPEN" | "OVERDUE"

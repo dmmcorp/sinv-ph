@@ -4,6 +4,7 @@ import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { TaxType } from "../lib/constants/TAX_TYPES";
 import { Id } from "./_generated/dataModel";
+import { aggregateInvoiceByUser } from "./aggregate";
 
 // COUNTER SYNTAX:
 // INVOCE - TYPE OF INVOICE - BUSINESS ID - YEAR
@@ -333,6 +334,8 @@ export const createInvoice = mutation({
       dueDate: args.dueDate,
       updatedAt: Math.floor(Date.now() / 1000),
     });
+    const doc = await ctx.db.get(invoiceId)
+    await aggregateInvoiceByUser.insert(ctx, doc!);
 
     return invoiceId;
   },
@@ -358,7 +361,7 @@ export const getInvoiceById = query({
       throw new ConvexError("Access denied.");
     }
 
-    // SNAPSHOT
+    // SNAPSHOT = OPEN, PAID, DUE_DATE
     if (invoice.templateSnapshot) {
       return {
         invoice,

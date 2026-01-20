@@ -1,5 +1,9 @@
+"use client";
+
 import { FileText, FilePen, CheckCircle2, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 const metrics = [
   {
@@ -33,6 +37,10 @@ const metrics = [
 ];
 
 export function MetricsCards() {
+  const cntInvoice = useQuery(api.dashboard.getInvoiceCountsForUser, {
+    status: "DRAFT",
+  });
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {metrics.map((metric) => (
