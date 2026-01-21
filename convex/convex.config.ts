@@ -1,8 +1,8 @@
 // convex/convex.config.ts
 import { defineApp } from "convex/server";
-import shardedCounter from "@convex-dev/sharded-counter/convex.config.js";
+import aggregate from "@convex-dev/aggregate/convex.config.js";
 
 const app = defineApp();
-app.use(shardedCounter);
+app.use(aggregate, { name: "aggregateInvoices" });
 
 export default app;

@@ -1,38 +1,51 @@
+"use client";
+
 import { FileText, FilePen, CheckCircle2, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
-const metrics = [
-  {
-    label: "Total Generated Invoices",
-    value: "9",
-    icon: FileText,
-    iconColor: "text-slate-600",
-    iconBg: "bg-slate-100",
-  },
-  {
-    label: "Draft Invoices",
-    value: "3",
-    icon: FilePen,
-    iconColor: "text-amber-600",
-    iconBg: "bg-amber-50",
-  },
-  {
-    label: "Paid Invoices",
-    value: "4",
-    icon: CheckCircle2,
-    iconColor: "text-emerald-600",
-    iconBg: "bg-emerald-50",
-  },
-  {
-    label: "Unpaid Invoices",
-    value: "2",
-    icon: AlertCircle,
-    iconColor: "text-rose-600",
-    iconBg: "bg-rose-50",
-  },
-];
+interface MetricsCardsProp {
+  year: string;
+}
 
-export function MetricsCards() {
+export const MetricsCards = ({ year }: MetricsCardsProp) => {
+  const metricsData = useQuery(api.dashboard.getInvoiceMetricsForUser, {
+    year,
+  });
+  if (!metricsData) return null;
+
+  const metrics = [
+    {
+      label: "Total Generated Invoices",
+      value: metricsData.total,
+      icon: FileText,
+      iconColor: "text-slate-600",
+      iconBg: "bg-slate-100",
+    },
+    {
+      label: "Draft Invoices",
+      value: metricsData.draft,
+      icon: FilePen,
+      iconColor: "text-amber-600",
+      iconBg: "bg-amber-50",
+    },
+    {
+      label: "Paid Invoices",
+      value: metricsData.paid,
+      icon: CheckCircle2,
+      iconColor: "text-emerald-600",
+      iconBg: "bg-emerald-50",
+    },
+    {
+      label: "Unpaid Invoices",
+      value: metricsData.open + metricsData.overdue,
+      icon: AlertCircle,
+      iconColor: "text-rose-600",
+      iconBg: "bg-rose-50",
+    },
+  ];
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {metrics.map((metric) => (
@@ -59,4 +72,4 @@ export function MetricsCards() {
       ))}
     </div>
   );
-}
+};

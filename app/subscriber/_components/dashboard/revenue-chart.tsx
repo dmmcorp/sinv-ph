@@ -1,6 +1,9 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { api } from "@/convex/_generated/api";
+import { yearMonthToShortMonth } from "@/lib/utils";
+import { useQuery } from "convex/react";
 import {
   Bar,
   BarChart,
@@ -10,22 +13,36 @@ import {
   Tooltip,
 } from "recharts";
 
-const revenueData = [
-  { month: "Jan", revenue: 12500 },
-  { month: "Feb", revenue: 18200 },
-  { month: "Mar", revenue: 15800 },
-  { month: "Apr", revenue: 22400 },
-  { month: "May", revenue: 19600 },
-  { month: "Jun", revenue: 28900 },
-  { month: "Jul", revenue: 24300 },
-  { month: "Aug", revenue: 31200 },
-  { month: "Sep", revenue: 27800 },
-  { month: "Oct", revenue: 35400 },
-  { month: "Nov", revenue: 32100 },
-  { month: "Dec", revenue: 38500 },
-];
+// const revenueData = [
+//   { month: "Jan", revenue: 12500 },
+//   { month: "Feb", revenue: 18200 },
+//   { month: "Mar", revenue: 15800 },
+//   { month: "Apr", revenue: 22400 },
+//   { month: "May", revenue: 19600 },
+//   { month: "Jun", revenue: 28900 },
+//   { month: "Jul", revenue: 24300 },
+//   { month: "Aug", revenue: 31200 },
+//   { month: "Sep", revenue: 27800 },
+//   { month: "Oct", revenue: 35400 },
+//   { month: "Nov", revenue: 32100 },
+//   { month: "Dec", revenue: 38500 },
+// ];
 
-export function RevenueChart() {
+interface RevenueChartProp {
+  year: string;
+}
+
+export function RevenueChart({ year }: RevenueChartProp) {
+  const data = useQuery(api.dashboard.getMonthlyRevenueForUser, {
+    year,
+  });
+  if (!data) return null;
+
+  const chartData = data.map((d) => ({
+    month: yearMonthToShortMonth(d.month),
+    revenue: d.revenue,
+  }));
+
   return (
     <Card className="h-full">
       <CardHeader className="pb-2">
@@ -37,9 +54,9 @@ export function RevenueChart() {
         </p>
       </CardHeader>
       <CardContent className="pt-4">
-        <div className="h-[300px]">
+        <div className="h-75">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={revenueData}>
+            <BarChart data={chartData}>
               <XAxis
                 dataKey="month"
                 axisLine={false}
@@ -50,7 +67,7 @@ export function RevenueChart() {
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: "#64748b", fontSize: 12 }}
-                tickFormatter={(value) => `₱${value / 1000}k`}
+                tickFormatter={(value) => `₱${value / 1000}k`} // TODO: what if million na pero k yung dulo m na dapat????
               />
               <Tooltip
                 cursor={{ fill: "rgba(0,0,0,0.04)" }}

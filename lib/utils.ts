@@ -294,12 +294,12 @@ export const calculateInvoiceAmounts = (args: {
     let vatExemptSales = 0;
     let specialDiscountAmount = 0;
 
-    if (
-      args.specialDiscountType === "SP" &&
-      args.items.every(i => !i.legalFlags?.soloParentEligible)
-    ) {
-      throw new Error("No Solo Parent–eligible items in this invoice");
-    }
+    // if (
+    //   args.specialDiscountType === "SP" &&
+    //   args.items.every(i => !i.legalFlags?.soloParentEligible)
+    // ) {
+    //   throw new Error("No Solo Parent–eligible items in this invoice");
+    // }
 
     for (const item of args.items) {
       const gross = item.unitPrice * item.quantity
@@ -608,4 +608,10 @@ export const randomHexColor = () => {
   return `#${Math.floor(Math.random() * 0xffffff)
     .toString(16)
     .padStart(6, "0")}`;
+};
+
+export const yearMonthToShortMonth = (yearMonth: string) => {
+  // "2026-01" → Date("2026-01-01")
+  const date = new Date(`${yearMonth}-01`);
+  return date.toLocaleString("en-US", { month: "short" });
 };
