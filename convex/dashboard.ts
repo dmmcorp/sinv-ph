@@ -4,31 +4,33 @@ import { aggregateInvoiceByUser, aggregateRevenueByUser } from "./aggregate";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { STATUSTYPE } from "../lib/constants/STATUS_TYPES";
 
-export const getInvoiceCountsForUser = query({
-    args: {
-        status: v.union(
-            v.literal("DRAFT"),
-            v.literal("PAID"), // HAS OR = PAID
-            v.literal("OPEN"), // NO OR = NOT PAID
-            v.literal("OVERDUE"),
-        ),
-    },
-    handler: async (ctx, args) => {
-        const userId = await getAuthUserId(ctx)
-        if (!userId) return null
+// export const getInvoiceCountsForUser = query({
+//     args: {
+//         status: v.union(
+//             v.literal("DRAFT"),
+//             v.literal("PAID"), // HAS OR = PAID
+//             v.literal("OPEN"), // NO OR = NOT PAID
+//             v.literal("OVERDUE"),
+//         ),
+//     },
+//     handler: async (ctx, args) => {
+//         const userId = await getAuthUserId(ctx)
+//         if (!userId) return null
 
-        return await aggregateInvoiceByUser.count(ctx, {
-            namespace: userId,
-            bounds: {
-                eq: args.status,
-            }
-        })
-    }
-})
+//         return await aggregateInvoiceByUser.count(ctx, {
+//             namespace: userId,
+//             bounds: {
+//                 eq: args.status,
+//             }
+//         })
+//     }
+// })
 
 export const getInvoiceMetricsForUser = query({
-    args: {},
-    handler: async (ctx) => {
+    args: {
+        year: v.string(), // 2026
+    },
+    handler: async (ctx, { year }) => {
         const userId = await getAuthUserId(ctx);
         if (!userId) throw new ConvexError("Not authenticated");
 
@@ -50,7 +52,10 @@ export const getInvoiceMetricsForUser = query({
         for (const status of statuses) {
             const count = await aggregateInvoiceByUser.count(ctx, {
                 namespace: userId,
-                bounds: { eq: status },
+                bounds: {
+                    eq: [year, status],
+                    prefix: [year, status],
+                },
             })
 
             result.total += count;
@@ -68,7 +73,7 @@ export const getInvoiceMetricsForUser = query({
 
 export const getMonthlyRevenueForUser = query({
     args: {
-        year: v.number() // 2026
+        year: v.string() // 2026
     },
     handler: async (ctx, { year }) => {
         const userId = await getAuthUserId(ctx);

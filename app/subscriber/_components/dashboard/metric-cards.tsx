@@ -5,8 +5,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
-export function MetricsCards() {
-  const metricsData = useQuery(api.dashboard.getInvoiceMetricsForUser);
+interface MetricsCardsProp {
+  year: string;
+}
+
+export const MetricsCards = ({ year }: MetricsCardsProp) => {
+  const metricsData = useQuery(api.dashboard.getInvoiceMetricsForUser, {
+    year,
+  });
   if (!metricsData) return null;
 
   const metrics = [
@@ -66,4 +72,4 @@ export function MetricsCards() {
       ))}
     </div>
   );
-}
+};

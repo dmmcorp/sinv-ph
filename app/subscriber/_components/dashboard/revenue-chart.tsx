@@ -28,9 +28,13 @@ import {
 //   { month: "Dec", revenue: 38500 },
 // ];
 
-export function RevenueChart() {
+interface RevenueChartProp {
+  year: string;
+}
+
+export function RevenueChart({ year }: RevenueChartProp) {
   const data = useQuery(api.dashboard.getMonthlyRevenueForUser, {
-    year: 2026,
+    year,
   });
   if (!data) return null;
 
@@ -50,7 +54,7 @@ export function RevenueChart() {
         </p>
       </CardHeader>
       <CardContent className="pt-4">
-        <div className="h-[300px]">
+        <div className="h-75">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData}>
               <XAxis
@@ -63,7 +67,7 @@ export function RevenueChart() {
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: "#64748b", fontSize: 12 }}
-                tickFormatter={(value) => `₱${value / 1000}k`}
+                tickFormatter={(value) => `₱${value / 1000}k`} // TODO: what if million na pero k yung dulo m na dapat????
               />
               <Tooltip
                 cursor={{ fill: "rgba(0,0,0,0.04)" }}
