@@ -37,7 +37,7 @@ export default defineSchema({
     businessType: v.union(
       v.literal("Freelancer/Individual"), // freelancer = automatic vat-exempt on items vatType (mapupunta sa NON-VAT taxtype)
       v.literal("Small Business"), // Scenario 1: If BIR Registered but not met 3m threshold then (mapupunta sa VAT_EXEMPT). Scenario 2: Not BIR Registered (NON-VAT)
-      v.literal("VAT-Registered Business") // FOR 3M PATAAS (SHOULD BE VAT-REGISTERED)
+      v.literal("VAT-Registered Business"), // FOR 3M PATAAS (SHOULD BE VAT-REGISTERED)
     ),
     vatRegistration: v.boolean(), // SCENARIO 1: small business is registered OR (true) -> small business is not registered v.literal("VAT-Registered Business")
 
@@ -81,17 +81,23 @@ export default defineSchema({
         backgroundColor: v.string(),
 
         // layout
-        layoutConfig: v.optional(v.object({
-          headerPosition: v.union(v.literal("top"), v.literal("left")),
-          logoPosition: v.union(v.literal("top-left"), v.literal("center")),
-          showFooterTotals: v.boolean(),
-          itemTableStyle: v.union(v.literal("grid"), v.literal("list"), v.literal("compact")),
-          font: v.string(),
+        layoutConfig: v.optional(
+          v.object({
+            headerPosition: v.union(v.literal("top"), v.literal("left")),
+            logoPosition: v.union(v.literal("top-left"), v.literal("center")),
+            showFooterTotals: v.boolean(),
+            itemTableStyle: v.union(
+              v.literal("grid"),
+              v.literal("list"),
+              v.literal("compact"),
+            ),
+            font: v.string(),
 
-          // sourceUserTemplateId: v.optional(v.id("userTemplates")),
-          // sourceTemplateId: v.optional(v.id("templates")),
-        })),
-      })
+            // sourceUserTemplateId: v.optional(v.id("userTemplates")),
+            // sourceTemplateId: v.optional(v.id("templates")),
+          }),
+        ),
+      }),
     ),
 
     // sellers (store pa rin, because as per BIR old invoices should remain the same business name even if that specific business changed its name, address or tin already.)
@@ -104,7 +110,7 @@ export default defineSchema({
     invoiceType: v.union(
       v.literal("SALES"), // SI-00003 = sales i
       v.literal("SERVICE"),
-      v.literal("COMMERCIAL")
+      v.literal("COMMERCIAL"),
     ), // from bir sales invoice format
     invoiceNumber: v.string(), // serial number
 
@@ -116,8 +122,8 @@ export default defineSchema({
         v.literal("VAT_EXEMPT"), // FOR VAT-REGISTERED BUSINESSES (LAHAT NG ITEMS AY VAT-EXEMPT)
         v.literal("ZERO_RATED"), // FOR EXPORTS (NOT SURE)
         v.literal("MIXED"), // FOR VAT-REGISTERED BUSINESSES (MAY PC TAS MAY GULAY)
-        v.literal("PAYMENT_RECEIPT") // (TO STUDY)
-      )
+        v.literal("PAYMENT_RECEIPT"), // (TO STUDY)
+      ),
     ),
 
     // discounts
@@ -132,7 +138,7 @@ export default defineSchema({
         v.literal("NAAC"),
         v.literal("MOV"),
         v.literal("SP"),
-      )
+      ),
     ),
     specialDiscountId: v.optional(v.string()),
     specialDiscountAmount: v.optional(v.number()),
@@ -147,7 +153,7 @@ export default defineSchema({
         vatType: v.union(
           v.literal("VATABLE"),
           v.literal("VAT_EXEMPT"), // VAT-EXEMPT = “This sale is exempt from VAT even though the business is VAT-registered.”
-          v.literal("ZERO_RATED")
+          v.literal("ZERO_RATED"),
           // v.literal("NON_VAT"), // NON-VAT = “This business does not deal with VAT at all.” this is a seller status not a vat item type
         ),
 
@@ -158,9 +164,9 @@ export default defineSchema({
             soloParentEligible: v.optional(v.boolean()),
             naacEligible: v.optional(v.boolean()),
             movEligible: v.optional(v.boolean()),
-          })
+          }),
         ),
-      })
+      }),
     ),
 
     // buyer info
@@ -214,7 +220,7 @@ export default defineSchema({
       v.literal("VATABLE"), // Subject to 12% VAT
       // v.literal("NON_VAT"), // Seller not VAT-registered (usually for small businesses < 3MPHP ANNUAL SALES)
       v.literal("VAT_EXEMPT"), // No VAT (usually educational services, books, newspapers)
-      v.literal("ZERO_RATED") // 0% VAT (for export / international transport)
+      v.literal("ZERO_RATED"), // 0% VAT (for export / international transport)
     ),
     // bio flu
     legalFlags: v.optional(
@@ -223,11 +229,10 @@ export default defineSchema({
         soloParentEligible: v.optional(v.boolean()),
         naacEligible: v.optional(v.boolean()),
         movEligible: v.optional(v.boolean()),
-      })
+      }),
     ),
 
     normalizedName: v.optional(v.string()),
-
 
     // TODO: Need to assess how to handle category properly and check if it is needed to be put in invoice
     // category: v.optional(
@@ -252,49 +257,57 @@ export default defineSchema({
   // 1st - 5 value (forest, sky)
   // // 6th value
   // TEMPLATES = POSITIONING OF ITEMS / FONTS
-  
+
   templates: defineTable({
     // DEFAULT TEMPLATES
 
     // userId: v.id("users"),     // subscriber
-    templateName: v.string(),       // TEMPLATE NAME
-    layoutConfig: v.object({      // new field
+    templateName: v.string(), // TEMPLATE NAME
+    layoutConfig: v.object({
+      // new field
       headerPosition: v.union(v.literal("top"), v.literal("left")),
       logoPosition: v.union(v.literal("top-left"), v.literal("center")),
       showFooterTotals: v.boolean(),
-      itemTableStyle: v.union(v.literal("grid"), v.literal("list"), v.literal("compact")),
+      itemTableStyle: v.union(
+        v.literal("grid"),
+        v.literal("list"),
+        v.literal("compact"),
+      ),
       font: v.string(),
     }),
     // visuals color customization
-    primaryColor: v.string(),         // hex values // usually bold 10% of sales invoice template
-    secondaryColor: v.string(),       // hex values // usually normal text
-    headerColor: v.string(),          // hex values (header color for template)
-    backgroundColor: v.string(),      // hex values (background color)
+    primaryColor: v.string(), // hex values // usually bold 10% of sales invoice template
+    secondaryColor: v.string(), // hex values // usually normal text
+    headerColor: v.string(), // hex values (header color for template)
+    backgroundColor: v.string(), // hex values (background color)
     // logoUrl: v.optional(v.string()),
     // digitalSignatureUrl: v.optional(v.string()),
-  })
-    .index("by_template", ["templateName"]),
+  }).index("by_template", ["templateName"]),
   userTemplates: defineTable({
     userId: v.id("users"),
     templateId: v.id("templates"),
 
     templateName: v.string(),
 
-    primaryColor: v.string(),     // hex values // usually bold 10% of sales invoice template
-    secondaryColor: v.string(),   // hex values // usually normal text
-    headerColor: v.string(),      // hex values (header color for template)
-    backgroundColor: v.string(),  // hex values (background color)
+    primaryColor: v.string(), // hex values // usually bold 10% of sales invoice template
+    secondaryColor: v.string(), // hex values // usually normal text
+    headerColor: v.string(), // hex values (header color for template)
+    backgroundColor: v.string(), // hex values (background color)
 
     layoutConfig: v.optional(
       v.object({
-        headerPosition: v.optional(v.union(v.literal("top"), v.literal("left"))),
-        logoPosition: v.optional(v.union(v.literal("top-left"), v.literal("center"))),
+        headerPosition: v.optional(
+          v.union(v.literal("top"), v.literal("left")),
+        ),
+        logoPosition: v.optional(
+          v.union(v.literal("top-left"), v.literal("center")),
+        ),
         showFooterTotals: v.optional(v.boolean()),
         itemTableStyle: v.optional(
-          v.union(v.literal("grid"), v.literal("list"), v.literal("compact"))
+          v.union(v.literal("grid"), v.literal("list"), v.literal("compact")),
         ),
         font: v.optional(v.string()),
-      })
+      }),
     ),
   })
     .index("by_user", ["userId"])

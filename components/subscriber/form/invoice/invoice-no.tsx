@@ -1,16 +1,15 @@
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { useGetInvoiceNo } from "@/hooks/use-get-invoice-no";
 import { InvoiceFormValues } from "@/lib/types";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
 
-function InvoiceNumber({ form }: { form: UseFormReturn<InvoiceFormValues> }) {
+function InvoiceNumber({
+  form,
+  style,
+}: {
+  form: UseFormReturn<InvoiceFormValues>;
+  style?: React.CSSProperties;
+}) {
   const { invoiceNo } = useGetInvoiceNo();
 
   useEffect(() => {
@@ -18,7 +17,9 @@ function InvoiceNumber({ form }: { form: UseFormReturn<InvoiceFormValues> }) {
   }, [invoiceNo, form]);
 
   return (
-   <h3 className="invoice-text">{invoiceNo}</h3>
+    <h3 className="invoice-text" style={style}>
+      {invoiceNo}
+    </h3>
   );
 }
 

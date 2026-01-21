@@ -191,5 +191,4 @@ input[type="number"] {
   background: white;
   margin: auto;
   box-shadow: 0 0 0.3cm rgba(0, 0, 0, 0.22);
-  @apply p-10;
 }

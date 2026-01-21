@@ -8,6 +8,7 @@ import useClientSelection from "@/stores/client/useClientSelection";
 import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
 import ActionsCard from "./actions-card";
 import { animate, motion } from "motion/react";
+import { useTemplate } from "@/hooks/use-templates";
 
 export interface SelectedItemType {
   id: number;
