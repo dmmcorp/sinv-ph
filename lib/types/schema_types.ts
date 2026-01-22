@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 
-export const HeaderObject = v.object({
+export const HeaderLeftObject = v.object({
 
     // CONTAINER
     container: v.object({
@@ -119,4 +119,30 @@ export const HeaderObject = v.object({
     }),
     // END OF INVOICE META
 
+})
+
+export const HeaderContainerObject = v.object({
+    display: v.union(
+        v.literal("flex"),
+        v.literal("grid"),
+        v.literal("inline-flex"),
+        v.literal("inline-grid"),
+    ),
+    flexDirection: v.union(
+        v.literal("row"),
+        v.literal("col"),
+    ),
+    justifyContent: v.union(
+        v.literal("center"),
+        v.literal("flex-start"),
+        v.literal("flex-end"),
+        v.literal("space-between"),
+        v.literal("space-around"),
+        v.literal("space-evenly"),
+        v.literal("normal"),
+        v.literal("stretch"),
+    ),
+    alignItems: v.string(),
+    padding: v.string(),
+    backgroundColor: v.string(),
 })

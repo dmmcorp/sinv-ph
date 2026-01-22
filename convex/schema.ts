@@ -1,7 +1,7 @@
 import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { HeaderObject } from "../lib/types/schema_types"
+import { HeaderContainerObject, HeaderLeftObject } from "../lib/types/schema_types"
 
 export default defineSchema({
   ...authTables,
@@ -78,7 +78,8 @@ export default defineSchema({
         templateName: v.string(),
 
         // HEADER
-        header: HeaderObject
+        headerContainer: HeaderContainerObject,
+        header: HeaderLeftObject
       }),
     ),
 
@@ -274,7 +275,8 @@ export default defineSchema({
     templateName: v.string(), // TEMPLATE NAME ex: "classic"
 
     // HEADER
-    header: HeaderObject
+    headerContainer: HeaderContainerObject,
+    headerLeft: HeaderLeftObject,
 
     // userId: v.id("users"),     // subscriber
     // layoutConfig: v.object({
