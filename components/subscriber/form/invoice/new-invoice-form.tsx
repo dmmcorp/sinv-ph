@@ -121,7 +121,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
     // <InvoiceThemeProvider template={selectedTemplate}>
     //   <div className="relative a4-size flex flex-col min-h-185  lg:min-h-312 mx-auto border-2  rounded-2xl space-y-5 lg:space-y-10 ">
     //     {/* HEADER */}
-        <InvoiceHeader form={form} config={DUMMY_HEADER_LEFT} />
+    // <InvoiceHeader form={form} config={DUMMY_HEADER_LEFT} />
 
     //     {/* CLIENT INFO */}
     //     <div className="flex justify-between">

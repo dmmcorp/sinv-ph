@@ -1,10 +1,13 @@
 import React from "react";
 import { DUMMY_HEADER_LEFT } from "./invoice-business-header";
+import InvoiceNumber from "../../form/invoice/invoice-no";
+import { useGetInvoiceNo } from "@/hooks/use-get-invoice-no";
 
 interface InvoiceMetaProps {
   config: typeof DUMMY_HEADER_LEFT;
 }
 function InvoiceMeta({ config }: InvoiceMetaProps) {
+  const { invoiceNo } = useGetInvoiceNo();
   return (
     <div className="">
       <h1
@@ -26,12 +29,9 @@ function InvoiceMeta({ config }: InvoiceMetaProps) {
           >
             Invoice No.
           </h3>
-          <InvoiceNumber
-            form={form}
-            style={{
-              fontSize: config.invoiceMeta.style.fontSize,
-            }}
-          />
+          <h3 style={{ fontSize: config.invoiceMeta.style.fontSize }}>
+            {invoiceNo}
+          </h3>
         </div>
         <div className="grid grid-cols-2 items-center gap-x-2 invoice-text font-normal">
           <h3 style={{ fontSize: config.invoiceMeta.style.fontSize }}>
