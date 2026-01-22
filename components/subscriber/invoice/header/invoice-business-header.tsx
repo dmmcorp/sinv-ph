@@ -16,7 +16,7 @@ export const DUMMY_HEADER_LEFT = {
   },
 
   logo: {
-    display: "none",
+    display: "block",
     position: "left",
     maxWidth: 120,
     maxHeight: 60,
