@@ -33,10 +33,82 @@ export interface Invoice {
   templateSettings: TemplateSettings;
 }
 
+export type HeaderLayout = "left" | "right" | "split";
+export type Density = "compact" | "normal" | "spacious";
+
+export type PaddingToken = "none" | "sm" | "md" | "lg" | "xl";
+export type RadiusToken = "none" | "sm" | "md" | "lg" | "xl";
+
+export type FontSizeToken = "xs" | "sm" | "md" | "lg" | "xl";
+export type FontWeightToken = "normal" | "medium" | "semibold" | "bold";
+
+export type TextAlignToken = "left" | "center" | "right";
+export type ColorToken = "default" | "muted" | "primary" | "accent";
+
 // Visual / layout settings per template
 export interface TemplateSettings {
-  accentColor?: string;
-  fontSize?: "sm" | "md" | "lg";
-  showLogo?: boolean;
-  headerAlignment?: "left" | "right" | "center";
+  templateKey: TemplateKey;
+  headerSection: HeaderSettings;
+  customerSection: CustomerInfoSettings;
+}
+export interface HeaderSettings {
+  layout: HeaderLayout;
+  density: Density;
+  padding: PaddingToken;
+  radius: RadiusToken;
+  background: ColorToken;
+  border: "none" | "light" | "strong";
+  textColor: string;
+  businessInfo: {
+    visibility: {
+      logo: boolean;
+      businessName: boolean;
+      address: boolean;
+      contactDetails: boolean;
+    };
+    styleTokens: {
+      logoSize: "sm" | "md" | "lg" | "xl";
+      businessNameSize: FontSizeToken;
+      businessNameWeight: FontWeightToken;
+      businessMetaSize: FontSizeToken;
+      businessMetaWeight: FontWeightToken;
+      textAlign?: TextAlignToken;
+    };
+  };
+
+  invoiceMeta: {
+    visibility: {
+      invoiceNumber: boolean;
+      issueDate: boolean;
+      dueDate: boolean;
+    };
+    styleTokens: {
+      invoiceTitleSize: FontSizeToken;
+      invoiceTitleWeight: FontWeightToken;
+      metaSize: FontSizeToken;
+      metaWeight: FontWeightToken;
+      textAlign: TextAlignToken;
+    };
+  };
+}
+
+export interface CustomerInfoSettings {
+  layout: "left" | "right" | "split";
+  density: Density;
+  padding: PaddingToken;
+
+  visibility: {
+    name: boolean;
+    address: boolean;
+    email: boolean;
+    phone?: boolean;
+  };
+
+  styleTokens: {
+    nameSize: FontSizeToken;
+    nameWeight: FontWeightToken;
+    metaSize: FontSizeToken;
+    metaWeight: FontWeightToken;
+    textAlign: TextAlignToken;
+  };
 }

@@ -1,6 +1,7 @@
 "use client";
 import { Id } from "@/convex/_generated/dataModel";
 import { INVOiCETYPE, VATTYPE } from "@/lib/types";
+import { TemplateSettings } from "@/lib/types/invoice";
 import { create } from "zustand";
 export type SelectedItemType = {
   _id: Id<"itemCatalog">;
@@ -12,7 +13,7 @@ export type SelectedItemType = {
     scPwdEligible?: boolean;
     naacEligible?: boolean;
     movEligible?: boolean;
-    soloParentEligible?: boolean; 
+    soloParentEligible?: boolean;
   };
 };
 
@@ -23,6 +24,9 @@ export type SelectedItemType = {
 
 interface InvoiceStoreType {
   createdInvoiceId: Id<"invoices"> | undefined;
+
+  templateKey?: string;
+  templateSettings?: TemplateSettings;
 
   invoiceType: INVOiCETYPE;
   selectedCurrency: string;
@@ -35,7 +39,6 @@ interface InvoiceStoreType {
   isSpecialDiscount: boolean;
   selectedSpecialDiscounts?: "SC" | "PWD" | "NAAC" | "MOV" | "SP";
   scIdNumber: string; // for senior citizen id number or any government id number
-
 
   selectedItems: SelectedItemType[];
 
@@ -50,14 +53,20 @@ interface InvoiceStoreType {
   setInvoiceNo: (value: string) => void;
   setInvoiceType: (value: INVOiCETYPE) => void;
   setIsSpecialDiscount: (value: boolean) => void;
-  setSelectedSpecialDiscounts: (value: "SC" | "PWD" | "NAAC" | "MOV" | "SP" | undefined) => void;
+  setSelectedSpecialDiscounts: (
+    value: "SC" | "PWD" | "NAAC" | "MOV" | "SP" | undefined,
+  ) => void;
   setScIdNumber: (value: string) => void;
   setDiscountValue: (value: string) => void;
   setIsPercentage: (value: boolean) => void;
   setSelectedItems: (items: SelectedItemType[]) => void;
 
   addItem: (item: SelectedItemType) => void;
-  updateItemQuantity: (id: Id<"itemCatalog">, quantity: number, type: "increment" | "replace") => void;
+  updateItemQuantity: (
+    id: Id<"itemCatalog">,
+    quantity: number,
+    type: "increment" | "replace",
+  ) => void;
   removeItem: (id: Id<"itemCatalog">) => void;
 
   clearInvoice: () => void;
@@ -107,14 +116,15 @@ export const useInvoiceStore = create<InvoiceStoreType>((set) => ({
   setIsPercentage: (value) => set({ isPercentage: value }),
   setIsSpecialDiscount: (value) => set({ isSpecialDiscount: value }),
   setScIdNumber: (value) => set({ scIdNumber: value }),
-  setSelectedSpecialDiscounts: (value) => set({ selectedSpecialDiscounts: value }),
+  setSelectedSpecialDiscounts: (value) =>
+    set({ selectedSpecialDiscounts: value }),
 
   addItem: (item) =>
     set((state) => ({
       selectedItems: [...state.selectedItems, item],
     })),
 
-    setSelectedItems: (items) =>
+  setSelectedItems: (items) =>
     set(() => ({
       selectedItems: items,
     })),
@@ -122,7 +132,13 @@ export const useInvoiceStore = create<InvoiceStoreType>((set) => ({
   updateItemQuantity: (id, quantity, type) =>
     set((state) => ({
       selectedItems: state.selectedItems.map((item) =>
-        item._id === id ? { ...item, quantity: type === "increment" ? item.quantity + quantity : quantity } : item
+        item._id === id
+          ? {
+              ...item,
+              quantity:
+                type === "increment" ? item.quantity + quantity : quantity,
+            }
+          : item,
       ),
     })),
 
