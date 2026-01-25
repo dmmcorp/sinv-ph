@@ -84,11 +84,12 @@ export const getMonthlyRevenueForUser = query({
             `${year}-${String(i + 1).padStart(2, "0")}`
         )
 
+        // calculate revenue for paid payments only
         const results = await Promise.all(
             months.map((month) =>
                 aggregateRevenueByUser.sum(ctx, {
                     bounds: {
-                        prefix: [userId, month]
+                        prefix: [userId, month, "PAID"]
                     }
                 })
             )
@@ -98,5 +99,17 @@ export const getMonthlyRevenueForUser = query({
             month,
             revenue: results[i] ?? 0,
         }))
+    }
+})
+
+export const getSalesForUser = query({
+    args: {
+
+    },
+    handler: async (ctx) => {
+        const userId = await getAuthUserId(ctx);
+        if (!userId) throw new ConvexError("Not authenticated")
+
+
     }
 })

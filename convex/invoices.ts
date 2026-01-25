@@ -337,7 +337,7 @@ export const createInvoice = mutation({
     const doc = await ctx.db.get(invoiceId)
 
     await aggregateInvoiceByUser.insert(ctx, doc!);
-    await aggregateRevenueByUser.insert(ctx, doc!);
+    // await aggregateRevenueByUser.insert(ctx, doc!);
 
     return invoiceId;
   },
@@ -472,9 +472,16 @@ export const handleInvoiceStatus = mutation({
       throw new ConvexError("Access denied");
     }
 
-    if (invoice.status !== "DRAFT") {
+    // !IMPORTANT new guard for overdue invoices (dating logic ay !== "DRAFT")... di mahhandle or macchange yung status ng mga open at overdue kung ganon ang logic
+    if (invoice.status === "PAID") {
       throw new ConvexError("Issued invoices cannot be modified.");
     }
+
+    // if (invoice.status !== "DRAFT") {
+    //   throw new ConvexError("Issued invoices cannot be modified.");
+    // }
+
+
 
     let templateSnapshot = undefined;
 
@@ -514,7 +521,11 @@ export const handleInvoiceStatus = mutation({
     if (!newDoc) throw new Error("Updated invoice not found")
 
     await aggregateInvoiceByUser.replace(ctx, invoice, newDoc);
-    await aggregateRevenueByUser.replace(ctx, invoice, newDoc);
+
+    // IF STATUS IS PAID SAKA MO LANG I-CALCULATE ANG TOTAL REVENUE...
+    if (status === "PAID") {
+      await aggregateRevenueByUser.insert(ctx, newDoc!);
+    }
 
     return true
   }

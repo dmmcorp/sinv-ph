@@ -26,10 +26,19 @@ export const aggregateInvoiceByUser = new TableAggregate<{
 })
 
 export const aggregateRevenueByUser = new TableAggregate<{
-    Key: [Id<"users">, string];
+    Key: [Id<"users">, string, STATUSTYPE];
     DataModel: DataModel;
     TableName: "invoices";
 }>(components.aggregateInvoices, {
-    sortKey: (doc) => [doc.userId, monthKey(doc._creationTime)],
+    sortKey: (doc) => [doc.userId, monthKey(doc._creationTime), doc.status],
     sumValue: (doc) => doc.totalAmount,
+})
+
+export const aggregateInvoiceVat = new TableAggregate<{
+    Key: [Id<"users">, string];
+    DataModel: DataModel;
+    TableName: "invoices";
+}>(components.aggregateInvoiceVat, {
+    sortKey: (doc) => [doc.userId, monthKey(doc._creationTime)],
+    sumValue: (doc) => doc.vatAmount,
 })
