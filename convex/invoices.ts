@@ -4,7 +4,7 @@ import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { TaxType } from "../lib/constants/TAX_TYPES";
 import { Id } from "./_generated/dataModel";
-import { aggregateInvoiceByUser, aggregateInvoiceVat, aggregateRevenueByUser } from "./aggregate";
+import { aggregateInvoiceByUser, aggregateInvoiceVat, aggregateInvoiceVatableSales, aggregateInvoiceVatExemptSales, aggregateInvoiceZeroRatedSales, aggregateRevenueByUser } from "./aggregate";
 
 // COUNTER SYNTAX:
 // INVOCE - TYPE OF INVOICE - BUSINESS ID - YEAR
@@ -526,6 +526,9 @@ export const handleInvoiceStatus = mutation({
     if (status === "PAID") {
       await aggregateRevenueByUser.insert(ctx, newDoc!);
       await aggregateInvoiceVat.insert(ctx, newDoc!);
+      await aggregateInvoiceVatableSales.insert(ctx, newDoc!)
+      await aggregateInvoiceZeroRatedSales.insert(ctx, newDoc!)
+      await aggregateInvoiceVatExemptSales.insert(ctx, newDoc!)
     }
 
     return true

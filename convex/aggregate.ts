@@ -43,3 +43,30 @@ export const aggregateInvoiceVat = new TableAggregate<{
     sortKey: (doc) => [doc.userId, yearKey(doc._creationTime)],
     sumValue: (doc) => doc.vatAmount,
 })
+
+export const aggregateInvoiceVatableSales = new TableAggregate<{
+    Key: [Id<"users">, string];
+    DataModel: DataModel;
+    TableName: "invoices";
+}>(components.aggregateInvoiceVatableSales, {
+    sortKey: (doc) => [doc.userId, yearKey(doc._creationTime)],
+    sumValue: (doc) => doc.vatableSales,
+})
+
+export const aggregateInvoiceZeroRatedSales = new TableAggregate<{
+    Key: [Id<"users">, string];
+    DataModel: DataModel;
+    TableName: "invoices";
+}>(components.aggregateInvoiceZeroRatedSales, {
+    sortKey: (doc) => [doc.userId, yearKey(doc._creationTime)],
+    sumValue: (doc) => doc.zeroRatedSales ?? 0,
+})
+
+export const aggregateInvoiceVatExemptSales = new TableAggregate<{
+    Key: [Id<"users">, string];
+    DataModel: DataModel;
+    TableName: "invoices";
+}>(components.aggregateInvoiceVatExemptSales, {
+    sortKey: (doc) => [doc.userId, yearKey(doc._creationTime)],
+    sumValue: (doc) => doc.vatExemptSales ?? 0,
+})

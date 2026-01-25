@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { query } from "./_generated/server";
-import { aggregateInvoiceByUser, aggregateInvoiceVat, aggregateRevenueByUser } from "./aggregate";
+import { aggregateInvoiceByUser, aggregateInvoiceVat, aggregateInvoiceVatableSales, aggregateInvoiceVatExemptSales, aggregateInvoiceZeroRatedSales, aggregateRevenueByUser } from "./aggregate";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { STATUSTYPE } from "../lib/constants/STATUS_TYPES";
 
@@ -116,5 +116,30 @@ export const getTotalSales = query({
                 prefix: [userId, year]
             }
         })
+
+        const vatableSales = await aggregateInvoiceVatableSales.sum(ctx, {
+            bounds: {
+                prefix: [userId, year]
+            }
+        })
+
+        const zeroRatedSales = await aggregateInvoiceZeroRatedSales.sum(ctx, {
+            bounds: {
+                prefix: [userId, year]
+            }
+        })
+
+        const vatExemptSales = await aggregateInvoiceVatExemptSales.sum(ctx, {
+            bounds: {
+                prefix: [userId, year]
+            }
+        })
+
+        return {
+            vat,
+            vatableSales,
+            zeroRatedSales,
+            vatExemptSales,
+        }
     }
 })
