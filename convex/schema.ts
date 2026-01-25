@@ -1,6 +1,7 @@
 import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { HeaderContainerObject, HeaderLeftObject } from "../lib/types/schema_types"
 
 export default defineSchema({
   ...authTables,
@@ -74,31 +75,42 @@ export default defineSchema({
     userTemplateId: v.optional(v.id("userTemplates")), // template invoice
     templateSnapshot: v.optional(
       v.object({
-        // colors
-        primaryColor: v.string(),
-        secondaryColor: v.string(),
-        headerColor: v.string(),
-        backgroundColor: v.string(),
+        templateName: v.string(),
 
-        // layout
-        layoutConfig: v.optional(
-          v.object({
-            headerPosition: v.union(v.literal("top"), v.literal("left")),
-            logoPosition: v.union(v.literal("top-left"), v.literal("center")),
-            showFooterTotals: v.boolean(),
-            itemTableStyle: v.union(
-              v.literal("grid"),
-              v.literal("list"),
-              v.literal("compact"),
-            ),
-            font: v.string(),
-
-            // sourceUserTemplateId: v.optional(v.id("userTemplates")),
-            // sourceTemplateId: v.optional(v.id("templates")),
-          }),
-        ),
+        // HEADER
+        headerContainer: HeaderContainerObject,
+        header: HeaderLeftObject
       }),
     ),
+
+    // !IMPORTANT this is the old template snapshop
+    // templateSnapshot: v.optional(
+    //   v.object({
+    //     // colors
+    //     primaryColor: v.string(),
+    //     secondaryColor: v.string(),
+    //     headerColor: v.string(),
+    //     backgroundColor: v.string(),
+
+    //     // layout
+    //     layoutConfig: v.optional(
+    //       v.object({
+    //         headerPosition: v.union(v.literal("top"), v.literal("left")),
+    //         logoPosition: v.union(v.literal("top-left"), v.literal("center")),
+    //         showFooterTotals: v.boolean(),
+    //         itemTableStyle: v.union(
+    //           v.literal("grid"),
+    //           v.literal("list"),
+    //           v.literal("compact"),
+    //         ),
+    //         font: v.string(),
+
+    //         // sourceUserTemplateId: v.optional(v.id("userTemplates")),
+    //         // sourceTemplateId: v.optional(v.id("templates")),
+    //       }),
+    //     ),
+    //   }),
+    // ),
 
     // sellers (store pa rin, because as per BIR old invoices should remain the same business name even if that specific business changed its name, address or tin already.)
     sellerBusinessName: v.optional(v.string()), //nadadag 12/17/2025
@@ -260,26 +272,30 @@ export default defineSchema({
 
   templates: defineTable({
     // DEFAULT TEMPLATES
+    templateName: v.string(), // TEMPLATE NAME ex: "classic"
+
+    // HEADER
+    headerContainer: HeaderContainerObject,
+    headerLeft: HeaderLeftObject,
 
     // userId: v.id("users"),     // subscriber
-    templateName: v.string(), // TEMPLATE NAME
-    layoutConfig: v.object({
-      // new field
-      headerPosition: v.union(v.literal("top"), v.literal("left")),
-      logoPosition: v.union(v.literal("top-left"), v.literal("center")),
-      showFooterTotals: v.boolean(),
-      itemTableStyle: v.union(
-        v.literal("grid"),
-        v.literal("list"),
-        v.literal("compact"),
-      ),
-      font: v.string(),
-    }),
-    // visuals color customization
-    primaryColor: v.string(), // hex values // usually bold 10% of sales invoice template
-    secondaryColor: v.string(), // hex values // usually normal text
-    headerColor: v.string(), // hex values (header color for template)
-    backgroundColor: v.string(), // hex values (background color)
+    // layoutConfig: v.object({
+    //   // new field
+    //   headerPosition: v.union(v.literal("top"), v.literal("left")),
+    //   logoPosition: v.union(v.literal("top-left"), v.literal("center")),
+    //   showFooterTotals: v.boolean(),
+    //   itemTableStyle: v.union(
+    //     v.literal("grid"),
+    //     v.literal("list"),
+    //     v.literal("compact"),
+    //   ),
+    //   font: v.string(),
+    // }),
+    // // visuals color customization
+    // primaryColor: v.string(), // hex values // usually bold 10% of sales invoice template
+    // secondaryColor: v.string(), // hex values // usually normal text
+    // headerColor: v.string(), // hex values (header color for template)
+    // backgroundColor: v.string(), // hex values (background color)
     // logoUrl: v.optional(v.string()),
     // digitalSignatureUrl: v.optional(v.string()),
   }).index("by_template", ["templateName"]),

@@ -392,7 +392,7 @@ export const getInvoiceById = query({
             headerColor: userTemplate.headerColor,
             backgroundColor: userTemplate.backgroundColor,
             layoutConfig: {
-              ...baseTemplate.layoutConfig,
+              // ...baseTemplate.layoutConfig, // !IMPORTANT commented out due to schema changes for base template
               ...(userTemplate.layoutConfig ?? {}),
             },
           },
@@ -486,19 +486,20 @@ export const handleInvoiceStatus = mutation({
           throw new ConvexError("Base template not found");
         }
 
-        templateSnapshot = {
-          // colors
-          primaryColor: userTemplate.primaryColor,
-          secondaryColor: userTemplate.secondaryColor,
-          headerColor: userTemplate.headerColor,
-          backgroundColor: userTemplate.backgroundColor,
+        // TODO: implement the user template function for invoice snapshots
+        // templateSnapshot = {
+        //   // colors
+        //   primaryColor: userTemplate.primaryColor,
+        //   secondaryColor: userTemplate.secondaryColor,
+        //   headerColor: userTemplate.headerColor,
+        //   backgroundColor: userTemplate.backgroundColor,
 
-          // layout
-          layoutConfig: {
-            ...baseTemplate.layoutConfig,
-            ...(userTemplate.layoutConfig ?? {}),
-          },
-        };
+        //   // layout
+        //   layoutConfig: {
+        //     // ...baseTemplate.layoutConfig, // !IMPORTANT commented out due to schema changes for base template
+        //     ...(userTemplate.layoutConfig ?? {}),
+        //   },
+        // };
       }
     }
 
