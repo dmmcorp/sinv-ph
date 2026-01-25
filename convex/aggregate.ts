@@ -9,6 +9,7 @@ function monthKey(issuedAt: number) {
     return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
 }
 
+// ex: 2026
 function yearKey(issuedAt: number) {
     const d = new Date(issuedAt);
 
@@ -39,6 +40,6 @@ export const aggregateInvoiceVat = new TableAggregate<{
     DataModel: DataModel;
     TableName: "invoices";
 }>(components.aggregateInvoiceVat, {
-    sortKey: (doc) => [doc.userId, monthKey(doc._creationTime)],
+    sortKey: (doc) => [doc.userId, yearKey(doc._creationTime)],
     sumValue: (doc) => doc.vatAmount,
 })

@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { query } from "./_generated/server";
-import { aggregateInvoiceByUser, aggregateRevenueByUser } from "./aggregate";
+import { aggregateInvoiceByUser, aggregateInvoiceVat, aggregateRevenueByUser } from "./aggregate";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { STATUSTYPE } from "../lib/constants/STATUS_TYPES";
 
@@ -102,14 +102,19 @@ export const getMonthlyRevenueForUser = query({
     }
 })
 
-export const getSalesForUser = query({
+// !IMPORTANT for now I am only fetching paid total vat for paid.. handleInvoiceStatus in invoices.ts is where I handle aggregateInvoiceVat
+export const getTotalSales = query({
     args: {
-
+        year: v.string(), // 2026
     },
-    handler: async (ctx) => {
+    handler: async (ctx, { year }) => {
         const userId = await getAuthUserId(ctx);
         if (!userId) throw new ConvexError("Not authenticated")
 
-
+        const vat = await aggregateInvoiceVat.sum(ctx, {
+            bounds: {
+                prefix: [userId, year]
+            }
+        })
     }
 })
