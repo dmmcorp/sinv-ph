@@ -13,14 +13,6 @@ import { VAT_RATE_PERCENTAGE } from "@/lib/constants/VAT_RATE";
 import { useCalculateInvioceAmount } from "@/hooks/use-calculate-invoice-amount";
 import InvoiceNumber from "./invoice-no";
 import { toast } from "sonner";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import ItemDetailsDialog from "./item-details-dialog";
 import useClientSelection from "@/stores/client/useClientSelection";
 import { useState } from "react";
@@ -29,52 +21,11 @@ import { InvoiceThemeProvider } from "@/components/template-theme-provider";
 import { InvoiceHeader } from "./template/invoice-header";
 import { DUMMY_INVOICE_HEADER_DATA } from "./template/dummy-data";
 import { InvoiceRenderer } from "@/renderers/invoice-renderer";
-import { Invoice } from "@/lib/types/invoice";
+import { Invoice, TemplateSettings } from "@/lib/types/invoice";
 
 interface NewInvoiceFormProps {
   form: UseFormReturn<InvoiceFormValues>;
 }
-
-const dummyInvoice: Invoice = {
-  id: "inv_001",
-  number: "1001",
-  status: "draft",
-  issueDate: "2026-01-22",
-  dueDate: "2026-02-22",
-  currency: "USD",
-  customer: {
-    name: "Acme Corp",
-    address: "123 Business Rd, Metropolis",
-    email: "contact@acme.com",
-  },
-  lineItems: [
-    {
-      description: "Web Design Services",
-      quantity: 2,
-      unitPrice: 500,
-      total: 1000,
-    },
-    {
-      description: "Hosting (Annual)",
-      quantity: 1,
-      unitPrice: 200,
-      total: 200,
-    },
-  ],
-  templateKey: "classic", // must match a key in invoiceTemplates
-  metadata: {
-    company_name: "My Business Ltd",
-    company_address: "456 Company Ave, Cityville",
-    company_tin: "TIN-123456",
-    footer_note: "Thank you for your business!",
-  },
-  templateSettings: {
-    accentColor: "#2563eb",
-    fontSize: "md",
-    showLogo: true,
-    headerAlignment: "left",
-  },
-};
 
 function NewInvoiceForm({ form }: NewInvoiceFormProps) {
   const { selectedClient } = useClientSelection();
@@ -116,6 +67,71 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
     setDialogOpen(false);
     setSelectedItem(null);
   };
+
+  const DUMMY_TEMPLATE_SETTINGS_MINIMAL: TemplateSettings = {
+    templateKey: "classic",
+    headerSection: {
+      layout: "split",
+      density: "spacious",
+      padding: "xl",
+      border: "light",
+      background: "muted",
+      radius: "none",
+      textColor: "text-black",
+      businessInfo: {
+        visibility: {
+          logo: false,
+          businessName: true,
+          address: true,
+          contactDetails: false,
+        },
+        styleTokens: {
+          logoSize: "lg",
+          businessNameSize: "xl",
+          businessNameWeight: "bold",
+          businessMetaSize: "xs",
+          businessMetaWeight: "normal",
+          textAlign: "left",
+        },
+      },
+
+      invoiceMeta: {
+        visibility: {
+          invoiceNumber: true,
+          issueDate: true,
+          dueDate: true,
+        },
+        styleTokens: {
+          invoiceTitleSize: "xl",
+          invoiceTitleWeight: "bold",
+          metaSize: "xs",
+          metaWeight: "normal",
+          textAlign: "right",
+        },
+      },
+    },
+
+    customerSection: {
+      layout: "left",
+      density: "normal",
+      padding: "sm",
+      visibility: {
+        name: true,
+        address: true,
+        email: true,
+        phone: false,
+      },
+
+      styleTokens: {
+        nameSize: "sm",
+        nameWeight: "semibold",
+        metaSize: "xs",
+        metaWeight: "normal",
+        textAlign: "center",
+      },
+    },
+  };
+  //fetch the template config values here
 
   return (
     // <InvoiceThemeProvider template={selectedTemplate}>
@@ -370,7 +386,7 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
     //     />
     //   </div>
     // </InvoiceThemeProvider>
-    <InvoiceRenderer invoice={dummyInvoice} />
+    <InvoiceRenderer templateSettings={DUMMY_TEMPLATE_SETTINGS_MINIMAL} />
   );
 }
 

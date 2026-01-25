@@ -1,28 +1,47 @@
 // templates/classic/ClassicInvoiceTemplate.tsx
 import React from "react";
 
-import { InvoiceTemplateProps } from "@/lib/types/invoice";
-import {
-  DUMMY_HEADER_LEFT,
-  InvoiceBusinessHeader,
-} from "@/components/subscriber/invoice/header/invoice-business-header";
+import { TemplateSettings } from "@/lib/types/invoice";
+import { InvoiceBusinessHeader } from "@/components/subscriber/invoice/header/invoice-business-header";
 import InvoiceMeta from "@/components/subscriber/invoice/header/invoice-meta";
-import HeaderContainer, {
-  HeaderContainerDummy,
-} from "@/components/subscriber/invoice/header/header-container";
+import InvoiceContainer from "@/components/subscriber/invoice/invoice-container";
+import InvoiceCustomerInfo from "@/components/subscriber/invoice/customer/invoice-customer-info";
+import {
+  resolveCustomerClasses,
+  resolveHeaderClasses,
+} from "./resolvers/template-resolver";
 
-export const ClassicInvoiceTemplate: React.FC<InvoiceTemplateProps> = ({
-  invoice,
-  metadata,
-  settings,
-}) => {
+interface ClassicInvoiceTemplateProps {
+  templateSettings: TemplateSettings;
+}
+
+export const ClassicInvoiceTemplate = ({
+  templateSettings,
+}: ClassicInvoiceTemplateProps) => {
+  const headerInfo = resolveHeaderClasses(templateSettings.headerSection);
+
+  const cusotmerInfo = resolveCustomerClasses(templateSettings.customerSection);
+
   return (
-    <div className="relative a4-size flex flex-col min-h-185  lg:min-h-312 mx-auto border-2  rounded-2xl space-y-5 lg:space-y-10 ">
-      <HeaderContainer config={HeaderContainerDummy}>
-        <InvoiceBusinessHeader config={DUMMY_HEADER_LEFT} />
-        <InvoiceMeta config={DUMMY_HEADER_LEFT} />
-      </HeaderContainer>
-      {/* Other sections: LineItems, Totals */}
+    <div className="relative a4-size flex flex-col min-h-185  lg:min-h-312 mx-auto border-2  rounded-2xl space-y-3">
+      {/* header information such as business name, logo, invoice no, date */}
+      <InvoiceContainer config={headerInfo.container}>
+        <InvoiceBusinessHeader
+          textColor={headerInfo.textColor}
+          businessInfo={headerInfo.businessInfo}
+          visibility={headerInfo.visibility.businessDetails}
+        />
+        <InvoiceMeta
+          textColor={headerInfo.textColor}
+          invoice={headerInfo.invoice}
+          visibility={headerInfo.visibility.businessMeta}
+        />
+      </InvoiceContainer>
+
+      {/* Customer information */}
+      <InvoiceContainer config={cusotmerInfo.container}>
+        <InvoiceCustomerInfo config={cusotmerInfo} />
+      </InvoiceContainer>
     </div>
   );
 };
