@@ -56,7 +56,7 @@ const TestDashboardPage = () => {
                   {metric.label}
                 </p>
                 <p className="mt-2 text-3xl font-bold tracking-tight">
-                  {metric.value}
+                  {metric.value.toFixed(2)}
                 </p>
               </div>
               <div className={`rounded-lg p-2 ${metric.iconBg}`}>

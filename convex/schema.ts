@@ -192,8 +192,8 @@ export default defineSchema({
     // totality
     vatableSales: v.number(), // products without tax
     vatAmount: v.number(), // 12% of vatable sales (vatableSales * 0.12)
-    vatExemptSales: v.optional(v.number()), // Sales exempt from VAT
-    zeroRatedSales: v.optional(v.number()), // Sales with 0% VAT
+    vatExemptSales: v.number(), // Sales exempt from VAT
+    zeroRatedSales: v.number(), // Sales with 0% VAT
 
     grossTotal: v.number(), // before any discounts (vat inclusive price)
     lessDiscount: v.optional(v.number()), // Regular discount

@@ -319,9 +319,8 @@ export const createInvoice = mutation({
       lessSpecialDiscount: amounts.specialDiscountAmount,
 
       vatableSales: amounts.vatableSales,
-      vatExemptSales: amounts.vatExemptSales,
-      zeroRatedSales: amounts.zeroRatedSales,
-
+      vatExemptSales: amounts.vatExemptSales ?? 0,
+      zeroRatedSales: amounts.zeroRatedSales ?? 0,
       vatAmount: amounts.vatAmount,
 
       netAmount: amounts.netAmount,
@@ -524,11 +523,25 @@ export const handleInvoiceStatus = mutation({
 
     // IF STATUS IS PAID SAKA MO LANG I-CALCULATE ANG TOTAL REVENUE...
     if (status === "PAID") {
+
+      // total revenue
       await aggregateRevenueByUser.insert(ctx, newDoc!);
-      await aggregateInvoiceVat.insert(ctx, newDoc!);
-      await aggregateInvoiceVatableSales.insert(ctx, newDoc!)
-      await aggregateInvoiceZeroRatedSales.insert(ctx, newDoc!)
-      await aggregateInvoiceVatExemptSales.insert(ctx, newDoc!)
+
+      if (newDoc.vatAmount > 0) {
+        await aggregateInvoiceVat.insert(ctx, newDoc!);
+      }
+
+      if (newDoc.vatableSales > 0) {
+        await aggregateInvoiceVatableSales.insert(ctx, newDoc!)
+      }
+
+      if (newDoc.zeroRatedSales !== undefined && newDoc.zeroRatedSales > 0) {
+        await aggregateInvoiceZeroRatedSales.insert(ctx, newDoc!)
+      }
+
+      if (newDoc.vatExemptSales !== undefined && newDoc.vatExemptSales > 0) {
+        await aggregateInvoiceVatExemptSales.insert(ctx, newDoc!)
+      }
     }
 
     return true
