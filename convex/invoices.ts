@@ -1,10 +1,11 @@
 import { calculateInvoiceAmounts } from "@/../../lib/utils";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { ConvexError, v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { query } from "./_generated/server";
 import { TaxType } from "../lib/constants/TAX_TYPES";
 import { Id } from "./_generated/dataModel";
 import { aggregateInvoiceByUser, aggregateInvoiceVat, aggregateInvoiceVatableSales, aggregateInvoiceVatExemptSales, aggregateInvoiceZeroRatedSales, aggregateRevenueByUser } from "./aggregate";
+import { mutation } from "./triggers";
 
 // COUNTER SYNTAX:
 // INVOCE - TYPE OF INVOICE - BUSINESS ID - YEAR
@@ -333,9 +334,8 @@ export const createInvoice = mutation({
       dueDate: args.dueDate,
       updatedAt: Math.floor(Date.now() / 1000),
     });
-    const doc = await ctx.db.get(invoiceId)
 
-    await aggregateInvoiceByUser.insert(ctx, doc!);
+    // await aggregateInvoiceByUser.insert(ctx, doc!);
     // await aggregateRevenueByUser.insert(ctx, doc!);
 
     return invoiceId;
@@ -481,7 +481,6 @@ export const handleInvoiceStatus = mutation({
     // }
 
 
-
     let templateSnapshot = undefined;
 
     if (invoice.userTemplateId) {
@@ -516,33 +515,30 @@ export const handleInvoiceStatus = mutation({
         updatedAt: Date.now(),
       });
 
-    const newDoc = await ctx.db.get(invoice._id)
-    if (!newDoc) throw new Error("Updated invoice not found")
-
-    await aggregateInvoiceByUser.replace(ctx, invoice, newDoc);
+    // await aggregateInvoiceByUser.replace(ctx, invoice, newDoc);
 
     // IF STATUS IS PAID SAKA MO LANG I-CALCULATE ANG TOTAL REVENUE...
-    if (status === "PAID") {
+    // if (status === "PAID") {
 
-      // total revenue
-      await aggregateRevenueByUser.insert(ctx, newDoc!);
+    // total revenue
+    // await aggregateRevenueByUser.insert(ctx, newDoc!);
 
-      if (newDoc.vatAmount > 0) {
-        await aggregateInvoiceVat.insert(ctx, newDoc!);
-      }
+    // if (newDoc.vatAmount > 0) {
+    //   await aggregateInvoiceVat.insert(ctx, newDoc!);
+    // }
 
-      if (newDoc.vatableSales > 0) {
-        await aggregateInvoiceVatableSales.insert(ctx, newDoc!)
-      }
+    // if (newDoc.vatableSales > 0) {
+    //   await aggregateInvoiceVatableSales.insert(ctx, newDoc!)
+    // }
 
-      if (newDoc.zeroRatedSales !== undefined && newDoc.zeroRatedSales > 0) {
-        await aggregateInvoiceZeroRatedSales.insert(ctx, newDoc!)
-      }
+    // if (newDoc.zeroRatedSales !== undefined && newDoc.zeroRatedSales > 0) {
+    //   await aggregateInvoiceZeroRatedSales.insert(ctx, newDoc!)
+    // }
 
-      if (newDoc.vatExemptSales !== undefined && newDoc.vatExemptSales > 0) {
-        await aggregateInvoiceVatExemptSales.insert(ctx, newDoc!)
-      }
-    }
+    // if (newDoc.vatExemptSales !== undefined && newDoc.vatExemptSales > 0) {
+    //   await aggregateInvoiceVatExemptSales.insert(ctx, newDoc!)
+    // }
+    // }
 
     return true
   }

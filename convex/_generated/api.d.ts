@@ -19,6 +19,7 @@ import type * as invoices from "../invoices.js";
 import type * as item_catalog from "../item_catalog.js";
 import type * as onboarding from "../onboarding.js";
 import type * as templates from "../templates.js";
+import type * as triggers from "../triggers.js";
 import type * as users from "../users.js";
 
 import type {
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   item_catalog: typeof item_catalog;
   onboarding: typeof onboarding;
   templates: typeof templates;
+  triggers: typeof triggers;
   users: typeof users;
 }>;
 
