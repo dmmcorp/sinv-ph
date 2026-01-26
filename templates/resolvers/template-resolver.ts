@@ -12,6 +12,7 @@ import {
   FontWeightToken,
   TextAlignToken,
   CustomerInfoSettings,
+  LineItemsSettings,
 } from "@/lib/types/invoice";
 
 const layoutClassMap: Record<HeaderLayout, string> = {
@@ -74,6 +75,24 @@ const textAlignClassMap: Record<TextAlignToken, string> = {
   left: "text-left",
   center: "text-center",
   right: "text-right",
+};
+
+const lineItemsLayoutClassMap = {
+  table: "flex flex-col",
+  stacked: "flex flex-col space-y-2",
+  card: "grid grid-cols-1 gap-4",
+};
+
+const rowStyleClassMap = {
+  plain: "",
+  striped: "odd:bg-transparent even:bg-muted",
+  bordered: "border-b border-border",
+};
+
+const totalsEmphasisClassMap = {
+  normal: "",
+  bold: "font-semibold",
+  boxed: "border p-3 rounded-lg bg-muted",
 };
 
 // --------------------
@@ -183,6 +202,47 @@ export function resolveCustomerClasses(settings: CustomerInfoSettings) {
     visibility: {
       ...settings.visibility,
     },
+  };
+}
+
+export function resolveLineItemsClasses(settings: LineItemsSettings) {
+  const { layout, density, padding, visibility } = settings;
+
+  const container = [
+    "w-full",
+    lineItemsLayoutClassMap[layout],
+    densityGapMap[density],
+    paddingClassMap[padding],
+  ].join(" ");
+
+  const header = [
+    backgroundClassMap[settings.header.backgroundColor],
+    fontSizeClassMap[settings.header.fontSize],
+    fontWeightClassMap[settings.header.fontWeight],
+    textAlignClassMap[settings.header.textAlign ?? "left"],
+  ].join(" ");
+
+  const row = [
+    rowStyleClassMap[settings.row.style],
+    fontSizeClassMap[settings.row.styleTokens.fontSize],
+    fontWeightClassMap[settings.row.styleTokens.fontWeight],
+    textAlignClassMap[settings.row.styleTokens.textAlign ?? "left"],
+  ].join(" ");
+
+  const data = [
+    settings.data.textColor,
+    fontSizeClassMap[settings.data.fontSize],
+    fontWeightClassMap[settings.data.fontWeight],
+    textAlignClassMap[settings.data.textAlign ?? "left"],
+  ].join(" ");
+
+  const lineNumber = visibility.lineNumber;
+  return {
+    container,
+    header,
+    row,
+    data,
+    lineNumber,
   };
 }
 

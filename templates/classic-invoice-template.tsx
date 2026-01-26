@@ -1,6 +1,3 @@
-// templates/classic/ClassicInvoiceTemplate.tsx
-import React from "react";
-
 import { TemplateSettings } from "@/lib/types/invoice";
 import { InvoiceBusinessHeader } from "@/components/subscriber/invoice/header/invoice-business-header";
 import InvoiceMeta from "@/components/subscriber/invoice/header/invoice-meta";
@@ -9,7 +6,11 @@ import InvoiceCustomerInfo from "@/components/subscriber/invoice/customer/invoic
 import {
   resolveCustomerClasses,
   resolveHeaderClasses,
+  resolveLineItemsClasses,
 } from "./resolvers/template-resolver";
+import { Table } from "@/components/ui/table";
+import LineItemsHeader from "@/components/subscriber/invoice/line-items/line-items-header";
+import LineItemsBody from "@/components/subscriber/invoice/line-items/line-items-body";
 
 interface ClassicInvoiceTemplateProps {
   templateSettings: TemplateSettings;
@@ -18,29 +19,51 @@ interface ClassicInvoiceTemplateProps {
 export const ClassicInvoiceTemplate = ({
   templateSettings,
 }: ClassicInvoiceTemplateProps) => {
-  const headerInfo = resolveHeaderClasses(templateSettings.headerSection);
+  const headerInfoClasses = resolveHeaderClasses(
+    templateSettings.headerSection,
+  );
 
-  const cusotmerInfo = resolveCustomerClasses(templateSettings.customerSection);
+  const cusotmerInfoClasses = resolveCustomerClasses(
+    templateSettings.customerSection,
+  );
+  const lineItemsClasses = resolveLineItemsClasses(
+    templateSettings.lineItemsSection,
+  );
 
   return (
     <div className="relative a4-size flex flex-col min-h-185  lg:min-h-312 mx-auto border-2  rounded-2xl space-y-3">
       {/* header information such as business name, logo, invoice no, date */}
-      <InvoiceContainer config={headerInfo.container}>
+      <InvoiceContainer config={headerInfoClasses.container}>
         <InvoiceBusinessHeader
-          textColor={headerInfo.textColor}
-          businessInfo={headerInfo.businessInfo}
-          visibility={headerInfo.visibility.businessDetails}
+          textColor={headerInfoClasses.textColor}
+          businessInfo={headerInfoClasses.businessInfo}
+          visibility={headerInfoClasses.visibility.businessDetails}
         />
         <InvoiceMeta
-          textColor={headerInfo.textColor}
-          invoice={headerInfo.invoice}
-          visibility={headerInfo.visibility.businessMeta}
+          textColor={headerInfoClasses.textColor}
+          invoice={headerInfoClasses.invoice}
+          visibility={headerInfoClasses.visibility.businessMeta}
         />
       </InvoiceContainer>
 
       {/* Customer information */}
-      <InvoiceContainer config={cusotmerInfo.container}>
-        <InvoiceCustomerInfo config={cusotmerInfo} />
+      <InvoiceContainer config={cusotmerInfoClasses.container}>
+        <InvoiceCustomerInfo config={cusotmerInfoClasses} />
+      </InvoiceContainer>
+
+      {/* Line items */}
+      <InvoiceContainer config={lineItemsClasses.container}>
+        <Table>
+          <LineItemsHeader
+            header={lineItemsClasses.header}
+            visibleLineNumber={lineItemsClasses.lineNumber}
+          />
+          <LineItemsBody
+            row={lineItemsClasses.row}
+            data={lineItemsClasses.data}
+            visibleLineNumber={lineItemsClasses.lineNumber}
+          />
+        </Table>
       </InvoiceContainer>
     </div>
   );
