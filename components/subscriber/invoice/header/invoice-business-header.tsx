@@ -43,6 +43,7 @@ export function InvoiceBusinessHeader({
         return businessProfile?.tin;
     }
   };
+
   return (
     <div className="">
       {businessProfile && visibility.logo && businessProfile.logoUrl !== "" && (

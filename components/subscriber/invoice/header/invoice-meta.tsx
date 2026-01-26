@@ -19,7 +19,7 @@ interface Invoice {
 function InvoiceMeta({ textColor, invoice, visibility }: InvoiceMetaProps) {
   const { invoiceNo } = useGetInvoiceNo();
   return (
-    <div className="">
+    <div className="space-y-3">
       <h1 className={`${invoice.invoiceTitle} ${textColor} text-right`}>
         INVOICE
       </h1>

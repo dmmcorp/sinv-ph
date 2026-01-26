@@ -7,10 +7,15 @@ import {
   resolveCustomerClasses,
   resolveHeaderClasses,
   resolveLineItemsClasses,
+  resolveTotalsClasses,
 } from "./resolvers/template-resolver";
 import { Table } from "@/components/ui/table";
 import LineItemsHeader from "@/components/subscriber/invoice/line-items/line-items-header";
 import LineItemsBody from "@/components/subscriber/invoice/line-items/line-items-body";
+import SubTotal from "@/components/subscriber/invoice/total/sub-total";
+import TaxBreakDown from "@/components/subscriber/invoice/total/tax-breakdown";
+import Discount from "@/components/subscriber/invoice/total/discount";
+import GrandTotal from "@/components/subscriber/invoice/total/grand-total";
 
 interface ClassicInvoiceTemplateProps {
   templateSettings: TemplateSettings;
@@ -22,13 +27,13 @@ export const ClassicInvoiceTemplate = ({
   const headerInfoClasses = resolveHeaderClasses(
     templateSettings.headerSection,
   );
-
   const cusotmerInfoClasses = resolveCustomerClasses(
     templateSettings.customerSection,
   );
   const lineItemsClasses = resolveLineItemsClasses(
     templateSettings.lineItemsSection,
   );
+  const totalsClasses = resolveTotalsClasses(templateSettings.totalsSection);
 
   return (
     <div className="relative a4-size flex flex-col min-h-185  lg:min-h-312 mx-auto border-2  rounded-2xl space-y-3">
@@ -39,6 +44,7 @@ export const ClassicInvoiceTemplate = ({
           businessInfo={headerInfoClasses.businessInfo}
           visibility={headerInfoClasses.visibility.businessDetails}
         />
+
         <InvoiceMeta
           textColor={headerInfoClasses.textColor}
           invoice={headerInfoClasses.invoice}
@@ -64,6 +70,13 @@ export const ClassicInvoiceTemplate = ({
             visibleLineNumber={lineItemsClasses.lineNumber}
           />
         </Table>
+      </InvoiceContainer>
+
+      <InvoiceContainer config={lineItemsClasses.container}>
+        <SubTotal subtotalClasses={totalsClasses.subtotal} />
+        <TaxBreakDown taxBreakdownClasses={totalsClasses.taxBreakdown} />
+        <Discount discountClasses={totalsClasses.discount} />
+        <GrandTotal grandTotalClasses={totalsClasses.grandTotal} />
       </InvoiceContainer>
     </div>
   );

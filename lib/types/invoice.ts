@@ -39,19 +39,27 @@ export type Density = "compact" | "normal" | "spacious";
 export type PaddingToken = "none" | "sm" | "md" | "lg" | "xl";
 export type RadiusToken = "none" | "sm" | "md" | "lg" | "xl";
 
-export type FontSizeToken = "xs" | "sm" | "md" | "lg" | "xl";
-export type FontWeightToken = "normal" | "medium" | "semibold" | "bold";
+export type FontSizeToken = "xs" | "sm" | "md" | "lg" | "xl" | "xxl" | "xxxl";
+export type FontWeightToken =
+  | "light"
+  | "normal"
+  | "medium"
+  | "semibold"
+  | "bold";
 
 export type TextAlignToken = "left" | "center" | "right";
 export type ColorToken = "default" | "muted" | "primary" | "accent";
 
-// Visual / layout settings per template
+/* ----------------------------------- */
 export interface TemplateSettings {
   templateKey: TemplateKey;
   headerSection: HeaderSettings;
   customerSection: CustomerInfoSettings;
   lineItemsSection: LineItemsSettings;
+  totalsSection: TotalsSettings;
 }
+
+/* ----------------------------------- */
 export interface HeaderSettings {
   layout: HeaderLayout;
   density: Density;
@@ -93,6 +101,7 @@ export interface HeaderSettings {
   };
 }
 
+/* ----------------------------------- */
 export interface CustomerInfoSettings {
   layout: "left" | "right" | "split";
   density: Density;
@@ -114,6 +123,7 @@ export interface CustomerInfoSettings {
   };
 }
 
+/* ----------------------------------- */
 export interface LineItemsSettings {
   layout: "table" | "stacked" | "card"; // how items are presented
   density: Density; // row spacing
@@ -122,7 +132,7 @@ export interface LineItemsSettings {
   header: {
     // show/hide column headers
     backgroundColor: ColorToken;
-    textColor: string;
+    textColor: ColorToken;
     fontSize: FontSizeToken;
     fontWeight: FontWeightToken;
     textAlign?: TextAlignToken;
@@ -148,3 +158,29 @@ export interface LineItemsSettings {
     textColor: string;
   };
 }
+
+/* ----------------------------------- */
+export interface TotalsSettings {
+  // Container
+  layout: "table" | "stacked" | "card";
+  density: Density;
+  padding: PaddingToken;
+  backgroundColor?: ColorToken;
+  border?: "none" | "light" | "strong";
+  radius?: RadiusToken;
+
+  // Rows
+  subtotal: TotalsTextStyle;
+  taxBreakdown: TotalsTextStyle;
+  discount: TotalsTextStyle;
+  grandTotal: TotalsTextStyle;
+}
+
+export interface TotalsTextStyle {
+  fontSize: FontSizeToken;
+  fontWeight: FontWeightToken;
+  textColor: string;
+  textAlign: TextAlignToken;
+  backgroundColor?: ColorToken;
+}
+/* ----------------------------------- */
