@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import React, { Dispatch, SetStateAction, useEffect } from "react";
+import React, { Dispatch, SetStateAction, useCallback, useEffect } from "react";
 import { Item } from "./add-items-dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import {
 import { VATTYPE } from "@/lib/types";
 import { Check } from "lucide-react";
 import useBusinessProfileStore from "@/stores/business-profile/useBusinessProfileStore";
+import { toast } from "sonner";
 
 interface CreateNewItemProps {
   onAddNewItem: (item?: Item) => void;
@@ -51,6 +52,10 @@ function CreateNewItem({
   newItemValues,
 }: CreateNewItemProps) {
   const { businessProfile } = useBusinessProfileStore();
+
+  const notComplete = !newItemValues.description || newItemValues.price == 0;
+  const isZeroRated = newItemValues.vatType === "ZERO_RATED";
+
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSetNewItemValues({
       ...newItemValues,
@@ -65,21 +70,29 @@ function CreateNewItem({
     });
   };
 
-  const isZeroRated = newItemValues.vatType === "ZERO_RATED";
+  const handleSave = () => {
+    if (notComplete) {
+      toast.error("Description & Price is required!");
+      return;
+    }
+    onAddNewItem();
+  };
+
+  const resetLegalFlags = useCallback(() => {
+    onSetNewItemValues((prev) => ({
+      ...prev,
+      legalFlags: {
+        scPwdEligible: false,
+        naacEligible: false,
+        movEligible: false,
+        soloParentEligible: false,
+      },
+    }));
+  }, [onSetNewItemValues]);
 
   useEffect(() => {
-    if (newItemValues.vatType === "ZERO_RATED") {
-      onSetNewItemValues((prev: NewItemValues) => ({
-        ...prev,
-        legalFlags: {
-          scPwdEligible: false,
-          naacEligible: false,
-          movEligible: false,
-          soloParentEligible: false,
-        },
-      }));
-    }
-  }, [newItemValues.vatType]);
+    if (isZeroRated) resetLegalFlags();
+  }, [isZeroRated, resetLegalFlags]);
 
   return (
     <>
@@ -91,9 +104,8 @@ function CreateNewItem({
         </div>
         <div className="flex justify-end items-center">
           <Button
-            onClick={() => {
-              onAddNewItem();
-            }}
+            disabled={notComplete}
+            onClick={() => handleSave()}
             type="submit"
             className=" flex items-center gap-2 cursor-pointer"
           >
