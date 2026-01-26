@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import React from "react";
-import { Item, NewItemValues } from "./add-items-dialog";
+import React, { Dispatch, SetStateAction, useEffect } from "react";
+import { Item } from "./add-items-dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,20 +17,21 @@ import useBusinessProfileStore from "@/stores/business-profile/useBusinessProfil
 
 interface CreateNewItemProps {
   onAddNewItem: (item?: Item) => void;
-  onSetNewItemValues: (values: {
-    description: string;
-    price: number;
-    vatType: VATTYPE;
-    legalFlags: {
-      scPwdEligible: boolean;
-      naacEligible: boolean;
-      movEligible: boolean;
-      soloParentEligible: boolean;
-    };
-  }) => void;
+  onSetNewItemValues: Dispatch<SetStateAction<NewItemValues>>;
   newItemValues: NewItemValues;
 }
 
+export interface NewItemValues {
+  description: string;
+  price: number;
+  vatType: VATTYPE;
+  legalFlags: {
+    scPwdEligible: boolean;
+    naacEligible: boolean;
+    movEligible: boolean;
+    soloParentEligible: boolean;
+  };
+}
 const VAT = [
   { value: "VATABLE", label: "Vatable" },
   { value: "VAT_EXEMPT", label: "Vat Exempt" },
@@ -64,21 +65,22 @@ function CreateNewItem({
     });
   };
 
-  const handleDisabledFlag = (): boolean => {
+  const isZeroRated = newItemValues.vatType === "ZERO_RATED";
+
+  useEffect(() => {
     if (newItemValues.vatType === "ZERO_RATED") {
-      onSetNewItemValues({
-        ...newItemValues,
+      onSetNewItemValues((prev: NewItemValues) => ({
+        ...prev,
         legalFlags: {
           scPwdEligible: false,
           naacEligible: false,
           movEligible: false,
           soloParentEligible: false,
         },
-      });
-      return true; // disable when vat type is zero rated for SC/PWD and Solo Parent
+      }));
     }
-    return false;
-  };
+  }, [newItemValues.vatType]);
+
   return (
     <>
       <div className="grid grid-cols-2 items-center">
@@ -178,7 +180,7 @@ function CreateNewItem({
                     },
                   })
                 }
-                disabled={handleDisabledFlag()}
+                disabled={isZeroRated}
                 className={`bg-white w-full text-left p-3 rounded-lg border transition-all flex flex-col 
                       ${
                         newItemValues.legalFlags[
@@ -187,7 +189,7 @@ function CreateNewItem({
                           ? "border-primary bg-primary/5 ring-1 ring-primary"
                           : "border-border hover:border-primary/50 hover:bg-muted/50"
                       }
-                      ${handleDisabledFlag() && "opacity-50 cursor-not-allowed"}
+                      ${isZeroRated && "opacity-50 cursor-not-allowed"}
                       `}
               >
                 <div className="flex items-start justify-between gap-2 ">
