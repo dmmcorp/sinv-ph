@@ -50,6 +50,7 @@ export interface TemplateSettings {
   templateKey: TemplateKey;
   headerSection: HeaderSettings;
   customerSection: CustomerInfoSettings;
+  lineItemsSection: LineItemsSettings;
 }
 export interface HeaderSettings {
   layout: HeaderLayout;
@@ -110,5 +111,40 @@ export interface CustomerInfoSettings {
     metaSize: FontSizeToken;
     metaWeight: FontWeightToken;
     textAlign: TextAlignToken;
+  };
+}
+
+export interface LineItemsSettings {
+  layout: "table" | "stacked" | "card"; // how items are presented
+  density: Density; // row spacing
+  padding: PaddingToken; // container padding
+
+  header: {
+    // show/hide column headers
+    backgroundColor: ColorToken;
+    textColor: string;
+    fontSize: FontSizeToken;
+    fontWeight: FontWeightToken;
+    textAlign?: TextAlignToken;
+  };
+
+  visibility: {
+    lineNumber: boolean;
+  };
+
+  row: {
+    style: "plain" | "striped" | "bordered";
+    styleTokens: {
+      fontSize: FontSizeToken;
+      fontWeight: FontWeightToken;
+      textAlign?: TextAlignToken;
+    };
+  };
+
+  data: {
+    fontSize: FontSizeToken;
+    fontWeight: FontWeightToken;
+    textAlign?: TextAlignToken;
+    textColor: string;
   };
 }

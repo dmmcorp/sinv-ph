@@ -130,6 +130,40 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
         textAlign: "center",
       },
     },
+
+    lineItemsSection: {
+      layout: "table",
+      density: "normal",
+      padding: "md",
+
+      header: {
+        backgroundColor: "muted",
+        textColor: "text-green-400",
+        fontSize: "xs",
+        fontWeight: "normal",
+        textAlign: "center",
+      },
+
+      visibility: {
+        lineNumber: false,
+      },
+
+      row: {
+        style: "bordered",
+        styleTokens: {
+          fontSize: "sm",
+          fontWeight: "normal",
+          textAlign: "left",
+        },
+      },
+
+      data: {
+        fontSize: "xs",
+        fontWeight: "normal",
+        textAlign: "center",
+        textColor: "text-black",
+      },
+    },
   };
   //fetch the template config values here
 
