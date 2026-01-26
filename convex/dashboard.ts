@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { query } from "./_generated/server";
-import { aggregateInvoiceByUser, aggregateRevenueByUser } from "./aggregate";
+import { aggregateInvoiceByUser, aggregateInvoiceVat, aggregateInvoiceVatableSales, aggregateInvoiceVatExemptSales, aggregateInvoiceZeroRatedSales, aggregateRevenueByUser } from "./aggregate";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { STATUSTYPE } from "../lib/constants/STATUS_TYPES";
 
@@ -84,11 +84,12 @@ export const getMonthlyRevenueForUser = query({
             `${year}-${String(i + 1).padStart(2, "0")}`
         )
 
+        // calculate revenue for paid payments only
         const results = await Promise.all(
             months.map((month) =>
                 aggregateRevenueByUser.sum(ctx, {
                     bounds: {
-                        prefix: [userId, month]
+                        prefix: [userId, month, "PAID"]
                     }
                 })
             )
@@ -98,5 +99,47 @@ export const getMonthlyRevenueForUser = query({
             month,
             revenue: results[i] ?? 0,
         }))
+    }
+})
+
+// !IMPORTANT for now I am only fetching paid total vat for paid.. handleInvoiceStatus in invoices.ts is where I handle aggregateInvoiceVat
+export const getTotalSales = query({
+    args: {
+        year: v.string(), // 2026
+    },
+    handler: async (ctx, { year }) => {
+        const userId = await getAuthUserId(ctx);
+        if (!userId) throw new ConvexError("Not authenticated")
+
+        const vat = await aggregateInvoiceVat.sum(ctx, {
+            bounds: {
+                prefix: [userId, year]
+            }
+        })
+
+        const vatableSales = await aggregateInvoiceVatableSales.sum(ctx, {
+            bounds: {
+                prefix: [userId, year]
+            }
+        })
+
+        const zeroRatedSales = await aggregateInvoiceZeroRatedSales.sum(ctx, {
+            bounds: {
+                prefix: [userId, year]
+            }
+        })
+
+        const vatExemptSales = await aggregateInvoiceVatExemptSales.sum(ctx, {
+            bounds: {
+                prefix: [userId, year]
+            }
+        })
+
+        return {
+            vat,
+            vatableSales,
+            zeroRatedSales,
+            vatExemptSales,
+        }
     }
 })

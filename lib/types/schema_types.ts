@@ -33,7 +33,7 @@ export const HeaderLeftObject = v.object({
         position: v.union(
             v.literal("left"),
             v.literal("center"),
-            v.literal("right")
+            v.literal("right"),
         ),
         maxWidth: v.number(),
         maxHeight: v.number(),
@@ -52,12 +52,12 @@ export const HeaderLeftObject = v.object({
                 v.literal("none"),
                 v.literal("uppercase"),
                 v.literal("lowercase"),
-                v.literal("capitalize")
+                v.literal("capitalize"),
             ),
             textAlign: v.union(
                 v.literal("left"),
                 v.literal("center"),
-                v.literal("right")
+                v.literal("right"),
             ),
             lineHeight: v.number(),
         }),

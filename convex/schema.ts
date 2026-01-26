@@ -272,7 +272,7 @@ export default defineSchema({
 
   templates: defineTable({
     // DEFAULT TEMPLATES
-    templateName: v.string(), // TEMPLATE NAME ex: "classic"
+    templateName: v.string(), // TODO: change to templateKey TEMPLATE NAME ex: "classic" 
 
     // HEADER
     headerContainer: HeaderContainerObject,
