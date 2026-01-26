@@ -32,7 +32,7 @@ export const aggregateRevenueByUser = new TableAggregate<{
     TableName: "invoices";
 }>(components.aggregateInvoices, {
     sortKey: (doc) => [doc.userId, monthKey(doc._creationTime), doc.status],
-    sumValue: (doc) => doc.totalAmount,
+    sumValue: (doc) => doc.status === "PAID" ? doc.totalAmount : 0,
 })
 
 export const aggregateInvoiceVat = new TableAggregate<{
@@ -41,7 +41,7 @@ export const aggregateInvoiceVat = new TableAggregate<{
     TableName: "invoices";
 }>(components.aggregateInvoiceVat, {
     sortKey: (doc) => [doc.userId, yearKey(doc._creationTime)],
-    sumValue: (doc) => doc.vatAmount,
+    sumValue: (doc) => doc.status === "PAID" ? doc.vatAmount : 0,
 })
 
 export const aggregateInvoiceVatableSales = new TableAggregate<{
@@ -50,7 +50,7 @@ export const aggregateInvoiceVatableSales = new TableAggregate<{
     TableName: "invoices";
 }>(components.aggregateInvoiceVatableSales, {
     sortKey: (doc) => [doc.userId, yearKey(doc._creationTime)],
-    sumValue: (doc) => doc.vatableSales,
+    sumValue: (doc) => doc.status === "PAID" ? doc.vatableSales : 0,
 })
 
 export const aggregateInvoiceZeroRatedSales = new TableAggregate<{
@@ -59,7 +59,7 @@ export const aggregateInvoiceZeroRatedSales = new TableAggregate<{
     TableName: "invoices";
 }>(components.aggregateInvoiceZeroRatedSales, {
     sortKey: (doc) => [doc.userId, yearKey(doc._creationTime)],
-    sumValue: (doc) => doc.zeroRatedSales,
+    sumValue: (doc) => doc.status === "PAID" ? doc.zeroRatedSales : 0,
 })
 
 export const aggregateInvoiceVatExemptSales = new TableAggregate<{
@@ -68,5 +68,5 @@ export const aggregateInvoiceVatExemptSales = new TableAggregate<{
     TableName: "invoices";
 }>(components.aggregateInvoiceVatExemptSales, {
     sortKey: (doc) => [doc.userId, yearKey(doc._creationTime)],
-    sumValue: (doc) => doc.vatExemptSales,
+    sumValue: (doc) => doc.status === "PAID" ? doc.vatExemptSales : 0,
 })
