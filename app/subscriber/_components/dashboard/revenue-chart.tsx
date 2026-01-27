@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
-import { yearMonthToShortMonth } from "@/lib/utils";
+import { formatCurrencyTick, yearMonthToShortMonth } from "@/lib/utils";
 import { useQuery } from "convex/react";
 import {
   Bar,
@@ -30,18 +30,44 @@ import {
 
 interface RevenueChartProp {
   year: string;
+  compareTo: string | undefined;
 }
 
-export function RevenueChart({ year }: RevenueChartProp) {
+const RevenueTooltip = ({ active, payload }: any) => {
+  if (!active || !payload?.length) return null;
+
+  return (
+    <div className="rounded-lg border bg-white px-3 py-2 shadow-md space-y-1">
+      {payload.map((p: any) => (
+        <p key={p.name} className="text-sm">
+          <span className="font-medium">{p.name}:</span> ₱
+          {p.value?.toLocaleString()}
+        </p>
+      ))}
+    </div>
+  );
+};
+
+export function RevenueChart({ year, compareTo }: RevenueChartProp) {
   const data = useQuery(api.dashboard.getMonthlyRevenueForUser, {
     year,
+    compareTo,
   });
   if (!data) return null;
 
-  const chartData = data.map((d) => ({
-    month: yearMonthToShortMonth(d.month),
-    revenue: d.revenue,
-  }));
+  const chartData = data.current.map((cur, i) => {
+    const prev = data.previous?.[i];
+
+    console.log(prev);
+
+    return {
+      month: yearMonthToShortMonth(cur.month),
+      current: cur.revenue,
+      previous: prev?.revenue ?? null,
+    };
+  });
+
+  console.log(chartData);
 
   return (
     <Card className="h-full">
@@ -67,24 +93,29 @@ export function RevenueChart({ year }: RevenueChartProp) {
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: "#64748b", fontSize: 12 }}
-                tickFormatter={(value) => `₱${value / 1000}k`} // TODO: what if million na pero k yung dulo m na dapat????
+                tickFormatter={formatCurrencyTick} // TODO: what if million na pero k yung dulo m na dapat????
               />
               <Tooltip
                 cursor={{ fill: "rgba(0,0,0,0.04)" }}
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    return (
-                      <div className="rounded-lg border bg-white px-3 py-2 shadow-md">
-                        <p className="text-sm font-medium">
-                          ₱{payload[0].value?.toLocaleString()}
-                        </p>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
+                content={RevenueTooltip}
               />
-              <Bar dataKey="revenue" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
+
+              {compareTo && (
+                <Bar
+                  dataKey="previous"
+                  fill="#059669"
+                  radius={[4, 4, 0, 0]}
+                  opacity={0.4}
+                  name={compareTo}
+                />
+              )}
+
+              <Bar
+                dataKey="current"
+                fill="#0ea5e9"
+                radius={[4, 4, 0, 0]}
+                name={year}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>

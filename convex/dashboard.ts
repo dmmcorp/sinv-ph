@@ -83,32 +83,46 @@ export const getInvoiceMetricsForUser = query({
 
 export const getMonthlyRevenueForUser = query({
     args: {
-        year: v.string() // 2026
+        year: v.string(), // 2026
+        compareTo: v.optional(v.string()), // for example 2025
     },
-    handler: async (ctx, { year }) => {
+    handler: async (ctx, { year, compareTo }) => {
         const userId = await getAuthUserId(ctx);
         if (!userId) throw new ConvexError("Not authenticated")
 
-        // 01, 02, .... 10 11 12
-        const months = Array.from({ length: 12 }, (_, i) =>
-            `${year}-${String(i + 1).padStart(2, "0")}`
-        )
 
-        // calculate revenue for paid payments only
-        const results = await Promise.all(
-            months.map((month) =>
-                aggregateRevenueByUser.sum(ctx, {
-                    bounds: {
-                        prefix: [userId, month, "PAID"]
-                    }
-                })
+        const buildMonthlyRevenue = async (y: string) => {
+            // 01, 02, .... 10 11 12
+            const months = Array.from({ length: 12 }, (_, i) =>
+                `${y}-${String(i + 1).padStart(2, "0")}`
             )
-        );
 
-        return months.map((month, i) => ({
-            month,
-            revenue: results[i] ?? 0,
-        }))
+            // calculate revenue for paid payments only
+            const results = await Promise.all(
+                months.map((month) =>
+                    aggregateRevenueByUser.sum(ctx, {
+                        bounds: {
+                            prefix: [userId, month, "PAID"]
+                        }
+                    })
+                )
+            );
+
+            return months.map((month, i) => ({
+                month,
+                revenue: results[i] ?? 0,
+            }))
+        }
+
+        const current = await buildMonthlyRevenue(year);
+        const previous = compareTo ? await buildMonthlyRevenue(compareTo) : null
+
+        return {
+            year,
+            compareTo: compareTo ?? null,
+            current,
+            previous,
+        }
     }
 })
 

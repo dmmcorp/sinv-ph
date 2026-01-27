@@ -53,11 +53,13 @@ function Dashboard() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">No comparison</SelectItem>
-              {Array.from({ length: 27 }, (_, i) => 2026 - i).map((y) => (
-                <SelectItem key={y} value={y.toString()}>
-                  {y}
-                </SelectItem>
-              ))}
+              {Array.from({ length: 27 }, (_, i) => 2026 - i)
+                .filter((y) => y.toString() !== year)
+                .map((y) => (
+                  <SelectItem key={y} value={y.toString()}>
+                    {y}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
@@ -88,7 +90,7 @@ function Dashboard() {
         <MetricsCards year={year} compareTo={compareTo} />
         <div className="mt-6 grid gap-6 lg:grid-cols-5">
           <div className="lg:col-span-3">
-            <RevenueChart year={year} />
+            <RevenueChart year={year} compareTo={compareTo} />
           </div>
           <div className="lg:col-span-2">
             <RecentActivity />

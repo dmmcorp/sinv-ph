@@ -611,7 +611,7 @@ export const randomHexColor = () => {
 };
 
 export const yearMonthToShortMonth = (yearMonth: string) => {
-  // "2026-01" → Date("2026-01-01")
+  // "2026-01" -> Date("2026-01-01")
   const date = new Date(`${yearMonth}-01`);
   return date.toLocaleString("en-US", { month: "short" });
 };
@@ -626,4 +626,12 @@ export function diff(current: number, previous?: number | null) {
     previous === 0 ? null : Math.round((value / previous) * 100);
 
   return { value, percent };
+}
+
+export function formatCurrencyTick(value: number) {
+  if (value >= 1_000_000)
+    return `₱${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000)
+    return `₱${(value / 1_000).toFixed(0)}k`;
+  return `₱${value}`;
 }
