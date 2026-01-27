@@ -13,12 +13,14 @@ import {
   TextAlignToken,
   CustomerInfoSettings,
   LineItemsSettings,
+  TotalsSettings,
+  TotalsTextStyle,
 } from "@/lib/types/invoice";
 
 const layoutClassMap: Record<HeaderLayout, string> = {
   left: "flex flex-col items-start",
   right: "flex flex-col items-end",
-  split: "flex flex-row justify-between items-start",
+  split: "flex flex-row justify-between ",
 };
 
 const densityGapMap: Record<Density, string> = {
@@ -49,6 +51,12 @@ const backgroundClassMap = {
   primary: "bg-primary",
   accent: "bg-accent",
 };
+const textColorClassMap = {
+  default: "text-white",
+  muted: "text-muted",
+  primary: "text-primary",
+  accent: "text-accent",
+};
 
 const borderClassMap = {
   none: "border-none",
@@ -62,9 +70,12 @@ const fontSizeClassMap: Record<FontSizeToken, string> = {
   md: "text-base",
   lg: "text-lg",
   xl: "text-xl",
+  xxl: "text-2xl",
+  xxxl: "text-3xl",
 };
 
 const fontWeightClassMap: Record<FontWeightToken, string> = {
+  light: "font-light",
   normal: "font-normal",
   medium: "font-medium",
   semibold: "font-semibold",
@@ -87,12 +98,6 @@ const rowStyleClassMap = {
   plain: "",
   striped: "odd:bg-transparent even:bg-muted",
   bordered: "border-b border-border",
-};
-
-const totalsEmphasisClassMap = {
-  normal: "",
-  bold: "font-semibold",
-  boxed: "border p-3 rounded-lg bg-muted",
 };
 
 // --------------------
@@ -217,6 +222,7 @@ export function resolveLineItemsClasses(settings: LineItemsSettings) {
 
   const header = [
     backgroundClassMap[settings.header.backgroundColor],
+    textColorClassMap[settings.header.textColor],
     fontSizeClassMap[settings.header.fontSize],
     fontWeightClassMap[settings.header.fontWeight],
     textAlignClassMap[settings.header.textAlign ?? "left"],
@@ -246,5 +252,45 @@ export function resolveLineItemsClasses(settings: LineItemsSettings) {
   };
 }
 
+export function resolveTotalsClasses(settings: TotalsSettings) {
+  const { layout, density, padding, radius, backgroundColor, border } =
+    settings;
+
+  // Container classes
+  const container = [
+    "flex w-full",
+    lineItemsLayoutClassMap[layout], // could map via layoutClassMap if needed
+    densityGapMap[density],
+    paddingClassMap[padding],
+    radius ? radiusClassMap[radius] : "",
+    backgroundColor ? backgroundClassMap[backgroundColor] : "",
+    border ? borderClassMap[border] : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  // Helper to resolve TotalsTextStyle to Tailwind classes
+  const resolveRowClasses = (style: TotalsTextStyle) =>
+    [
+      fontSizeClassMap[style.fontSize],
+      fontWeightClassMap[style.fontWeight],
+      textAlignClassMap[style.textAlign],
+      style.textColor,
+      style.backgroundColor ? backgroundClassMap[style.backgroundColor] : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+  return {
+    container,
+    subtotal: resolveRowClasses(settings.subtotal),
+    taxBreakdown: resolveRowClasses(settings.taxBreakdown),
+    discount: resolveRowClasses(settings.discount),
+    grandTotal: resolveRowClasses(settings.grandTotal),
+  };
+}
+
 export type CustomerInfo = ReturnType<typeof resolveCustomerClasses>;
 export type HeaderInfo = ReturnType<typeof resolveHeaderClasses>;
+export type LineItems = ReturnType<typeof resolveLineItemsClasses>;
+export type Totals = ReturnType<typeof resolveTotalsClasses>;

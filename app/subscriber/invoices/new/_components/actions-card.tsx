@@ -1,11 +1,8 @@
 "use client";
-import {
-  AddItemsDialog,
-  Item,
-} from "@/components/subscriber/form/invoice/add-items-dialog";
+import { AddItemsDialog } from "@/components/subscriber/form/invoice/add-items-dialog";
 import { TemplateDialog } from "@/components/subscriber/form/invoice/template-dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,11 +19,13 @@ import { useCalculateInvioceAmount } from "@/hooks/use-calculate-invoice-amount"
 import { SPECIAL_DISCOUNT_TYPES_MAP } from "@/lib/constants/DISCOUNT_TYPES";
 import useBusinessProfileStore from "@/stores/business-profile/useBusinessProfileStore";
 import useClientSelection from "@/stores/client/useClientSelection";
-import { useInvoiceStore } from "@/stores/invoice/useInvoiceStore";
-import useItemCatalogStore from "@/stores/items/useItemsCatalogStore";
+import {
+  SpecialDiscountTypesUndefined,
+  useInvoiceStore,
+} from "@/stores/invoice/useInvoiceStore";
 import { useMutation } from "convex/react";
 import { DollarSign, FileText, PhilippinePeso, Save, Tag } from "lucide-react";
-import { ChangeEvent, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 type ErrorType = "INVALID_DISCOUNT" | "TIN_REQUIRED" | "NEGATIVE_TOTAL";
 const currencies = [
@@ -304,7 +303,9 @@ function ActionsCard() {
                       <Select
                         defaultValue={invoice.selectedSpecialDiscounts}
                         onValueChange={(value) =>
-                          invoice.setSelectedSpecialDiscounts(value as any)
+                          invoice.setSelectedSpecialDiscounts(
+                            value as SpecialDiscountTypesUndefined,
+                          )
                         }
                       >
                         <SelectTrigger className="w-full bg-white">

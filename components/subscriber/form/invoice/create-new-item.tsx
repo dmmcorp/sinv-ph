@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import React from "react";
-import { Item, NewItemValues } from "./add-items-dialog";
+import React, { Dispatch, SetStateAction, useCallback, useEffect } from "react";
+import { Item } from "./add-items-dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,23 +14,25 @@ import {
 import { VATTYPE } from "@/lib/types";
 import { Check } from "lucide-react";
 import useBusinessProfileStore from "@/stores/business-profile/useBusinessProfileStore";
+import { toast } from "sonner";
 
 interface CreateNewItemProps {
   onAddNewItem: (item?: Item) => void;
-  onSetNewItemValues: (values: {
-    description: string;
-    price: number;
-    vatType: VATTYPE;
-    legalFlags: {
-      scPwdEligible: boolean;
-      naacEligible: boolean;
-      movEligible: boolean;
-      soloParentEligible: boolean;
-    };
-  }) => void;
+  onSetNewItemValues: Dispatch<SetStateAction<NewItemValues>>;
   newItemValues: NewItemValues;
 }
 
+export interface NewItemValues {
+  description: string;
+  price: number;
+  vatType: VATTYPE;
+  legalFlags: {
+    scPwdEligible: boolean;
+    naacEligible: boolean;
+    movEligible: boolean;
+    soloParentEligible: boolean;
+  };
+}
 const VAT = [
   { value: "VATABLE", label: "Vatable" },
   { value: "VAT_EXEMPT", label: "Vat Exempt" },
@@ -50,6 +52,10 @@ function CreateNewItem({
   newItemValues,
 }: CreateNewItemProps) {
   const { businessProfile } = useBusinessProfileStore();
+
+  const notComplete = !newItemValues.description || newItemValues.price == 0;
+  const isZeroRated = newItemValues.vatType === "ZERO_RATED";
+
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSetNewItemValues({
       ...newItemValues,
@@ -64,21 +70,30 @@ function CreateNewItem({
     });
   };
 
-  const handleDisabledFlag = (): boolean => {
-    if (newItemValues.vatType === "ZERO_RATED") {
-      onSetNewItemValues({
-        ...newItemValues,
-        legalFlags: {
-          scPwdEligible: false,
-          naacEligible: false,
-          movEligible: false,
-          soloParentEligible: false,
-        },
-      });
-      return true; // disable when vat type is zero rated for SC/PWD and Solo Parent
+  const handleSave = () => {
+    if (notComplete) {
+      toast.error("Description & Price is required!");
+      return;
     }
-    return false;
+    onAddNewItem();
   };
+
+  const resetLegalFlags = useCallback(() => {
+    onSetNewItemValues((prev) => ({
+      ...prev,
+      legalFlags: {
+        scPwdEligible: false,
+        naacEligible: false,
+        movEligible: false,
+        soloParentEligible: false,
+      },
+    }));
+  }, [onSetNewItemValues]);
+
+  useEffect(() => {
+    if (isZeroRated) resetLegalFlags();
+  }, [isZeroRated, resetLegalFlags]);
+
   return (
     <>
       <div className="grid grid-cols-2 items-center">
@@ -89,9 +104,8 @@ function CreateNewItem({
         </div>
         <div className="flex justify-end items-center">
           <Button
-            onClick={() => {
-              onAddNewItem();
-            }}
+            disabled={notComplete}
+            onClick={() => handleSave()}
             type="submit"
             className=" flex items-center gap-2 cursor-pointer"
           >
@@ -178,7 +192,7 @@ function CreateNewItem({
                     },
                   })
                 }
-                disabled={handleDisabledFlag()}
+                disabled={isZeroRated}
                 className={`bg-white w-full text-left p-3 rounded-lg border transition-all flex flex-col 
                       ${
                         newItemValues.legalFlags[
@@ -187,7 +201,7 @@ function CreateNewItem({
                           ? "border-primary bg-primary/5 ring-1 ring-primary"
                           : "border-border hover:border-primary/50 hover:bg-muted/50"
                       }
-                      ${handleDisabledFlag() && "opacity-50 cursor-not-allowed"}
+                      ${isZeroRated && "opacity-50 cursor-not-allowed"}
                       `}
               >
                 <div className="flex items-start justify-between gap-2 ">

@@ -1,73 +1,9 @@
 "use client";
 
-import { formatCurrency } from "@/lib/utils";
-import { useBusinessProfileSync } from "@/hooks/use-business-profile";
-import { UseFormReturn } from "react-hook-form";
-import { InvoiceFormValues } from "@/lib/types";
-import Image from "next/image";
-import {
-  SelectedItemType,
-  useInvoiceStore,
-} from "@/stores/invoice/useInvoiceStore";
-import { VAT_RATE_PERCENTAGE } from "@/lib/constants/VAT_RATE";
-import { useCalculateInvioceAmount } from "@/hooks/use-calculate-invoice-amount";
-import InvoiceNumber from "./invoice-no";
-import { toast } from "sonner";
-import ItemDetailsDialog from "./item-details-dialog";
-import useClientSelection from "@/stores/client/useClientSelection";
-import { useState } from "react";
-import useTemplatesStore from "@/stores/templates/useTemplatesStore";
-import { InvoiceThemeProvider } from "@/components/template-theme-provider";
-import { InvoiceHeader } from "./template/invoice-header";
-import { DUMMY_INVOICE_HEADER_DATA } from "./template/dummy-data";
 import { InvoiceRenderer } from "@/renderers/invoice-renderer";
-import { Invoice, TemplateSettings } from "@/lib/types/invoice";
+import { TemplateSettings } from "@/lib/types/invoice";
 
-interface NewInvoiceFormProps {
-  form: UseFormReturn<InvoiceFormValues>;
-}
-
-function NewInvoiceForm({ form }: NewInvoiceFormProps) {
-  const { selectedClient } = useClientSelection();
-  const { selectedTemplate } = useTemplatesStore();
-  const [selectedItem, setSelectedItem] = useState<SelectedItemType | null>(
-    null,
-  );
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [quantity, setQuantity] = useState<number>(selectedItem?.quantity || 1);
-  const total = useCalculateInvioceAmount();
-  const invoice = useInvoiceStore();
-
-  const handleItemClick = (item: SelectedItemType) => {
-    setSelectedItem(item);
-    setQuantity(item.quantity);
-    setDialogOpen(true);
-  };
-
-  const handleSaveChanges = () => {
-    if (selectedItem) {
-      invoice.updateItemQuantity(selectedItem._id, quantity, "replace");
-      if (quantity <= 0) {
-        handleRemoveItem();
-        return;
-      }
-      toast.success(
-        `${selectedItem.description} quantity updated successfully`,
-      );
-      setDialogOpen(false);
-      setSelectedItem(null);
-    }
-  };
-
-  const handleRemoveItem = () => {
-    if (selectedItem) {
-      invoice.removeItem(selectedItem._id);
-      toast.warning(`${selectedItem.description} was removed from the invoice`);
-    }
-    setDialogOpen(false);
-    setSelectedItem(null);
-  };
-
+function NewInvoiceForm() {
   const DUMMY_TEMPLATE_SETTINGS_MINIMAL: TemplateSettings = {
     templateKey: "classic",
     headerSection: {
@@ -75,18 +11,18 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
       density: "spacious",
       padding: "xl",
       border: "light",
-      background: "muted",
+      background: "default",
       radius: "none",
       textColor: "text-black",
       businessInfo: {
         visibility: {
-          logo: false,
+          logo: true,
           businessName: true,
           address: true,
           contactDetails: false,
         },
         styleTokens: {
-          logoSize: "lg",
+          logoSize: "md",
           businessNameSize: "xl",
           businessNameWeight: "bold",
           businessMetaSize: "xs",
@@ -102,9 +38,9 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
           dueDate: true,
         },
         styleTokens: {
-          invoiceTitleSize: "xl",
-          invoiceTitleWeight: "bold",
-          metaSize: "xs",
+          invoiceTitleSize: "xxxl",
+          invoiceTitleWeight: "normal",
+          metaSize: "sm",
           metaWeight: "normal",
           textAlign: "right",
         },
@@ -137,10 +73,10 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
       padding: "md",
 
       header: {
-        backgroundColor: "muted",
-        textColor: "text-green-400",
+        backgroundColor: "primary",
+        textColor: "muted",
         fontSize: "xs",
-        fontWeight: "normal",
+        fontWeight: "bold",
         textAlign: "center",
       },
 
@@ -162,6 +98,44 @@ function NewInvoiceForm({ form }: NewInvoiceFormProps) {
         fontWeight: "normal",
         textAlign: "center",
         textColor: "text-black",
+      },
+    },
+
+    totalsSection: {
+      layout: "table",
+      density: "spacious",
+      padding: "none",
+      backgroundColor: "default",
+      border: "none",
+      radius: "none",
+
+      subtotal: {
+        fontSize: "sm",
+        fontWeight: "semibold",
+        textColor: "text-default",
+        textAlign: "left",
+      },
+
+      taxBreakdown: {
+        fontSize: "xs",
+        fontWeight: "light",
+        textColor: "#000",
+        textAlign: "right",
+      },
+
+      discount: {
+        fontSize: "xs",
+        fontWeight: "normal",
+        textColor: "#d32f2f",
+        textAlign: "right",
+      },
+
+      grandTotal: {
+        fontSize: "lg",
+        fontWeight: "bold",
+        textColor: "text-primary",
+        textAlign: "right",
+        backgroundColor: "default",
       },
     },
   };

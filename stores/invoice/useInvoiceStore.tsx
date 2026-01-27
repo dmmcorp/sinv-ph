@@ -22,6 +22,14 @@ export type SelectedItemType = {
 //   quantity: number;
 //   price: number;
 
+export type SpecialDiscountTypesUndefined =
+  | "SC"
+  | "PWD"
+  | "NAAC"
+  | "MOV"
+  | "SP"
+  | undefined;
+
 interface InvoiceStoreType {
   createdInvoiceId: Id<"invoices"> | undefined;
 
@@ -53,9 +61,7 @@ interface InvoiceStoreType {
   setInvoiceNo: (value: string) => void;
   setInvoiceType: (value: INVOiCETYPE) => void;
   setIsSpecialDiscount: (value: boolean) => void;
-  setSelectedSpecialDiscounts: (
-    value: "SC" | "PWD" | "NAAC" | "MOV" | "SP" | undefined,
-  ) => void;
+  setSelectedSpecialDiscounts: (value: SpecialDiscountTypesUndefined) => void;
   setScIdNumber: (value: string) => void;
   setDiscountValue: (value: string) => void;
   setIsPercentage: (value: boolean) => void;
