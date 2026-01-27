@@ -1,7 +1,7 @@
 import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { HeaderContainerObject, HeaderLeftObject } from "../lib/types/schema_types"
+import { CustomerSectionObject, HeaderSectionObject, LineItemsSectionObject, TotalsSectionObject } from "../lib/types/schema_types"
 
 export default defineSchema({
   ...authTables,
@@ -77,9 +77,11 @@ export default defineSchema({
       v.object({
         templateName: v.string(),
 
-        // HEADER
-        headerContainer: HeaderContainerObject,
-        header: HeaderLeftObject
+        // components
+        headerSection: HeaderSectionObject,
+        customerSection: CustomerSectionObject,
+        lineItemsSection: LineItemsSectionObject,
+        totalsSection: TotalsSectionObject,
       }),
     ),
 
@@ -272,11 +274,13 @@ export default defineSchema({
 
   templates: defineTable({
     // DEFAULT TEMPLATES
-    templateName: v.string(), // TODO: change to templateKey TEMPLATE NAME ex: "classic" 
+    templateKey: v.string(),
 
-    // HEADER
-    headerContainer: HeaderContainerObject,
-    headerLeft: HeaderLeftObject,
+    // components
+    headerSection: HeaderSectionObject,
+    customerSection: CustomerSectionObject,
+    lineItemsSection: LineItemsSectionObject,
+    totalsSection: TotalsSectionObject,
 
     // userId: v.id("users"),     // subscriber
     // layoutConfig: v.object({
@@ -298,7 +302,7 @@ export default defineSchema({
     // backgroundColor: v.string(), // hex values (background color)
     // logoUrl: v.optional(v.string()),
     // digitalSignatureUrl: v.optional(v.string()),
-  }).index("by_template", ["templateName"]),
+  }).index("by_template", ["templateKey"]),
   userTemplates: defineTable({
     userId: v.id("users"),
     templateId: v.id("templates"),

@@ -1,148 +1,200 @@
 import { v } from "convex/values";
 
-export const HeaderLeftObject = v.object({
 
-    // CONTAINER
-    container: v.object({
-        alignment: v.union(
-            v.literal("left"),
-            v.literal("center"),
-            v.literal("right")
-        ),
-        padding: v.object({
-            top: v.number(),
-            right: v.number(),
-            bottom: v.number(),
-            left: v.number(),
-        }),
-        backgroundColor: v.optional(v.string()),
-        borderBottom: v.object({
-            enabled: v.boolean(),
-            color: v.string(),
-            width: v.number(),
-        }),
-    }),
-    // END OF CONTAINER
+const HeaderLayoutField = v.union(
+    v.literal("left"),
+    v.literal("right"),
+    v.literal("split"),
+)
 
-    // LOGO
-    logo: v.object({
-        display: v.union(
-            v.literal("none"),
-            v.literal("block"),
-        ),
-        position: v.union(
-            v.literal("left"),
-            v.literal("center"),
-            v.literal("right"),
-        ),
-        maxWidth: v.number(),
-        maxHeight: v.number(),
-    }),
-    // END OF LOGO
+const DensityField = v.union(
+    v.literal("compact"),
+    v.literal("normal"),
+    v.literal("spacious"),
+)
 
-    // BUSINESS NAME
-    businessName: v.object({
-        visible: v.boolean(),
-        style: v.object({
-            fontFamily: v.string(),
-            fontSize: v.number(),
-            fontWeight: v.number(),
-            color: v.string(),
-            textTransform: v.union(
-                v.literal("none"),
-                v.literal("uppercase"),
-                v.literal("lowercase"),
-                v.literal("capitalize"),
-            ),
-            textAlign: v.union(
-                v.literal("left"),
-                v.literal("center"),
-                v.literal("right"),
-            ),
-            lineHeight: v.number(),
-        }),
-    }),
-    // END OF BUSINESS NAME
+const PaddingField = v.union(
+    v.literal("none"),
+    v.literal("sm"),
+    v.literal("md"),
+    v.literal("lg"),
+    v.literal("xl"),
+)
 
-    // BUSINESS META
-    businessMeta: v.object({
-        visible: v.boolean(),
-        style: v.object({
-            fontFamily: v.string(),
-            fontSize: v.number(),
-            fontWeight: v.number(),
-            color: v.string(),
-            lineHeight: v.number(),
-            textAlign: v.union(
-                v.literal("left"),
-                v.literal("center"),
-                v.literal("right")
-            ),
-        }),
-        spacingTop: v.number(),
-    }),
-    // END OF BUSINESS META
+const RadiusField = v.union(
+    v.literal("none"),
+    v.literal("sm"),
+    v.literal("md"),
+    v.literal("lg"),
+    v.literal("xl"),
+)
 
-    // INVOICE TITLE
-    invoiceTitle: v.object({
-        visible: v.boolean(),
-        variant: v.string(),
-        style: v.object({
-            fontFamily: v.string(),
-            fontSize: v.number(),
-            fontWeight: v.number(),
-            color: v.string(),
-            textAlign: v.union(
-                v.literal("left"),
-                v.literal("center"),
-                v.literal("right")
-            ),
-        }),
-    }),
-    // END OF INVOICE TITLE
+const ColorTokenField = v.union(
+    v.literal("default"),
+    v.literal("muted"),
+    v.literal("primary"),
+    v.literal("accent"),
+)
 
-    // INVOICE META
-    invoiceMeta: v.object({
-        layout: v.string(),
-        style: v.object({
-            fontFamily: v.string(),
-            fontSize: v.number(),
-            fontWeight: v.number(),
-            color: v.string(),
-            lineHeight: v.number(),
-            textAlign: v.union(
-                v.literal("left"),
-                v.literal("center"),
-                v.literal("right")
-            ),
-        }),
-    }),
-    // END OF INVOICE META
+const FontSizeTokenField = v.union(
+    v.literal("xs"),
+    v.literal("sm"),
+    v.literal("md"),
+    v.literal("lg"),
+    v.literal("xl"),
+    v.literal("xxl"),
+    v.literal("xxxl"),
+)
 
+const FontWeightTokenField = v.union(
+    v.literal("light"),
+    v.literal("normal"),
+    v.literal("medium"),
+    v.literal("semibold"),
+    v.literal("bold"),
+)
+
+const TextAlignTokenField = v.union(
+    v.literal("left"),
+    v.literal("center"),
+    v.literal("right"),
+)
+
+const TotalsTextStyleField = v.object({
+    fontSize: FontSizeTokenField,
+    fontWeight: FontWeightTokenField,
+    textColor: v.string(),
+    textAlign: TextAlignTokenField,
+    backgroundColor: v.optional(ColorTokenField),
 })
 
-export const HeaderContainerObject = v.object({
-    display: v.union(
-        v.literal("flex"),
-        v.literal("grid"),
-        v.literal("inline-flex"),
-        v.literal("inline-grid"),
+export const HeaderSectionObject = v.object({
+    layout: HeaderLayoutField,
+    density: DensityField,
+    padding: PaddingField,
+    radius: RadiusField,
+    background: ColorTokenField,
+    border: v.union(
+        v.literal("none"),
+        v.literal("light"),
+        v.literal("strong"),
     ),
-    flexDirection: v.union(
-        v.literal("row"),
-        v.literal("col"),
+    textColor: v.string(),
+    businessInfo: v.object({
+        visibility: v.object({
+            logo: v.boolean(),
+            businessName: v.boolean(),
+            address: v.boolean(),
+            contactDetails: v.boolean(),
+        }),
+
+        styleTokens: v.object({
+            logoSize: v.union(
+                v.literal("sm"),
+                v.literal("md"),
+                v.literal("lg"),
+                v.literal("xl"),
+            ),
+            businessNameSize: FontSizeTokenField,
+            businessNameWeight: FontWeightTokenField,
+            businessMetaSize: FontSizeTokenField,
+            businessMetaWeight: FontWeightTokenField,
+            textAlign: v.optional(TextAlignTokenField),
+        }),
+    }),
+    invoiceMeta: v.object({
+        visibility: v.object({
+            invoiceNumber: v.boolean(),
+            issueDate: v.boolean(),
+            dueDate: v.boolean(),
+        }),
+        styleTokens: v.object({
+            invoiceTitleSize: FontSizeTokenField,
+            invoiceTitleWeight: FontWeightTokenField,
+            metaSize: FontSizeTokenField,
+            metaWeight: FontWeightTokenField,
+            textAlign: TextAlignTokenField,
+        })
+    }),
+})
+
+export const CustomerSectionObject = v.object({
+    layout: HeaderLayoutField,
+    density: DensityField,
+    padding: PaddingField,
+    visibility: v.object({
+        name: v.boolean(),
+        address: v.boolean(),
+        email: v.boolean(),
+        phone: v.optional(v.boolean()),
+    }),
+    styleTokens: v.object({
+        nameSize: FontSizeTokenField,
+        nameWeight: FontWeightTokenField,
+        metaSize: FontSizeTokenField,
+        metaWeight: FontWeightTokenField,
+        textAlign: TextAlignTokenField,
+    }),
+})
+
+export const LineItemsSectionObject = v.object({
+    layout: v.union(
+        v.literal("table"),
+        v.literal("stacked"),
+        v.literal("card"),
     ),
-    justifyContent: v.union(
-        v.literal("center"),
-        v.literal("flex-start"),
-        v.literal("flex-end"),
-        v.literal("space-between"),
-        v.literal("space-around"),
-        v.literal("space-evenly"),
-        v.literal("normal"),
-        v.literal("stretch"),
+    density: DensityField,
+    padding: PaddingField,
+    header: v.object({
+        backgroundColor: ColorTokenField,
+        textColor: ColorTokenField,
+        fontSize: FontSizeTokenField,
+        fontWeight: FontWeightTokenField,
+        textAlign: v.optional(TextAlignTokenField),
+    }),
+    visibility: v.object({
+        lineNumber: v.boolean(),
+    }),
+    row: v.object({
+        style: v.union(
+            v.literal("plain"),
+            v.literal("striped"),
+            v.literal("bordered"),
+        ),
+        styleTokens: v.object({
+            fontSize: FontSizeTokenField,
+            fontWeight: FontWeightTokenField,
+            textAlign: v.optional(TextAlignTokenField),
+        }),
+    }),
+    data: v.object({
+        fontSize: FontSizeTokenField,
+        fontWeight: FontWeightTokenField,
+        textAlign: v.optional(TextAlignTokenField),
+        textColor: v.string(),
+    }),
+})
+
+export const TotalsSectionObject = v.object({
+    // Container
+    layout: v.union(
+        v.literal("table"),
+        v.literal("stacked"),
+        v.literal("card"),
     ),
-    alignItems: v.string(),
-    padding: v.string(),
-    backgroundColor: v.string(),
+    density: DensityField,
+    padding: PaddingField,
+    backgroundColor: v.optional(ColorTokenField),
+    border: v.optional(v.union(
+        v.literal("none"),
+        v.literal("light"),
+        v.literal("strong"),
+    )),
+    radius: v.optional(RadiusField),
+
+    // Rows
+    subtotal: TotalsTextStyleField,
+    taxBreakdown: TotalsTextStyleField,
+    discount: TotalsTextStyleField,
+    grandTotal: TotalsTextStyleField,
 })
