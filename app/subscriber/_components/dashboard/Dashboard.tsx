@@ -22,6 +22,9 @@ function Dashboard() {
   const d = new Date();
   const currentYear = d.getUTCFullYear();
   const [year, setYear] = useState(currentYear.toString());
+  const [compareTo, setCompareTo] = useState<string | undefined>(undefined);
+
+  console.log(compareTo);
 
   return (
     <div className="relative w-full space-y-6 py-5 lg:py-10">
@@ -38,6 +41,26 @@ function Dashboard() {
             ))}
           </SelectContent>
         </Select>
+
+        <div className="flex items-center gap-3">
+          <p>Compare data from previous years:</p>
+          <Select
+            value={compareTo ?? "none"}
+            onValueChange={(v) => setCompareTo(v === "none" ? undefined : v)}
+          >
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Compare to" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">No comparison</SelectItem>
+              {Array.from({ length: 27 }, (_, i) => 2026 - i).map((y) => (
+                <SelectItem key={y} value={y.toString()}>
+                  {y}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         <AddNewInvoiceBtn />
       </div>
@@ -62,7 +85,7 @@ function Dashboard() {
         </div>
       </div> */}
       <main className=" ">
-        <MetricsCards year={year} />
+        <MetricsCards year={year} compareTo={compareTo} />
         <div className="mt-6 grid gap-6 lg:grid-cols-5">
           <div className="lg:col-span-3">
             <RevenueChart year={year} />

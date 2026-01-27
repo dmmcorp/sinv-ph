@@ -29,8 +29,9 @@ import { STATUSTYPE } from "../lib/constants/STATUS_TYPES";
 export const getInvoiceMetricsForUser = query({
     args: {
         year: v.string(), // 2026
+        compareTo: v.optional(v.string()), // for example 2025
     },
-    handler: async (ctx, { year }) => {
+    handler: async (ctx, { year, compareTo }) => {
         const userId = await getAuthUserId(ctx);
         if (!userId) throw new ConvexError("Not authenticated");
 
@@ -41,33 +42,42 @@ export const getInvoiceMetricsForUser = query({
             "OVERDUE",
         ];
 
-        const result = {
-            total: 0,
-            draft: 0,
-            open: 0,
-            paid: 0,
-            overdue: 0,
+        const buildMetrics = async (y: string) => {
+            const result = {
+                total: 0,
+                draft: 0,
+                open: 0,
+                paid: 0,
+                overdue: 0,
+            }
+
+            for (const status of statuses) {
+                const count = await aggregateInvoiceByUser.count(ctx, {
+                    namespace: userId,
+                    bounds: {
+                        prefix: [y, status],
+                    },
+                })
+
+                result.total += count;
+                if (status === "DRAFT") result.draft = count;
+                if (status === "OPEN") result.open = count;
+                if (status === "PAID") result.paid = count;
+                if (status === "OVERDUE") result.overdue = count;
+            }
+            return result;
         }
 
-        for (const status of statuses) {
-            const count = await aggregateInvoiceByUser.count(ctx, {
-                namespace: userId,
-                bounds: {
-                    eq: [year, status],
-                    prefix: [year, status],
-                },
-            })
+        const current = await buildMetrics(year);
+        const previous = compareTo ? await buildMetrics(compareTo) : null
 
-            result.total += count;
-
-
-            if (status === "DRAFT") result.draft = count;
-            if (status === "OPEN") result.open = count;
-            if (status === "PAID") result.paid = count;
-            if (status === "OVERDUE") result.overdue = count;
+        return {
+            year,
+            compareTo: compareTo ?? null,
+            current,
+            previous,
         }
 
-        return result;
     },
 });
 
@@ -143,3 +153,4 @@ export const getTotalSales = query({
         }
     }
 })
+

@@ -615,3 +615,15 @@ export const yearMonthToShortMonth = (yearMonth: string) => {
   const date = new Date(`${yearMonth}-01`);
   return date.toLocaleString("en-US", { month: "short" });
 };
+
+export function diff(current: number, previous?: number | null) {
+  if (previous === null || previous === undefined) return null;
+  if (current === previous) return null;
+
+  const value = current - previous;
+
+  const percent =
+    previous === 0 ? null : Math.round((value / previous) * 100);
+
+  return { value, percent };
+}
