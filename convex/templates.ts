@@ -2,6 +2,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { mutation, query } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
 import { Id } from "./_generated/dataModel";
+import { randomHexColor } from "../lib/utils";
 
 export const getAllTemplates = query({
   args: {},
@@ -293,5 +294,185 @@ export const changeInvoiceUserTemplate = mutation({
 
     await ctx.db.patch(invoice._id, { userTemplateId });
     return true;
+  },
+});
+
+// ------------ generating random templates for testing (with helpers) -----------------
+
+function randomFrom<T>(arr: readonly T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function randomBool() {
+  return Math.random() > 0.5;
+}
+
+function randomInt(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function pick<T extends readonly string[]>(values: T): T[number] {
+  return values[Math.floor(Math.random() * values.length)];
+}
+
+const HEADER_LAYOUT = ["left", "right", "split"] as const;
+const DENSITY = ["compact", "normal", "spacious"] as const;
+const PADDING = ["none", "sm", "md", "lg", "xl"] as const;
+const RADIUS = ["none", "sm", "md", "lg", "xl"] as const;
+const COLOR_TOKEN = ["default", "muted", "primary", "accent"] as const;
+const FONT_SIZE = ["xs", "sm", "md", "lg", "xl", "xxl", "xxxl"] as const;
+const FONT_WEIGHT = ["light", "normal", "medium", "semibold", "bold"] as const;
+const TEXT_ALIGN = ["left", "center", "right"] as const;
+
+
+function generateHeaderSection() {
+  return {
+    layout: pick(HEADER_LAYOUT),
+    density: pick(DENSITY),
+    padding: pick(PADDING),
+    radius: pick(RADIUS),
+    background: pick(COLOR_TOKEN),
+    border: pick(["none", "light", "strong"] as const),
+    textColor: randomHexColor(),
+
+    businessInfo: {
+      visibility: {
+        logo: Math.random() > 0.2,
+        businessName: true,
+        address: Math.random() > 0.3,
+        contactDetails: Math.random() > 0.4,
+      },
+      styleTokens: {
+        logoSize: pick(["sm", "md", "lg", "xl"] as const),
+        businessNameSize: pick(FONT_SIZE),
+        businessNameWeight: pick(FONT_WEIGHT),
+        businessMetaSize: pick(FONT_SIZE),
+        businessMetaWeight: pick(FONT_WEIGHT),
+        textAlign: pick(TEXT_ALIGN),
+      },
+    },
+
+    invoiceMeta: {
+      visibility: {
+        invoiceNumber: true,
+        issueDate: true,
+        dueDate: Math.random() > 0.5,
+      },
+      styleTokens: {
+        invoiceTitleSize: pick(FONT_SIZE),
+        invoiceTitleWeight: pick(FONT_WEIGHT),
+        metaSize: pick(FONT_SIZE),
+        metaWeight: pick(FONT_WEIGHT),
+        textAlign: pick(TEXT_ALIGN),
+      },
+    },
+  };
+}
+
+function generateCustomerSection() {
+  return {
+    layout: pick(HEADER_LAYOUT),
+    density: pick(DENSITY),
+    padding: pick(PADDING),
+
+    visibility: {
+      name: true,
+      address: Math.random() > 0.2,
+      email: Math.random() > 0.3,
+      phone: Math.random() > 0.5,
+    },
+
+    styleTokens: {
+      nameSize: pick(FONT_SIZE),
+      nameWeight: pick(FONT_WEIGHT),
+      metaSize: pick(FONT_SIZE),
+      metaWeight: pick(FONT_WEIGHT),
+      textAlign: pick(TEXT_ALIGN),
+    },
+  };
+}
+
+function generateLineItemsSection() {
+  return {
+    layout: pick(["table", "stacked", "card"] as const),
+    density: pick(DENSITY),
+    padding: pick(PADDING),
+
+    header: {
+      backgroundColor: pick(COLOR_TOKEN),
+      textColor: pick(COLOR_TOKEN),
+      fontSize: pick(FONT_SIZE),
+      fontWeight: pick(FONT_WEIGHT),
+      textAlign: pick(TEXT_ALIGN),
+    },
+
+    visibility: {
+      lineNumber: Math.random() > 0.5,
+    },
+
+    row: {
+      style: pick(["plain", "striped", "bordered"] as const),
+      styleTokens: {
+        fontSize: pick(FONT_SIZE),
+        fontWeight: pick(FONT_WEIGHT),
+        textAlign: pick(TEXT_ALIGN),
+      },
+    },
+
+    data: {
+      fontSize: pick(FONT_SIZE),
+      fontWeight: pick(FONT_WEIGHT),
+      textAlign: pick(TEXT_ALIGN),
+      textColor: "#111827",
+    },
+  };
+}
+
+function generateTotalsTextStyle() {
+  return {
+    fontSize: pick(FONT_SIZE),
+    fontWeight: pick(FONT_WEIGHT),
+    textColor: "#111827",
+    textAlign: pick(TEXT_ALIGN),
+    backgroundColor: Math.random() > 0.7 ? pick(COLOR_TOKEN) : undefined,
+  };
+}
+
+function generateTotalsSection() {
+  return {
+    layout: pick(["table", "stacked", "card"] as const),
+    density: pick(DENSITY),
+    padding: pick(PADDING),
+    backgroundColor: Math.random() > 0.6 ? pick(COLOR_TOKEN) : undefined,
+    border: pick(["none", "light", "strong"] as const),
+    radius: pick(RADIUS),
+
+    subtotal: generateTotalsTextStyle(),
+    taxBreakdown: generateTotalsTextStyle(),
+    discount: generateTotalsTextStyle(),
+    grandTotal: generateTotalsTextStyle(),
+  };
+}
+
+export const createRandomTemplate = mutation({
+  args: {
+    templateKey: v.string(),
+  },
+  handler: async (ctx, { templateKey }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new ConvexError("Not authenticated");
+    }
+
+    const templateId = await ctx.db.insert("templates", {
+      templateKey,
+
+      headerSection: generateHeaderSection(),
+      customerSection: generateCustomerSection(),
+      lineItemsSection: generateLineItemsSection(),
+      totalsSection: generateTotalsSection(),
+    });
+
+    return templateId;
   },
 });
