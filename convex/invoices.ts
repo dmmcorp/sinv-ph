@@ -377,23 +377,14 @@ export const getInvoiceById = query({
         .get(invoice.userTemplateId)
 
       if (userTemplate) {
-        const baseTemplate = await ctx.db
-          .get(userTemplate.templateId)
-        if (!baseTemplate) {
-          throw new ConvexError("Base template not found")
-        }
-
         return {
           invoice,
           renderTemplate: {
-            primaryColor: userTemplate.primaryColor,
-            secondaryColor: userTemplate.secondaryColor,
-            headerColor: userTemplate.headerColor,
-            backgroundColor: userTemplate.backgroundColor,
-            layoutConfig: {
-              // ...baseTemplate.layoutConfig, // !IMPORTANT commented out due to schema changes for base template
-              ...(userTemplate.layoutConfig ?? {}),
-            },
+            templateName: userTemplate.templateKey,
+            headerSection: userTemplate.headerSection,
+            customerSection: userTemplate.customerSection,
+            lineItemsSection: userTemplate.lineItemsSection,
+            totalsSection: userTemplate.totalsSection,
           },
           templateSource: "DRAFT" as const,
         }
@@ -483,36 +474,52 @@ export const handleInvoiceStatus = mutation({
 
     let templateSnapshot = undefined;
 
-    if (invoice.userTemplateId) {
-      const userTemplate = await ctx.db.get(invoice.userTemplateId);
+
+    if (status !== "DRAFT" && invoice.userTemplateId) {
+      const userTemplate = await ctx.db
+        .get(invoice.userTemplateId)
+
       if (userTemplate) {
-        const baseTemplate = await ctx.db.get(userTemplate.templateId);
-        if (!baseTemplate) {
-          throw new ConvexError("Base template not found");
-        }
-
-        // TODO: implement the user template function for invoice snapshots
-        // templateSnapshot = {
-        //   // colors
-        //   primaryColor: userTemplate.primaryColor,
-        //   secondaryColor: userTemplate.secondaryColor,
-        //   headerColor: userTemplate.headerColor,
-        //   backgroundColor: userTemplate.backgroundColor,
-
-        //   // layout
-        //   layoutConfig: {
-        //     // ...baseTemplate.layoutConfig, // !IMPORTANT commented out due to schema changes for base template
-        //     ...(userTemplate.layoutConfig ?? {}),
-        //   },
-        // };
+        templateSnapshot = {
+          templateName: userTemplate.templateKey,
+          headerSection: userTemplate.headerSection,
+          customerSection: userTemplate.customerSection,
+          lineItemsSection: userTemplate.lineItemsSection,
+          totalsSection: userTemplate.totalsSection,
+        };
       }
     }
+
+    // if (invoice.userTemplateId) {
+    //   const userTemplate = await ctx.db.get(invoice.userTemplateId);
+    //   if (userTemplate) {
+    //     const baseTemplate = await ctx.db.get(userTemplate.templateId);
+    //     if (!baseTemplate) {
+    //       throw new ConvexError("Base template not found");
+    //     }
+
+    //     // TODO: implement the user template function for invoice snapshots
+    //     // templateSnapshot = {
+    //     //   // colors
+    //     //   primaryColor: userTemplate.primaryColor,
+    //     //   secondaryColor: userTemplate.secondaryColor,
+    //     //   headerColor: userTemplate.headerColor,
+    //     //   backgroundColor: userTemplate.backgroundColor,
+
+    //     //   // layout
+    //     //   layoutConfig: {
+    //     //     // ...baseTemplate.layoutConfig, // !IMPORTANT commented out due to schema changes for base template
+    //     //     ...(userTemplate.layoutConfig ?? {}),
+    //     //   },
+    //     // };
+    //   }
+    // }
 
     await ctx.db
       .patch(invoice._id, {
         templateSnapshot,
         status,
-        updatedAt: Date.now(),
+        updatedAt: Math.floor(Date.now() / 1000),
       });
 
     // await aggregateInvoiceByUser.replace(ctx, invoice, newDoc);

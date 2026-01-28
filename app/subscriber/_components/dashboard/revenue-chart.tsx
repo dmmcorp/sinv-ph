@@ -93,7 +93,7 @@ export function RevenueChart({ year, compareTo }: RevenueChartProp) {
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: "#64748b", fontSize: 12 }}
-                tickFormatter={formatCurrencyTick} // TODO: what if million na pero k yung dulo m na dapat????
+                tickFormatter={formatCurrencyTick}
               />
               <Tooltip
                 cursor={{ fill: "rgba(0,0,0,0.04)" }}

@@ -3,6 +3,7 @@ import { mutation, query } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 import { randomHexColor } from "../lib/utils";
+import { CustomerSectionObject, HeaderSectionObject, LineItemsSectionObject, TotalsSectionObject } from "../lib/types/schema_types";
 
 export const getAllTemplates = query({
   args: {},
@@ -66,28 +67,11 @@ export const getAllTemplates = query({
 export const createUserTemplate = mutation({
   args: {
     templateId: v.id("templates"),
-    primaryColor: v.string(), // hex values // usually bold 10% of sales invoice template
-    secondaryColor: v.string(), // hex values // usually normal text
-    headerColor: v.string(), // hex values (header color for template)
-    backgroundColor: v.string(), // hex values (background color)
-
-    templateName: v.string(),
-
-    layoutConfig: v.optional(
-      v.object({
-        headerPosition: v.optional(
-          v.union(v.literal("top"), v.literal("left")),
-        ),
-        logoPosition: v.optional(
-          v.union(v.literal("top-left"), v.literal("center")),
-        ),
-        showFooterTotals: v.optional(v.boolean()),
-        itemTableStyle: v.optional(
-          v.union(v.literal("grid"), v.literal("list"), v.literal("compact")),
-        ),
-        font: v.optional(v.string()),
-      }),
-    ),
+    templateKey: v.string(),
+    headerSection: HeaderSectionObject,
+    customerSection: CustomerSectionObject,
+    lineItemsSection: LineItemsSectionObject,
+    totalsSection: TotalsSectionObject,
 
     isSaved: v.optional(v.boolean()),
   },
@@ -100,12 +84,11 @@ export const createUserTemplate = mutation({
     const userTemplateId = await ctx.db.insert("userTemplates", {
       userId,
       templateId: args.templateId,
-      primaryColor: args.primaryColor,
-      secondaryColor: args.secondaryColor,
-      headerColor: args.headerColor,
-      backgroundColor: args.backgroundColor,
-      layoutConfig: args.layoutConfig,
-      templateName: args.templateName,
+      templateKey: args.templateKey,
+      headerSection: args.headerSection,
+      customerSection: args.customerSection,
+      lineItemsSection: args.lineItemsSection,
+      totalsSection: args.totalsSection,
     });
 
     if (args.isSaved) {
@@ -133,27 +116,10 @@ export const createUserTemplate = mutation({
 export const editUserTemplate = mutation({
   args: {
     userTemplateId: v.id("userTemplates"),
-    primaryColor: v.optional(v.string()), // hex values // usually bold 10% of sales invoice template
-    secondaryColor: v.optional(v.string()), // hex values // usually normal text
-    headerColor: v.optional(v.string()), // hex values (header color for template)
-    backgroundColor: v.optional(v.string()), // hex values (background color)
-    templateName: v.optional(v.string()),
-
-    layoutConfig: v.optional(
-      v.object({
-        headerPosition: v.optional(
-          v.union(v.literal("top"), v.literal("left")),
-        ),
-        logoPosition: v.optional(
-          v.union(v.literal("top-left"), v.literal("center")),
-        ),
-        showFooterTotals: v.optional(v.boolean()),
-        itemTableStyle: v.optional(
-          v.union(v.literal("grid"), v.literal("list"), v.literal("compact")),
-        ),
-        font: v.optional(v.string()),
-      }),
-    ),
+    headerSection: v.optional(HeaderSectionObject),
+    customerSection: v.optional(CustomerSectionObject),
+    lineItemsSection: v.optional(LineItemsSectionObject),
+    totalsSection: v.optional(TotalsSectionObject),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -187,26 +153,17 @@ export const editUserTemplate = mutation({
     // patching only those values provided
     const update: Partial<typeof userTemplate> = {};
 
-    if (args.primaryColor !== undefined)
-      update.primaryColor = args.primaryColor;
+    if (args.headerSection !== undefined)
+      update.headerSection = args.headerSection;
 
-    if (args.secondaryColor !== undefined)
-      update.secondaryColor = args.secondaryColor;
+    if (args.customerSection !== undefined)
+      update.customerSection = args.customerSection;
 
-    if (args.headerColor !== undefined) update.headerColor = args.headerColor;
+    if (args.lineItemsSection !== undefined)
+      update.lineItemsSection = args.lineItemsSection;
 
-    if (args.backgroundColor !== undefined)
-      update.backgroundColor = args.backgroundColor;
-
-    if (args.templateName !== undefined)
-      update.templateName = args.templateName;
-
-    if (args.layoutConfig !== undefined) {
-      update.layoutConfig = {
-        ...(userTemplate.layoutConfig ?? {}),
-        ...args.layoutConfig,
-      };
-    }
+    if (args.totalsSection !== undefined)
+      update.totalsSection = args.totalsSection;
 
     return await ctx.db.patch(userTemplate._id, update);
   },

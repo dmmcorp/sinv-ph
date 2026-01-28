@@ -248,7 +248,6 @@ export default defineSchema({
 
     normalizedName: v.optional(v.string()),
 
-    // TODO: Need to assess how to handle category properly and check if it is needed to be put in invoice
     // category: v.optional(
     //     v.union(
     //         v.literal("GOODS"),
@@ -306,29 +305,13 @@ export default defineSchema({
   userTemplates: defineTable({
     userId: v.id("users"),
     templateId: v.id("templates"),
+    templateKey: v.string(),
 
-    templateName: v.string(),
-
-    primaryColor: v.string(), // hex values // usually bold 10% of sales invoice template
-    secondaryColor: v.string(), // hex values // usually normal text
-    headerColor: v.string(), // hex values (header color for template)
-    backgroundColor: v.string(), // hex values (background color)
-
-    layoutConfig: v.optional(
-      v.object({
-        headerPosition: v.optional(
-          v.union(v.literal("top"), v.literal("left")),
-        ),
-        logoPosition: v.optional(
-          v.union(v.literal("top-left"), v.literal("center")),
-        ),
-        showFooterTotals: v.optional(v.boolean()),
-        itemTableStyle: v.optional(
-          v.union(v.literal("grid"), v.literal("list"), v.literal("compact")),
-        ),
-        font: v.optional(v.string()),
-      }),
-    ),
+    // components
+    headerSection: HeaderSectionObject,
+    customerSection: CustomerSectionObject,
+    lineItemsSection: LineItemsSectionObject,
+    totalsSection: TotalsSectionObject,
   })
     .index("by_user", ["userId"])
     .index("by_template", ["templateId"]),
